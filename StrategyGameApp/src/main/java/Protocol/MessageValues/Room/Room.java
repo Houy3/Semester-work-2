@@ -1,4 +1,6 @@
 package Protocol.MessageValues.Room;
 
-public class Room {
+import Protocol.MessageValues.MessageValue;
+
+public final class Room extends MessageValue {
 }

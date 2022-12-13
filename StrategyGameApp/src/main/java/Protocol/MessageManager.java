@@ -1,8 +1,16 @@
 package Protocol;
 
 
+import Protocol.MessageValues.Game.*;
+import Protocol.MessageValues.MessageValue;
 import Protocol.MessageValues.Response.Error;
 import Protocol.MessageValues.Response.Success;
+import Protocol.MessageValues.Room.Room;
+import Protocol.MessageValues.Room.RoomInitParams;
+import Protocol.MessageValues.User.User;
+import Protocol.exceptions.BadResponseException;
+import Protocol.exceptions.MismatchedClassException;
+import Protocol.exceptions.ProtocolVersionException;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,81 +18,138 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static Protocol.MessageManager.MessageType.*;
+
 public class MessageManager {
 
     public final static byte VERSION = 1;
 
-    public enum MessageTypes {
-        RESPONSE_ERROR((byte)-1),
-        RESPONSE_SUCCESS((byte)0),
+    public enum MessageType {
+        RESPONSE_ERROR((byte)-1),//содержит Error
+        RESPONSE_SUCCESS((byte)0), //содержит Success с объектом
 
-        USER_REGISTRATION((byte)11),
-        USER_AUTHENTICATION((byte)12),
-        USER_DATA_UPDATE((byte)13),
+        USER_REGISTRATION((byte)11), //ничего не возвращает
+        USER_AUTHENTICATION((byte)12), //возвращает UserData
 
-        ROOM_INIT((byte)21),
-        ROOM_CONNECT((byte)22),
-        ROOM_DISCONNECT((byte)23),
+        USER_DATA_GET((byte)13), //возвращает UserData
+        USER_DATA_UPDATE((byte)14), //ничего не возвращает
 
-        GAME_INIT((byte)31),
-        GAME_DISCONNECT((byte)32),
-        GAME_RECONNECT((byte)33),
+        ROOM_INIT((byte)21), //возвращает Room
+        ROOM_CONNECT((byte)22), //возвращает Room
+        ROOM_DISCONNECT((byte)23), //ничего не возвращает
 
-        GAME_START((byte)34),
-        GAME_END((byte)35),
+        GAME_INIT((byte)31), //возвращает Game
+        GAME_RECONNECT((byte)32), //возвращает Game
+        GAME_DISCONNECT((byte)33), //ничего не возвращает
 
-        GAME_ACTION((byte)41),
-        GAME_CHAT_MESSAGE((byte)42),
+        GAME_START((byte)34), //сервер упоминает клиента о начале игры. Ответ может быть пустым
+        GAME_END((byte)35), //сервер упоминает клиента о конце игры. Ответ может быть пустым
 
-        GET_OPEN_ROOMS((byte)51);
+        GAME_ACTION((byte)41), //ничего не возвращает
+        GAME_CHAT_MESSAGE((byte)42), //ничего не возвращает
 
+        GET_OPEN_ROOMS((byte)51); //возвращает List<Room>
 
         final byte value;
-        MessageTypes(byte value) {
+        MessageType(byte value) {
             this.value = value;
         }
     }
-    private static final Map<Byte, MessageTypes> messageTypes = new HashMap<>();;
+    //информация, какой класс должен содержать message с таким классом
+    private static final Map<MessageType, Class> typeToClassMap = new HashMap<>();;
     static {
-        Arrays.stream(MessageTypes.values()).
+        typeToClassMap.put(RESPONSE_ERROR, Error.class);
+        typeToClassMap.put(RESPONSE_SUCCESS, Success.class);
+
+        typeToClassMap.put(USER_REGISTRATION, User.class);
+        typeToClassMap.put(USER_AUTHENTICATION, User.class);
+
+        typeToClassMap.put(USER_DATA_GET, null);
+        typeToClassMap.put(USER_DATA_UPDATE, User.class);
+
+        typeToClassMap.put(ROOM_INIT, RoomInitParams.class);
+        typeToClassMap.put(ROOM_CONNECT, Room.class);
+        typeToClassMap.put(ROOM_DISCONNECT, null);
+
+        typeToClassMap.put(GAME_INIT, GameInitParams.class);
+        typeToClassMap.put(GAME_RECONNECT, null);
+        typeToClassMap.put(GAME_DISCONNECT, null);
+
+        typeToClassMap.put(GAME_START, Game.class);
+        typeToClassMap.put(GAME_END, GameResults.class);
+
+        typeToClassMap.put(GAME_ACTION, GameAction.class);
+        typeToClassMap.put(GAME_CHAT_MESSAGE, GameChatMessage.class);
+
+        typeToClassMap.put(GET_OPEN_ROOMS, null);
+
+    }
+
+    private static final Map<Byte, MessageType> messageTypes = new HashMap<>();
+    static {
+        Arrays.stream(MessageType.values()).
                 forEach(type -> messageTypes.put(type.value, type));
     }
 
 
-    //Необходимо отправить ответ после считывания сообщения
-    public static Message readMessage(Socket socket) throws IOException, ProtocolException {
-        InputStream in = socket.getInputStream();
 
+
+
+
+
+    /**Необходимо отправить ответ после вызова этой функции*/
+    public static Message readMessage(InputStream in ) throws IOException, ProtocolVersionException, MismatchedClassException {
         if (in.read() != VERSION) {
-            throw new ProtocolException("Wrong version of protocol");
+            throw new ProtocolVersionException();
         }
         try {
-            return new Message(readType(in), readValue(in));
+            MessageType type = readType(in);
+            MessageValue value = readValue(in);
+
+            Class classMustBe = typeToClassMap.get(type);
+
+            if (classMustBe == null && value == null) {
+                return new Message(type, null);
+
+            } else if (classMustBe == null || value == null) {
+                throw new MismatchedClassException();
+
+            } else {
+                if (!classMustBe.equals(value.getClass())) {
+                    throw new MismatchedClassException();
+                } else {
+                    return new Message(type, value);
+                }
+            }
         } catch (ClassNotFoundException e) {
-            throw new ProtocolException("Wrong message value");
+            throw new MismatchedClassException();
         }
     }
 
     public static void sendErrorResponse(Error error, OutputStream out) throws IOException {
-        sendMessageWithoutWaitingForResponse(new Message(MessageTypes.RESPONSE_SUCCESS, error), out);
+        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_ERROR, error), out);
     }
 
     public static void sendSuccessResponse(Success success, OutputStream out) throws IOException {
-        sendMessageWithoutWaitingForResponse(new Message(MessageTypes.RESPONSE_ERROR, success), out);
+        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_SUCCESS, success), out);
     }
 
 
     
 
-    public static Message sendMessage(Message message, Socket socket) throws IOException, ProtocolException {
+    public static Message sendMessage(Message message, Socket socket) throws IOException, BadResponseException {
         sendMessageWithoutWaitingForResponse(message, socket.getOutputStream());
-        
-        Message response = readMessage(socket);
-        if (response.type() == MessageTypes.RESPONSE_SUCCESS 
-                || response.type() == MessageTypes.RESPONSE_ERROR) {
-            return response;
+
+        try {
+            Message response = readMessage(socket.getInputStream());
+            if (response.type() == MessageType.RESPONSE_SUCCESS
+                    || response.type() == MessageType.RESPONSE_ERROR) {
+                return response;
+            }
+            throw new BadResponseException("Not response type detected");
+        } catch (ProtocolVersionException | MismatchedClassException e) {
+            throw new BadResponseException(e);
         }
-        throw new ProtocolException("Wrong response");
     }
 
     private static void sendMessageWithoutWaitingForResponse(Message message, OutputStream out) throws IOException {
@@ -92,7 +157,7 @@ public class MessageManager {
         sendType(message.type(), out);
         sendValue(message.value(), out);
     }
-    private static void sendType(MessageTypes type, OutputStream out) throws IOException {
+    private static void sendType(MessageType type, OutputStream out) throws IOException {
         out.write(type.value);
     }
 
@@ -101,7 +166,7 @@ public class MessageManager {
     }
 
 
-    private static MessageTypes readType(InputStream in) throws IOException {
+    private static MessageType readType(InputStream in) throws IOException {
         return messageTypes.get((byte)in.read());
     }
 

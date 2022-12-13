@@ -1,8 +1,10 @@
 package Protocol;
 
+import Protocol.MessageValues.MessageValue;
+
 import java.util.Objects;
 
-public record Message(MessageManager.MessageTypes type, MessageValue value) {
+public record Message(MessageManager.MessageType type, MessageValue value) {
 
     @Override
     public String toString() {

@@ -1,4 +1,6 @@
 package Protocol.MessageValues.Room;
 
-public class RoomInitParams {
+import Protocol.MessageValues.MessageValue;
+
+public final class RoomInitParams extends MessageValue {
 }

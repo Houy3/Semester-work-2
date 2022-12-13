@@ -1,4 +1,6 @@
 package Protocol.MessageValues.Game;
 
-public class GameChatMessage {
+import Protocol.MessageValues.MessageValue;
+
+public final class GameChatMessage extends MessageValue {
 }
