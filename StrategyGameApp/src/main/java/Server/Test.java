@@ -1,27 +1,40 @@
 package Server;
 
-import Protocol.MessageValues.User;
+import Protocol.Message;
+import Protocol.MessageManager;
+import Protocol.MessageValues.Response.Success;
+import Protocol.MessageValues.User.User;
+import Protocol.exceptions.MismatchedClassException;
+import Protocol.exceptions.ProtocolVersionException;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Test{
+public class Test {
 
+    private final static int PORT = 8080;
     public static void main(String[] args) {
 
-        try {
-            ServerSocket serverSocket = new ServerSocket(8080);
-            Socket socket = serverSocket.accept();
+        while (true) {
+            try (ServerSocket server = new ServerSocket(PORT)) {
+                Socket socket = server.accept();
 
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-            User user = (User) in.readObject();
-            System.out.println(user);
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+                User user = new User("email", "nick", "pass");
+
+                Message message = MessageManager.readMessage(socket.getInputStream());
+
+                System.out.println(message);
+
+                MessageManager.sendSuccessResponse(new Success(), socket.getOutputStream());
+
+            } catch (IOException | ProtocolVersionException | MismatchedClassException e) {
+                e.printStackTrace();
+            }
         }
-
     }
 }

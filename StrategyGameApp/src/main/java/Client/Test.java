@@ -1,31 +1,37 @@
 package Client;
 
-import Protocol.MessageValues.User;
+import Protocol.Message;
+import Protocol.MessageManager;
+import Protocol.MessageValues.Game.Game;
+import Protocol.MessageValues.User.User;
+import Protocol.exceptions.BadResponseException;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Test {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws BadResponseException {
+
+
         try {
             Socket socket = new Socket("localhost", 8080);
 
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            User user = new User("email", "nick", "pass");
 
-            Map<Integer, String> map = new HashMap<>();
-            map.put(12, "hohoh");
-            map.put(15, "neet");
-            User user = new User("gagaga", map);
+            Message message = MessageManager.sendMessage(
+                    new Message(MessageManager.MessageType.USER_AUTHENTICATION, new Game()),
+                    socket
+            );
 
-            out.writeObject(user);
-            out.flush();
+            System.out.println("end");
+
+
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.println();
+
     }
 }
