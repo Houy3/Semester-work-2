@@ -2,5 +2,5 @@ package Protocol.MessageValues;
 
 import java.io.Serializable;
 
-public class MessageValue implements Serializable {
+public interface MessageValue extends Serializable {
 }
