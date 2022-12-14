@@ -3,7 +3,7 @@ package Protocol.MessageValues.User;
 
 import Protocol.MessageValues.MessageValue;
 
-public final class User extends MessageValue {
+public final class User implements MessageValue {
 
     private String email;
     private String nick;

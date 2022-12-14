@@ -2,7 +2,7 @@ package Protocol.MessageValues.Response;
 
 import Protocol.MessageValues.MessageValue;
 
-public final class Error extends MessageValue {
+public final class Error implements MessageValue {
 
     private String message;
 
