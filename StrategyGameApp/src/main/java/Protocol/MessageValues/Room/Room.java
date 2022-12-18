@@ -14,6 +14,7 @@ public final class Room implements MessageValue {
     private RoomAccess access;
 
     private Map<UserPublicData, Color> users;
+    private Map<UserPublicData, Boolean> isReady;
 
     private GameInitializationForm gameInitializationForm;
 
@@ -21,11 +22,12 @@ public final class Room implements MessageValue {
     public Room() {
     }
 
-    public Room(String code, Integer maxCountOfPlayers, RoomAccess access, Map<UserPublicData, Color> users, GameInitializationForm gameInitializationForm) {
+    public Room(String code, Integer maxCountOfPlayers, RoomAccess access, Map<UserPublicData, Color> users, Map<UserPublicData, Boolean> isReady, GameInitializationForm gameInitializationForm) {
         this.code = code;
         this.maxCountOfPlayers = maxCountOfPlayers;
         this.access = access;
         this.users = users;
+        this.isReady = isReady;
         this.gameInitializationForm = gameInitializationForm;
     }
 
@@ -65,6 +67,14 @@ public final class Room implements MessageValue {
         return gameInitializationForm;
     }
 
+    public Map<UserPublicData, Boolean> getIsReady() {
+        return isReady;
+    }
+
+    public void setIsReady(Map<UserPublicData, Boolean> isReady) {
+        this.isReady = isReady;
+    }
+
     public void setGameInitializationForm(GameInitializationForm gameInitializationForm) {
         this.gameInitializationForm = gameInitializationForm;
     }
@@ -76,6 +86,7 @@ public final class Room implements MessageValue {
                 ", maxCountOfPlayers=" + maxCountOfPlayers +
                 ", access=" + access +
                 ", users=" + users +
+                ", isReady=" + isReady +
                 ", gameInitializationForm=" + gameInitializationForm +
                 '}';
     }
