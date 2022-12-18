@@ -1,6 +1,8 @@
 package Protocol;
 
 
+import Protocol.MessageValues.Game.GameActions.ArmyMovement;
+import Protocol.MessageValues.Game.GameActions.CityCapture;
 import Protocol.MessageValues.MessageValue;
 import Protocol.MessageValues.Game.*;
 import Protocol.MessageValues.Response.*;
@@ -31,22 +33,25 @@ public class MessageManager {
         USER_DATA_GET((byte)13), //возвращает UserData
         USER_DATA_UPDATE((byte)14), //ничего не возвращает
 
-        ROOM_INITIALIZE((byte)21), //возвращает RoomData
-        ROOM_CONNECT((byte)22), //возвращает RoomData
+        ROOM_INITIALIZE((byte)21), //возвращает Room
+        ROOM_CONNECT((byte)22), //возвращает Room
         ROOM_DISCONNECT((byte)23), //ничего не возвращает
-        ROOM_DATA_GET((byte)24), //возвращает RoomData
+        ROOM_DATA_GET((byte)24), //возвращает Room
 
-        GAME_INITIALIZE((byte)31), //возвращает Game
+        GAME_INITIALIZE((byte)31), //ничего не возвращает
         GAME_RECONNECT((byte)32), //возвращает Game
         GAME_DISCONNECT((byte)33), //ничего не возвращает
-
         GAME_START((byte)34), //ничего не возвращает
         GAME_END((byte)35), //ничего не возвращает
 
-        GAME_ACTION((byte)41), //ничего не возвращает
-        GAME_CHAT_MESSAGE((byte)42), //ничего не возвращает
+        GAME_ACTION_ARMY_MOVEMENT((byte)41), //ничего не возвращает
+        GAME_ACTION_CITY_CAPTURE((byte)42), //ничего не возвращает
+        GAME_CHAT_MESSAGE((byte)43), //ничего не возвращает
+        GAME_DATA_GET((byte)44), //возвращает Game
 
-        GET_OPEN_ROOMS((byte)51); //возвращает List<Room>
+
+        GET_OPEN_ROOMS((byte)51), //возвращает List<Room>
+        EXIT((byte)52); //ничего не возвращает
 
         final byte value;
         MessageType(byte value) {
@@ -74,19 +79,21 @@ public class MessageManager {
         typeToClassMap.put(ROOM_DATA_GET, null);
 
 
-        typeToClassMap.put(GAME_INITIALIZE, GameInitParams.class);
-        typeToClassMap.put(GAME_DISCONNECT, null);
+        typeToClassMap.put(GAME_INITIALIZE, GameInitializationForm.class);
         typeToClassMap.put(GAME_RECONNECT, null);
+        typeToClassMap.put(GAME_DISCONNECT, null);
         typeToClassMap.put(GAME_START, Game.class);
         typeToClassMap.put(GAME_END, GameResults.class);
 
 
-        typeToClassMap.put(GAME_ACTION, GameAction.class);
+        typeToClassMap.put(GAME_ACTION_ARMY_MOVEMENT, ArmyMovement.class);
+        typeToClassMap.put(GAME_ACTION_CITY_CAPTURE, CityCapture.class);
         typeToClassMap.put(GAME_CHAT_MESSAGE, GameChatMessage.class);
+        typeToClassMap.put(GAME_DATA_GET, null);
 
 
         typeToClassMap.put(GET_OPEN_ROOMS, null);
-
+        typeToClassMap.put(EXIT, null);
 
         if (values().length != typeToClassMap.size()) {
             throw new RuntimeException("Protocol is bad");

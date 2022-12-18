@@ -1,29 +1,32 @@
 package Protocol.MessageValues.Room;
 
+import Protocol.MessageValues.Game.GameInitializationForm;
 import Protocol.MessageValues.MessageValue;
-import Protocol.MessageValues.User.UserData;
+import Protocol.MessageValues.User.UserPublicData;
 
 import java.awt.*;
 import java.util.Map;
 
-public final class RoomData implements MessageValue {
+public final class Room implements MessageValue {
 
     private String code;
-
     private Integer maxCountOfPlayers;
-
     private RoomAccess access;
 
-    private Map<UserData, Color> users;
+    private Map<UserPublicData, Color> users;
 
-    public RoomData() {
+    private GameInitializationForm gameInitializationForm;
+
+
+    public Room() {
     }
 
-    public RoomData(String code, Integer maxCountOfPlayers, RoomAccess access, Map<UserData, Color> users) {
+    public Room(String code, Integer maxCountOfPlayers, RoomAccess access, Map<UserPublicData, Color> users, GameInitializationForm gameInitializationForm) {
         this.code = code;
         this.maxCountOfPlayers = maxCountOfPlayers;
         this.access = access;
         this.users = users;
+        this.gameInitializationForm = gameInitializationForm;
     }
 
     public String getCode() {
@@ -50,21 +53,30 @@ public final class RoomData implements MessageValue {
         this.access = access;
     }
 
-    public Map<UserData, Color> getUsers() {
+    public Map<UserPublicData, Color> getUsers() {
         return users;
     }
 
-    public void setUsers(Map<UserData, Color> users) {
+    public void setUsers(Map<UserPublicData, Color> users) {
         this.users = users;
+    }
+
+    public GameInitializationForm getGameInitializationForm() {
+        return gameInitializationForm;
+    }
+
+    public void setGameInitializationForm(GameInitializationForm gameInitializationForm) {
+        this.gameInitializationForm = gameInitializationForm;
     }
 
     @Override
     public String toString() {
-        return "RoomData{" +
+        return "Room{" +
                 "code='" + code + '\'' +
                 ", maxCountOfPlayers=" + maxCountOfPlayers +
                 ", access=" + access +
                 ", users=" + users +
+                ", gameInitializationForm=" + gameInitializationForm +
                 '}';
     }
 }
