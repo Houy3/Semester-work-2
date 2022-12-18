@@ -29,7 +29,8 @@ public class MessageManager {
         RESPONSE_SUCCESS((byte)0), //содержит Success с объектом
 
         USER_REGISTRATION((byte)11), //ничего не возвращает
-        USER_AUTHENTICATION((byte)12), //возвращает UserData
+        USER_LOGIN((byte)12), //возвращает UserData
+        USER_LOGOUT((byte)13), //ничего не возвращает
 
         USER_DATA_GET((byte)13), //возвращает UserData
         USER_DATA_UPDATE((byte)14), //ничего не возвращает
@@ -42,8 +43,8 @@ public class MessageManager {
         GAME_RECONNECT((byte)32), //возвращает Game
         GAME_DISCONNECT((byte)33), //ничего не возвращает
 
-        GAME_START((byte)34), //сервер упоминает клиента о начале игры. Ответ может быть пустым
-        GAME_END((byte)35), //сервер упоминает клиента о конце игры. Ответ может быть пустым
+        GAME_START((byte)34), //ничего не возвращает
+        GAME_END((byte)35), //ничего не возвращает
 
         GAME_ACTION((byte)41), //ничего не возвращает
         GAME_CHAT_MESSAGE((byte)42), //ничего не возвращает
@@ -62,7 +63,8 @@ public class MessageManager {
         typeToClassMap.put(RESPONSE_SUCCESS, Success.class);
 
         typeToClassMap.put(USER_REGISTRATION, User.class);
-        typeToClassMap.put(USER_AUTHENTICATION, User.class);
+        typeToClassMap.put(USER_LOGIN, User.class);
+        typeToClassMap.put(USER_LOGOUT, null);
 
         typeToClassMap.put(USER_DATA_GET, null);
         typeToClassMap.put(USER_DATA_UPDATE, User.class);
@@ -151,6 +153,9 @@ public class MessageManager {
             throw new BadResponseException(e);
         }
     }
+
+
+
 
     private static void sendMessageWithoutWaitingForResponse(Message message, OutputStream out) throws IOException {
         out.write(VERSION);
