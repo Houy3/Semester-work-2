@@ -12,14 +12,15 @@ import java.util.Map;
 public final class Game implements MessageValue {
 
     private CitiesMap citiesMap;
+    private Map<UserPublicData, Color> usersColor;
+    private Date startTime;
+
+
 
     private Map<City, Integer> citiesArmies;
-
     private Map<City, UserPublicData> usersCities;
 
-    private Map<UserPublicData, Color> usersColor;
 
-    private Date startTime;
 
     //скорость армии, когда она идет от одного города к другому. усл.ед./с.
     private int armySpeed;

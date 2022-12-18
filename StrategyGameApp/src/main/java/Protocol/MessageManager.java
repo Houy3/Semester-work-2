@@ -21,7 +21,7 @@ import static Protocol.MessageManager.MessageType.*;
 
 public class MessageManager {
 
-    public final static byte VERSION = 1;
+    public final static byte VERSION = 2;
 
     public enum MessageType {
         RESPONSE_ERROR((byte)-1),//содержит Error
@@ -35,14 +35,17 @@ public class MessageManager {
 
         ROOM_INITIALIZE((byte)21), //возвращает Room
         ROOM_CONNECT((byte)22), //возвращает Room
+
+        ROOM_READY_CHANGE((byte)24), //ничего не возвращает
         ROOM_DISCONNECT((byte)23), //ничего не возвращает
         ROOM_DATA_GET((byte)24), //возвращает Room
+
 
         GAME_INITIALIZE((byte)31), //ничего не возвращает
         GAME_RECONNECT((byte)32), //возвращает Game
         GAME_DISCONNECT((byte)33), //ничего не возвращает
-        GAME_START((byte)34), //ничего не возвращает
-        GAME_END((byte)35), //ничего не возвращает
+        GAME_STARTED((byte)34), //ничего не возвращает
+        GAME_ENDED((byte)35), //ничего не возвращает
 
         GAME_ACTION_ARMY_MOVEMENT((byte)41), //ничего не возвращает
         GAME_ACTION_CITY_CAPTURE((byte)42), //ничего не возвращает
@@ -75,6 +78,7 @@ public class MessageManager {
 
         typeToClassMap.put(ROOM_INITIALIZE, RoomInitializationForm.class);
         typeToClassMap.put(ROOM_CONNECT, RoomConnectionForm.class);
+        typeToClassMap.put(ROOM_READY_CHANGE, null);
         typeToClassMap.put(ROOM_DISCONNECT, null);
         typeToClassMap.put(ROOM_DATA_GET, null);
 
@@ -82,8 +86,8 @@ public class MessageManager {
         typeToClassMap.put(GAME_INITIALIZE, GameInitializationForm.class);
         typeToClassMap.put(GAME_RECONNECT, null);
         typeToClassMap.put(GAME_DISCONNECT, null);
-        typeToClassMap.put(GAME_START, Game.class);
-        typeToClassMap.put(GAME_END, GameResults.class);
+        typeToClassMap.put(GAME_STARTED, Game.class);
+        typeToClassMap.put(GAME_ENDED, GameResults.class);
 
 
         typeToClassMap.put(GAME_ACTION_ARMY_MOVEMENT, ArmyMovement.class);
