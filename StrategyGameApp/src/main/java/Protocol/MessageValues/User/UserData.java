@@ -9,6 +9,12 @@ public final class UserData implements MessageValue {
     private Integer something;
     //тут будет куча различных параметров
 
+
+    public UserData(String nickname, Integer something) {
+        this.nickname = nickname;
+        this.something = something;
+    }
+
     public String getNickname() {
         return nickname;
     }
