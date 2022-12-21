@@ -2,11 +2,11 @@ package Protocol.MessageValues.User;
 
 import Protocol.MessageValues.MessageValue;
 
-public final class UserDataUpdateForm implements MessageValue {
+public final class UserDataSetForm implements MessageValue {
 
     private String nickname;
 
-    public UserDataUpdateForm(String nickname) {
+    public UserDataSetForm(String nickname) {
         this.nickname = nickname;
     }
 

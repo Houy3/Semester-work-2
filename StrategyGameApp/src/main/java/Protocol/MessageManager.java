@@ -31,25 +31,29 @@ public class MessageManager {
         USER_LOGIN((byte)12), //возвращает UserData
         USER_LOGOUT((byte)13), //ничего не возвращает
         USER_DATA_GET((byte)13), //возвращает UserData
-        USER_DATA_UPDATE((byte)14), //ничего не возвращает
+        USER_DATA_SET((byte)14), //ничего не возвращает
 
         ROOM_INITIALIZE((byte)21), //возвращает Room
         ROOM_CONNECT((byte)22), //возвращает Room
-
-        ROOM_READY_CHANGE((byte)24), //ничего не возвращает
         ROOM_DISCONNECT((byte)23), //ничего не возвращает
-        ROOM_DATA_GET((byte)24), //возвращает Room
+
+        ROOM_I_AM_READY_TO_START((byte)24), //ничего не возвращает
+        ROOM_I_AM_NOT_READY_TO_START((byte)25), //ничего не возвращает
+
+        ROOM_PARAMETERS_GET((byte)26), //возвращает Room
+        ROOM_PARAMETERS_SET((byte)26), //возвращает Room
 
 
-        GAME_INITIALIZE((byte)31), //ничего не возвращает
+
+        GAME_START((byte)31), //ничего не возвращает
         GAME_RECONNECT((byte)32), //возвращает Game
         GAME_DISCONNECT((byte)33), //ничего не возвращает
-        GAME_STARTED((byte)34), //ничего не возвращает
-        GAME_ENDED((byte)35), //ничего не возвращает
+        GAME_STARTED((byte)34), //ничего не возвращает (приходит клиенту)
+        GAME_ENDED((byte)35), //ничего не возвращает (приходит клиенту)
 
-        GAME_ACTION_ARMY_MOVEMENT((byte)41), //ничего не возвращает
-        GAME_ACTION_CITY_CAPTURE((byte)42), //ничего не возвращает
-        GAME_CHAT_MESSAGE((byte)43), //ничего не возвращает
+        GAME_ACTION_ARMY_MOVEMENT((byte)41), //ничего не возвращает (приходит клиенту)
+        GAME_ACTION_CITY_CAPTURE((byte)42), //ничего не возвращает (приходит клиенту)
+        GAME_CHAT_MESSAGE((byte)43), //ничего не возвращает (приходит клиенту)
         GAME_DATA_GET((byte)44), //возвращает Game
 
 
@@ -73,17 +77,20 @@ public class MessageManager {
         typeToClassMap.put(USER_LOGIN, UserLoginForm.class);
         typeToClassMap.put(USER_LOGOUT, null);
         typeToClassMap.put(USER_DATA_GET, null);
-        typeToClassMap.put(USER_DATA_UPDATE, UserDataUpdateForm.class);
+        typeToClassMap.put(USER_DATA_SET, UserDataSetForm.class);
 
 
         typeToClassMap.put(ROOM_INITIALIZE, RoomInitializationForm.class);
         typeToClassMap.put(ROOM_CONNECT, RoomConnectionForm.class);
-        typeToClassMap.put(ROOM_READY_CHANGE, null);
         typeToClassMap.put(ROOM_DISCONNECT, null);
-        typeToClassMap.put(ROOM_DATA_GET, null);
+        typeToClassMap.put(ROOM_I_AM_READY_TO_START, null);
+        typeToClassMap.put(ROOM_I_AM_NOT_READY_TO_START, null);
+        typeToClassMap.put(ROOM_PARAMETERS_GET, null);
+        typeToClassMap.put(ROOM_PARAMETERS_SET, null);
 
 
-        typeToClassMap.put(GAME_INITIALIZE, GameInitializationForm.class);
+
+        typeToClassMap.put(GAME_START, null);
         typeToClassMap.put(GAME_RECONNECT, null);
         typeToClassMap.put(GAME_DISCONNECT, null);
         typeToClassMap.put(GAME_STARTED, Game.class);
