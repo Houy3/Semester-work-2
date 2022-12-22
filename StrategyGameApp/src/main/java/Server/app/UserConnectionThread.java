@@ -4,7 +4,10 @@ import Protocol.Message;
 import Protocol.MessageManager;
 import Protocol.MessageValues.Response.Error;
 import Protocol.MessageValues.Response.Success;
+import Protocol.MessageValues.Room.OpenRoomsList;
 import Protocol.MessageValues.Room.Room;
+import Protocol.MessageValues.Room.RoomConnectionForm;
+import Protocol.MessageValues.Room.RoomInitializationForm;
 import Protocol.MessageValues.User.*;
 import Protocol.exceptions.MismatchedClassException;
 import Protocol.exceptions.ProtocolVersionException;
@@ -12,30 +15,38 @@ import Server.DB.exceptions.DBException;
 import Server.DB.exceptions.NotFoundException;
 import Server.DB.exceptions.NotUniqueException;
 import Server.DB.exceptions.NullException;
+import Server.models.RoomDB;
 import Server.models.UserDB;
 import Server.models.validators.ValidatorException;
+import Server.services.Inter.RoomsService;
 import Server.services.Inter.UsersService;
-import Server.services.exceptions.ServiceException;
 import Server.services.ServicesToolKit;
+import Server.services.exceptions.ServiceException;
 import Server.services.exceptions.UserAlreadyLoginException;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserConnectionThread implements Runnable {
 
     private final Socket socket;
     private final UsersService usersService;
 
+    private final RoomsService roomsService;
+
+
     public UserConnectionThread(Socket socket, ServicesToolKit servicesToolKit) {
         this.socket = socket;
         this.usersService = servicesToolKit.getUsersService();
+        this.roomsService = servicesToolKit.getRoomService();
     }
 
     private UserDB userDB;
 
-    private Room room;
+    private RoomDB roomDB;
 
     private boolean isExit = false;
     private boolean isLogout = false;
@@ -47,6 +58,11 @@ public class UserConnectionThread implements Runnable {
             while (!isExit) {
                 loginOrRegister();
                 mainLobby();
+                try {
+                    Thread.sleep(100000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } catch (MismatchedClassException | ProtocolVersionException e) {
             errorMessageLog(e);
@@ -61,12 +77,12 @@ public class UserConnectionThread implements Runnable {
                 Message message = MessageManager.readMessage(socket.getInputStream());
                 switch (message.type()) {
                     case USER_REGISTER -> {
-                        UserRegistrationForm userRegistrationForm = (UserRegistrationForm) message.value();
-                        registerUserWithResponse(userRegistrationForm);
+                        UserRegistrationForm form = (UserRegistrationForm) message.value();
+                        registerUserWithResponse(form);
                     }
                     case USER_LOGIN -> {
-                        UserLoginForm userLoginForm = (UserLoginForm) message.value();
-                        loginUserWithResponse(userLoginForm);
+                        UserLoginForm form = (UserLoginForm) message.value();
+                        loginUserWithResponse(form);
                     }
                     case EXIT -> {
                         isExit = true;
@@ -99,7 +115,7 @@ public class UserConnectionThread implements Runnable {
         try {
             userDB = new UserDB(form);
             usersService.login(userDB);
-            User user = new User(userDB.getNickname());
+            User user = new User(this.userDB.getNickname());
             MessageManager.sendSuccessResponse(new Success(user), socket.getOutputStream());
             return;
         } catch (NullException e) {
@@ -127,12 +143,22 @@ public class UserConnectionThread implements Runnable {
                         logoutUserWithResponse();
                     }
                     case USER_UPDATE -> {
-                        UserUpdateForm userUpdateForm = (UserUpdateForm) message.value();
-                        userUpdateWithResponse(userUpdateForm);
+                        UserUpdateForm form = (UserUpdateForm) message.value();
+                        updateUserWithResponse(form);
                     }
                     case USER_PROFILE_DATA_GET -> {
-                        UserProfileData userProfileData = new UserProfileData(19);
-                        MessageManager.sendSuccessResponse(new Success(userProfileData), socket.getOutputStream());
+                        getUserProfileDataWithResponse();
+                    }
+                    case ROOM_INITIALIZE -> {
+                        RoomInitializationForm form = (RoomInitializationForm) message.value();
+                        initializeRoomWithResponse(form);
+                    }
+                    case ROOM_CONNECT -> {
+                        RoomConnectionForm form = (RoomConnectionForm) message.value();
+                        connectRoomWithResponse(form);
+                    }
+                    case GET_OPEN_ROOMS -> {
+                        getOpenRoomsWithResponse();
                     }
                     case EXIT -> {
                         isExit = true;
@@ -155,7 +181,7 @@ public class UserConnectionThread implements Runnable {
         MessageManager.sendSuccessResponse(new Success(null), socket.getOutputStream());
     }
 
-    private void userUpdateWithResponse(UserUpdateForm form) throws IOException {
+    private void updateUserWithResponse(UserUpdateForm form) throws IOException {
         try {
             usersService.update(form, userDB);
             MessageManager.sendSuccessResponse(new Success(null), socket.getOutputStream());
@@ -172,11 +198,36 @@ public class UserConnectionThread implements Runnable {
 
     }
 
-
-
-    private void gameCreation() {
-
+    private void getUserProfileDataWithResponse() throws IOException {
+        UserProfileData userProfileData = usersService.getProfileData(userDB);
+        MessageManager.sendSuccessResponse(new Success(userProfileData), socket.getOutputStream());
     }
+
+    private void initializeRoomWithResponse(RoomInitializationForm form) throws IOException {
+        try {
+            roomDB = roomsService.initialize(form, userDB);
+            MessageManager.sendSuccessResponse(new Success(roomDB.toRoom()), socket.getOutputStream());
+        } catch (ValidatorException e) {
+            MessageManager.sendErrorResponse(new Error(e.getMessage()), socket.getOutputStream());
+        }
+    }
+
+    private void connectRoomWithResponse(RoomConnectionForm form) throws IOException {
+        try {
+            roomDB = roomsService.connect(form, userDB);
+            MessageManager.sendSuccessResponse(new Success(roomDB.toRoom()), socket.getOutputStream());
+        } catch (ValidatorException e) {
+            MessageManager.sendErrorResponse(new Error(e.getMessage()), socket.getOutputStream());
+        }
+    }
+
+    private void getOpenRoomsWithResponse() throws IOException {
+        List<RoomDB> openRoomsDB = roomsService.getOpenRooms();
+        List<Room> openRooms =  openRoomsDB.stream().map(RoomDB::toRoom).collect(Collectors.toList());
+        OpenRoomsList openRoomsList = new OpenRoomsList(openRooms);
+        MessageManager.sendSuccessResponse(new Success(openRoomsList), socket.getOutputStream());
+    }
+
 
 
     private void logoutUser() {

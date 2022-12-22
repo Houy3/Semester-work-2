@@ -1,5 +1,6 @@
 package Server.services.Inter;
 
+import Protocol.MessageValues.User.UserProfileData;
 import Protocol.MessageValues.User.UserUpdateForm;
 import Server.DB.exceptions.DBException;
 import Server.DB.exceptions.NotFoundException;
@@ -20,4 +21,7 @@ public interface UsersService extends ServiceWithDB {
     void logout(UserDB userDB);
 
     void update(UserUpdateForm form, UserDB user) throws DBException, ServiceException, NotUniqueException, NotFoundException, NullException, ValidatorException;
+
+    UserProfileData getProfileData(UserDB user);
+
 }
