@@ -1,6 +1,7 @@
 package Server.services.Impl;
 
 
+import Protocol.MessageValues.User.UserProfileData;
 import Protocol.MessageValues.User.UserUpdateForm;
 import Server.DB.exceptions.DBException;
 import Server.DB.exceptions.NotFoundException;
@@ -82,5 +83,10 @@ public class UsersServiceImpl extends ServiceWithDBImpl implements UsersService 
 
         user.setNickname(form.getNickname());
         super.change(user, userIdFieldName);
+    }
+
+    @Override
+    public UserProfileData getProfileData(UserDB user) {
+        return new UserProfileData(19);
     }
 }

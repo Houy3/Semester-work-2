@@ -39,6 +39,8 @@ public class MessageManager {
         ROOM_INITIALIZE((byte)21), //возвращает Room
         ROOM_CONNECT((byte)22), //возвращает Room
 
+        GET_OPEN_ROOMS((byte)51), //возвращает List<Room>
+
 //этап лобби комнаты
         ROOM_DISCONNECT((byte)23), //ничего не возвращает
 
@@ -47,8 +49,6 @@ public class MessageManager {
 
         ROOM_PARAMETERS_GET((byte)26), //возвращает Room
         ROOM_PARAMETERS_SET((byte)26), //ничего не возвращает
-
-        GET_OPEN_ROOMS((byte)51), //возвращает List<Room>
 
 
         GAME_START((byte)31), //ничего не возвращает
