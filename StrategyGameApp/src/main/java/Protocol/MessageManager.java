@@ -46,7 +46,7 @@ public class MessageManager {
         ROOM_I_AM_NOT_READY_TO_START((byte)25), //ничего не возвращает
 
         ROOM_PARAMETERS_GET((byte)26), //возвращает Room
-        ROOM_PARAMETERS_SET((byte)26), //возвращает Room
+        ROOM_PARAMETERS_SET((byte)26), //ничего не возвращает
 
         GET_OPEN_ROOMS((byte)51), //возвращает List<Room>
 
@@ -60,7 +60,7 @@ public class MessageManager {
 
         GAME_ACTION_ARMY_MOVEMENT((byte)41), //ничего не возвращает (приходит клиенту)
         GAME_ACTION_CITY_CAPTURE((byte)42), //ничего не возвращает (приходит клиенту)
-        GAME_CHAT_MESSAGE((byte)43), //ничего не возвращает (приходит клиенту)
+        CHAT_MESSAGE((byte)43), //ничего не возвращает (приходит клиенту)
         GAME_DATA_GET((byte)44), //возвращает Game
 
 
@@ -93,7 +93,7 @@ public class MessageManager {
         typeToClassMap.put(ROOM_I_AM_READY_TO_START, null);
         typeToClassMap.put(ROOM_I_AM_NOT_READY_TO_START, null);
         typeToClassMap.put(ROOM_PARAMETERS_GET, null);
-        typeToClassMap.put(ROOM_PARAMETERS_SET, null);
+        typeToClassMap.put(ROOM_PARAMETERS_SET, RoomParametersSetForm.class);
 
 
 
@@ -106,11 +106,11 @@ public class MessageManager {
 
         typeToClassMap.put(GAME_ACTION_ARMY_MOVEMENT, ArmyMovement.class);
         typeToClassMap.put(GAME_ACTION_CITY_CAPTURE, CityCapture.class);
-        typeToClassMap.put(GAME_CHAT_MESSAGE, GameChatMessage.class);
         typeToClassMap.put(GAME_DATA_GET, null);
 
 
         typeToClassMap.put(GET_OPEN_ROOMS, null);
+        typeToClassMap.put(CHAT_MESSAGE, ChatMessage.class);
         typeToClassMap.put(EXIT, null);
 
         if (values().length != typeToClassMap.size()) {
