@@ -12,11 +12,11 @@ import Server.services.exceptions.ServiceException;
 import java.lang.reflect.Field;
 import java.util.Collection;
 
-public class ServiceImpl implements Service {
+public class ServiceWithDBImpl implements ServiceWithDB {
 
     protected RepositoryImpl repository;
 
-    public ServiceImpl(Repository repository) {
+    public ServiceWithDBImpl(Repository repository) {
         this.repository = (RepositoryImpl) repository;
     }
 

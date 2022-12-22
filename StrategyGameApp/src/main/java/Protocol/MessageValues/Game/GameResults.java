@@ -1,24 +1,24 @@
 package Protocol.MessageValues.Game;
 
 import Protocol.MessageValues.MessageValue;
-import Protocol.MessageValues.User.UserPublicData;
+import Protocol.MessageValues.User.User;
 
 public final class GameResults implements MessageValue {
 
-    private UserPublicData winner;
+    private User winner;
 
     private Long gameTime; //сколько времени длилась игра
 
-    public GameResults(UserPublicData winner, Long gameTime) {
+    public GameResults(User winner, Long gameTime) {
         this.winner = winner;
         this.gameTime = gameTime;
     }
 
-    public UserPublicData getWinner() {
+    public User getWinner() {
         return winner;
     }
 
-    public void setWinner(UserPublicData winner) {
+    public void setWinner(User winner) {
         this.winner = winner;
     }
 

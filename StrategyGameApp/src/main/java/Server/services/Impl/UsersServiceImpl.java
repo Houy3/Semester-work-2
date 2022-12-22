@@ -1,28 +1,31 @@
 package Server.services.Impl;
 
+
+import Protocol.MessageValues.User.UserUpdateForm;
 import Server.DB.exceptions.DBException;
 import Server.DB.exceptions.NotFoundException;
 import Server.DB.exceptions.NotUniqueException;
 import Server.DB.exceptions.NullException;
-import Server.DB.models.UserDB;
-import Server.DB.models.encryptors.PasswordEncryptor;
-import Server.DB.models.validators.EmailValidator;
-import Server.DB.models.validators.NicknameValidator;
-import Server.DB.models.validators.PasswordValidator;
-import Server.DB.models.validators.ValidatorException;
+import Server.models.UserDB;
+import Server.models.encryptors.PasswordEncryptor;
+import Server.models.validators.EmailValidator;
+import Server.models.validators.NicknameValidator;
+import Server.models.validators.PasswordValidator;
+import Server.models.validators.ValidatorException;
 import Server.DB.repositories.Inter.UsersRepository;
 import Server.services.Inter.UsersService;
 import Server.services.exceptions.ServiceException;
-import Server.services.ServiceImpl;
+import Server.services.ServiceWithDBImpl;
 import Server.services.exceptions.UserAlreadyLoginException;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class UsersServiceImpl extends ServiceImpl implements UsersService {
+public class UsersServiceImpl extends ServiceWithDBImpl implements UsersService {
+
+    private final static String userIdFieldName = "id";
 
     private final UsersRepository usersRepository;
-
     private final Set<UserDB> activeUsers;
 
     private final EmailValidator emailValidator;
@@ -70,5 +73,14 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     @Override
     public void logout(UserDB userDB) {
         activeUsers.remove(userDB);
+    }
+
+
+    @Override
+    public void update(UserUpdateForm form, UserDB user) throws DBException, ServiceException, NotUniqueException, NotFoundException, NullException, ValidatorException {
+        nicknameValidator.check(form.getNickname());
+
+        user.setNickname(form.getNickname());
+        super.change(user, userIdFieldName);
     }
 }

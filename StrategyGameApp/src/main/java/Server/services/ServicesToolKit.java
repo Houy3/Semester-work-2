@@ -1,8 +1,8 @@
 package Server.services;
 
-import Server.DB.models.validators.EmailValidator;
-import Server.DB.models.validators.NicknameValidator;
-import Server.DB.models.validators.PasswordValidator;
+import Server.models.validators.EmailValidator;
+import Server.models.validators.NicknameValidator;
+import Server.models.validators.PasswordValidator;
 import Server.DB.repositories.Impl.UsersRepositoryImpl;
 import Server.DB.repositories.RepositoryImpl;
 import Server.app.ServerApp;
@@ -18,14 +18,14 @@ public class ServicesToolKit {
 
     private final DataSource dataSource;
 
-    private final Service service;
+    private final ServiceWithDB service;
     private final UsersService usersService;
 
 
     public ServicesToolKit(DataSource dataSource) {
         this.dataSource = dataSource;
 
-        service = new ServiceImpl(new RepositoryImpl(dataSource));
+        service = new ServiceWithDBImpl(new RepositoryImpl(dataSource));
 
 
         Properties properties = new Properties();
@@ -40,7 +40,11 @@ public class ServicesToolKit {
                 Integer.parseInt(properties.getProperty("password.minLength")),
                 Integer.parseInt(properties.getProperty("password.maxLength"))
         );
-        NicknameValidator nicknameValidator = new NicknameValidator(properties.getProperty("nickname.regexp"));
+        NicknameValidator nicknameValidator = new NicknameValidator(
+                properties.getProperty("nickname.regexp"),
+                Integer.parseInt(properties.getProperty("nickname.minLength")),
+                Integer.parseInt(properties.getProperty("nickname.maxLength"))
+        );
 
         usersService = new UsersServiceImpl(
                 new UsersRepositoryImpl(dataSource),
@@ -49,7 +53,7 @@ public class ServicesToolKit {
                 nicknameValidator);
     }
 
-    public Service getMainService() {
+    public ServiceWithDB getMainService() {
         return service;
     }
 

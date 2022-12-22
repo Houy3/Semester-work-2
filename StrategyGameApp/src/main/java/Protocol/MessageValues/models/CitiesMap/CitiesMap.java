@@ -1,4 +1,4 @@
-package Protocol.MessageValues.Game.CitiesMap;
+package Protocol.MessageValues.models.CitiesMap;
 
 import java.util.List;
 

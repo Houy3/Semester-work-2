@@ -1,4 +1,4 @@
-package Server.DB.models.encryptors;
+package Server.models.encryptors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 

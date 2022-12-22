@@ -1,24 +1,24 @@
 package Protocol.MessageValues.Game;
 
 import Protocol.MessageValues.MessageValue;
-import Protocol.MessageValues.User.UserPublicData;
+import Protocol.MessageValues.User.User;
 
 public final class GameChatMessage implements MessageValue {
 
-    private UserPublicData user;
+    private User user;
 
     private String message;
 
-    public GameChatMessage(UserPublicData user, String message) {
+    public GameChatMessage(User user, String message) {
         this.user = user;
         this.message = message;
     }
 
-    public UserPublicData getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(UserPublicData user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

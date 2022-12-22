@@ -1,9 +1,9 @@
 package Protocol.MessageValues.Game;
 
-import Protocol.MessageValues.Game.CitiesMap.CitiesMap;
-import Protocol.MessageValues.Game.CitiesMap.City;
+import Protocol.MessageValues.User.User;
+import Protocol.MessageValues.models.CitiesMap.CitiesMap;
+import Protocol.MessageValues.models.CitiesMap.City;
 import Protocol.MessageValues.MessageValue;
-import Protocol.MessageValues.User.UserPublicData;
 
 import java.awt.*;
 import java.util.Date;
@@ -12,13 +12,13 @@ import java.util.Map;
 public final class Game implements MessageValue {
 
     private CitiesMap citiesMap;
-    private Map<UserPublicData, Color> usersColor;
+    private Map<User, Color> usersColor;
     private Date startTime;
 
 
 
     private Map<City, Integer> citiesArmies;
-    private Map<City, UserPublicData> usersCities;
+    private Map<City, User> usersCities;
 
 
 
@@ -31,7 +31,7 @@ public final class Game implements MessageValue {
     public Game() {
     }
 
-    public Game(CitiesMap citiesMap, Map<City, Integer> citiesArmies, Map<City, UserPublicData> usersCities, Map<UserPublicData, Color> usersColor, Date startTime, int armySpeed, int armyGrowthRate) {
+    public Game(CitiesMap citiesMap, Map<City, Integer> citiesArmies, Map<City, User> usersCities, Map<User, Color> usersColor, Date startTime, int armySpeed, int armyGrowthRate) {
         this.citiesMap = citiesMap;
         this.citiesArmies = citiesArmies;
         this.usersCities = usersCities;
@@ -58,19 +58,19 @@ public final class Game implements MessageValue {
         this.citiesArmies = citiesArmies;
     }
 
-    public Map<City, UserPublicData> getUsersCities() {
+    public Map<City, User> getUsersCities() {
         return usersCities;
     }
 
-    public void setUsersCities(Map<City, UserPublicData> usersCities) {
+    public void setUsersCities(Map<City, User> usersCities) {
         this.usersCities = usersCities;
     }
 
-    public Map<UserPublicData, Color> getUsersColor() {
+    public Map<User, Color> getUsersColor() {
         return usersColor;
     }
 
-    public void setUsersColor(Map<UserPublicData, Color> usersColor) {
+    public void setUsersColor(Map<User, Color> usersColor) {
         this.usersColor = usersColor;
     }
 

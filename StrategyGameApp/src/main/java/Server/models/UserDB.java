@@ -1,10 +1,10 @@
-package Server.DB.models;
+package Server.models;
 
 
 import Protocol.MessageValues.User.UserLoginForm;
 import Protocol.MessageValues.User.UserRegistrationForm;
+import Protocol.MessageValues.User.UserUpdateForm;
 import Server.DB.SQLGenerator.SQLAnnotations.*;
-import Server.DB.models.encryptors.PasswordEncryptor;
 
 import java.util.Objects;
 
@@ -94,6 +94,7 @@ public class UserDB {
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
+
 
     @Override
     public String toString() {
