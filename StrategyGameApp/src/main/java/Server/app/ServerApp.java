@@ -7,7 +7,7 @@ public class ServerApp {
 
     public static void main(String[] args) {
         try {
-            ServerApp serverApp = new ServerApp(8080);
+            ServerApp serverApp = new ServerApp(8888);
             serverApp.start();
         } catch (Exception e) {
             ErrorLogger.log(e.getMessage());

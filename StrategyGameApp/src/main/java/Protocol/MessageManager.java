@@ -1,15 +1,23 @@
 package Protocol;
 
 
+import Protocol.MessageValues.Game.Game;
 import Protocol.MessageValues.Game.GameActions.ArmyMovement;
 import Protocol.MessageValues.Game.GameActions.CityCapture;
+import Protocol.MessageValues.Game.GameChatMessage;
+import Protocol.MessageValues.Game.GameResults;
 import Protocol.MessageValues.MessageValue;
-import Protocol.MessageValues.Game.*;
-import Protocol.MessageValues.Response.*;
-import Protocol.MessageValues.Response.Error;
-import Protocol.MessageValues.Room.*;
-import Protocol.MessageValues.User.*;
-import Protocol.exceptions.*;
+import Protocol.MessageValues.Response.ErrorResponse;
+import Protocol.MessageValues.Response.Success;
+import Protocol.MessageValues.Room.RoomConnectionForm;
+import Protocol.MessageValues.Room.RoomInitializationForm;
+import Protocol.MessageValues.Room.RoomParametersSetForm;
+import Protocol.MessageValues.User.UserLoginForm;
+import Protocol.MessageValues.User.UserRegistrationForm;
+import Protocol.MessageValues.User.UserUpdateForm;
+import Protocol.exceptions.BadResponseException;
+import Protocol.exceptions.MismatchedClassException;
+import Protocol.exceptions.ProtocolVersionException;
 
 import java.io.*;
 import java.net.Socket;
@@ -24,7 +32,7 @@ public class MessageManager {
     public final static byte VERSION = 2;
 
     public enum MessageType {
-        RESPONSE_ERROR((byte)-1),//содержит Error
+        RESPONSE_ERROR((byte)-1),//содержит ErrorResponse
         RESPONSE_SUCCESS((byte)0), //содержит Success с объектом
 
 //этап входа
@@ -76,7 +84,7 @@ public class MessageManager {
     //если null, то передавай null.
     private static final Map<MessageType, Class> typeToClassMap = new HashMap<>();;
     static {
-        typeToClassMap.put(RESPONSE_ERROR, Error.class);
+        typeToClassMap.put(RESPONSE_ERROR, ErrorResponse.class);
         typeToClassMap.put(RESPONSE_SUCCESS, Success.class);
 
 
@@ -110,7 +118,7 @@ public class MessageManager {
 
 
         typeToClassMap.put(GET_OPEN_ROOMS, null);
-        typeToClassMap.put(CHAT_MESSAGE, ChatMessage.class);
+        typeToClassMap.put(CHAT_MESSAGE, GameChatMessage.class);
         typeToClassMap.put(EXIT, null);
 
         if (values().length != typeToClassMap.size()) {
@@ -146,8 +154,8 @@ public class MessageManager {
 
     }
 
-    public static void sendErrorResponse(Error error, OutputStream out) throws IOException {
-        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_ERROR, error), out);
+    public static void sendErrorResponse(ErrorResponse errorResponse, OutputStream out) throws IOException {
+        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_ERROR, errorResponse), out);
     }
 
     public static void sendSuccessResponse(Success success, OutputStream out) throws IOException {

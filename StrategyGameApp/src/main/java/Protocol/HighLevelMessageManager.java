@@ -1,9 +1,9 @@
 package Protocol;
 
-import Protocol.MessageValues.Game.ChatMessage;
 import Protocol.MessageValues.Game.Game;
 import Protocol.MessageValues.Game.GameActions.ArmyMovement;
 import Protocol.MessageValues.Game.GameActions.CityCapture;
+import Protocol.MessageValues.Game.GameChatMessage;
 import Protocol.MessageValues.Game.GameResults;
 import Protocol.MessageValues.Room.RoomConnectionForm;
 import Protocol.MessageValues.Room.RoomInitializationForm;
@@ -109,7 +109,7 @@ public class HighLevelMessageManager extends MessageManager {
         return sendMessage(new Message(GET_OPEN_ROOMS, null), socket);
     }
     /**пустой ответ. Принимает клиент*/
-    public Message sendChatMessage(ChatMessage value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
+    public Message sendChatMessage(GameChatMessage value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
         return sendMessage(new Message(CHAT_MESSAGE, value), socket);
     }
     /**пустой ответ*/

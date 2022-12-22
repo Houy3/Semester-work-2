@@ -2,7 +2,7 @@ package Server.app;
 
 import Protocol.Message;
 import Protocol.MessageManager;
-import Protocol.MessageValues.Response.Error;
+import Protocol.MessageValues.Response.ErrorResponse;
 import Protocol.MessageValues.Response.Success;
 import Protocol.MessageValues.Room.Room;
 import Protocol.MessageValues.User.*;
@@ -71,7 +71,7 @@ public class UserConnectionThread implements Runnable {
                     case EXIT -> {
                         isExit = true;
                     }
-                    default -> MessageManager.sendErrorResponse(new Error("Firstly you need login or register"), socket.getOutputStream());
+                    default -> MessageManager.sendErrorResponse(new ErrorResponse("Firstly you need login or register"), socket.getOutputStream());
                 }
             }
         } catch (IOException e) {
@@ -84,14 +84,14 @@ public class UserConnectionThread implements Runnable {
             usersService.register(new UserDB(form));
             MessageManager.sendSuccessResponse(new Success(null), socket.getOutputStream());
         } catch (NotUniqueException e) {
-            MessageManager.sendErrorResponse(new Error(e.getMessage() + " is already taken"), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse(e.getMessage() + " is already taken"), socket.getOutputStream());
         } catch (NullException e) {
-            MessageManager.sendErrorResponse(new Error(e.getMessage() + " can't be empty"), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse(e.getMessage() + " can't be empty"), socket.getOutputStream());
         } catch (ValidatorException e) {
-            MessageManager.sendErrorResponse(new Error(e.getMessage()), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse(e.getMessage()), socket.getOutputStream());
         } catch (ServiceException | DBException e) {
             errorMessageLog(e);
-            MessageManager.sendErrorResponse(new Error("Unexpected error"), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse("Unexpected error"), socket.getOutputStream());
         }
     }
 
@@ -103,14 +103,14 @@ public class UserConnectionThread implements Runnable {
             MessageManager.sendSuccessResponse(new Success(user), socket.getOutputStream());
             return;
         } catch (NullException e) {
-            MessageManager.sendErrorResponse(new Error(e.getMessage() + " can't be empty"), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse(e.getMessage() + " can't be empty"), socket.getOutputStream());
         } catch (NotFoundException e) {
-            MessageManager.sendErrorResponse(new Error("Email or password is incorrect"), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse("Email or password is incorrect"), socket.getOutputStream());
         } catch (UserAlreadyLoginException e) {
-            MessageManager.sendErrorResponse(new Error("Someone is active through this account"), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse("Someone is active through this account"), socket.getOutputStream());
         } catch (DBException | ServiceException e) {
             errorMessageLog(e);
-            MessageManager.sendErrorResponse(new Error("Unexpected error"), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse("Unexpected error"), socket.getOutputStream());
         }
         userDB = null;
     }
@@ -138,7 +138,7 @@ public class UserConnectionThread implements Runnable {
                         isExit = true;
                         throw new UserDisconnectException();
                     }
-                    default -> MessageManager.sendErrorResponse(new Error("later"), socket.getOutputStream());
+                    default -> MessageManager.sendErrorResponse(new ErrorResponse("later"), socket.getOutputStream());
                 }
 
                 if (isLogout || isExit) {
@@ -160,14 +160,14 @@ public class UserConnectionThread implements Runnable {
             usersService.update(form, userDB);
             MessageManager.sendSuccessResponse(new Success(null), socket.getOutputStream());
         } catch (ValidatorException e) {
-            MessageManager.sendErrorResponse(new Error(e.getMessage()), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse(e.getMessage()), socket.getOutputStream());
         } catch (NotUniqueException e) {
-            MessageManager.sendErrorResponse(new Error(e.getMessage() + " is already taken"), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse(e.getMessage() + " is already taken"), socket.getOutputStream());
         } catch (NullException e) {
-            MessageManager.sendErrorResponse(new Error(e.getMessage() + " can't be empty"), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse(e.getMessage() + " can't be empty"), socket.getOutputStream());
         } catch (DBException | ServiceException | NotFoundException e) {
             errorMessageLog(e);
-            MessageManager.sendErrorResponse(new Error("Unexpected error"), socket.getOutputStream());
+            MessageManager.sendErrorResponse(new ErrorResponse("Unexpected error"), socket.getOutputStream());
         }
 
     }
