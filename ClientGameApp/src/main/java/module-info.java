@@ -9,4 +9,8 @@ module com.example.clientgameapp {
 
     opens com.example.clientgameapp to javafx.fxml;
     exports com.example.clientgameapp;
+    exports com.example.clientgameapp.userUI;
+    opens com.example.clientgameapp.userUI to javafx.fxml;
+    exports com.example.clientgameapp.lobbyUI;
+    opens com.example.clientgameapp.lobbyUI to javafx.fxml;
 }

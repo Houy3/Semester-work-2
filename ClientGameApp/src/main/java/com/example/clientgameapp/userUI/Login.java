@@ -1,24 +1,22 @@
-package com.example.clientgameapp;
+package com.example.clientgameapp.userUI;
 
 import Protocol.HighLevelMessageManager;
 import Protocol.Message;
 import Protocol.MessageManager;
 import Protocol.MessageValues.Response.ErrorResponse;
 import Protocol.MessageValues.User.UserLoginForm;
-import com.example.clientgameapp.GameApp;
+import com.example.clientgameapp.DestinationsManager;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientRegistrationException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import util.ErrorAlert;
-import validators.Validator;
+import utils.StringConverter;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -46,7 +44,7 @@ public class Login {
             connection = ClientConnectionSingleton.getInstance();
             mManager = new HighLevelMessageManager();
             socket = connection.getSocket();
-            destinationsManager = new DestinationsManager();
+            destinationsManager = DestinationsManager.getInstance();
         } catch (ClientConnectionException ex) {
             ErrorAlert.show(ex.getMessage());
         }
@@ -58,7 +56,7 @@ public class Login {
         try {
             String email = textFieldEmail.getText();
             String password = textFieldPassword.getText();
-            if (Validator.isValid(email) && Validator.isValid(password)) {
+            if (StringConverter.isValid(email) && StringConverter.isValid(password)) {
                 UserLoginForm loginForm = new UserLoginForm(
                         email, password
                 );
@@ -79,11 +77,11 @@ public class Login {
     }
 
     public void switchToRegistration(ActionEvent actionEvent) throws IOException {
-        destinationsManager.switchToRegistration(actionEvent);
+        destinationsManager.switchToRegistration();
     }
 
 
     public void switchToChoiceScene(ActionEvent actionEvent) throws IOException {
-        destinationsManager.switchToChoiceScene(actionEvent);
+        destinationsManager.switchToChoiceScene();
     }
 }

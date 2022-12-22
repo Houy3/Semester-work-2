@@ -1,5 +1,11 @@
 package com.example.clientgameapp;
 
+import Protocol.Message;
+import Protocol.MessageManager;
+import Protocol.exceptions.MismatchedClassException;
+import Protocol.exceptions.ProtocolVersionException;
+import connection.ClientConnectionSingleton;
+import exceptions.ClientConnectionException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -8,35 +14,70 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+import java.net.URL;
 
 public class DestinationsManager {
 
-    private static Stage stage;
-    private Scene scene;
+    private  Stage stage;
+    private  Scene scene;
 
-    public void switchToChoiceScene(ActionEvent actionEvent) throws IOException {
-        Parent root = FXMLLoader.load(GameApp.class.getResource("creation-room-view.fxml"));
-        stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+    private static DestinationsManager instance;
+
+    private DestinationsManager() {
+
+    }
+
+    static {
+        try {
+            instance = new DestinationsManager();
+        } catch (Exception e) {
+            throw new RuntimeException("Exception occurred in creating singleton instance");
+        }
+    }
+
+    public static DestinationsManager getInstance() throws ClientConnectionException {
+        return instance;
+    }
+
+    public void init(Stage stage) throws ClientConnectionException {
+       this.stage = stage;
+    }
+
+    public void switchToChoiceScene() throws IOException {
+        showScene(GameApp.class.getResource("choice-view.fxml"));
+    }
+
+    private void showScene(URL destiny) throws IOException {
+        Parent root = FXMLLoader.load(destiny);
         scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
     }
 
-    public void openLoginScene(ActionEvent actionEvent) throws IOException {
-        Parent root = FXMLLoader.load(GameApp.class.getResource("login-view.fxml"));
-        stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-        scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
+    public void switchToLoginScene() throws IOException {
+        showScene(GameApp.class.getResource("login-view.fxml"));
     }
 
-    public void switchToRegistration(ActionEvent actionEvent) throws IOException {
-        Parent root = FXMLLoader.load(GameApp.class.getResource("register-view.fxml"));
-        stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-        scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
+    public void switchToRegistration() throws IOException {
+        showScene(GameApp.class.getResource("register-view.fxml"));
     }
 
+    public void switchToRoomCreationScene() throws IOException {
+        showScene(GameApp.class.getResource("room-creation-view.fxml"));
+    }
+
+    public void switchToRoomLobbyScene() throws IOException {
+        showScene(GameApp.class.getResource("room-lobby-view.fxml"));
+    }
+
+    public void switchToProfileScene() throws IOException {
+        showScene(GameApp.class.getResource("profile-view.fxml"));
+    }
+
+    public void switchToLobbyScene() throws IOException {
+        showScene(GameApp.class.getResource("lobby-view.fxml"));
+    }
 
 }

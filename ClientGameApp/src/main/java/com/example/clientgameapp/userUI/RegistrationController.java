@@ -1,12 +1,10 @@
-package com.example.clientgameapp;
+package com.example.clientgameapp.userUI;
 
 
 import Protocol.MessageValues.Response.ErrorResponse;
+import com.example.clientgameapp.DestinationsManager;
 import exceptions.ClientRegistrationException;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -18,9 +16,9 @@ import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
-import exceptions.ClientEmptyFieldException;
+import exceptions.ClientInputException;
 import util.ErrorAlert;
-import validators.Validator;
+import utils.StringConverter;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -44,7 +42,7 @@ public class RegistrationController {
             connection = ClientConnectionSingleton.getInstance();
             mManager = new HighLevelMessageManager();
             socket = connection.getSocket();
-            destinationsManager = new DestinationsManager();
+            destinationsManager = DestinationsManager.getInstance();
         } catch (ClientConnectionException ex) {
             ErrorAlert.show(ex.getMessage());
         }
@@ -57,7 +55,7 @@ public class RegistrationController {
             String password = textFieldPassword.getText();
             String email = textFieldEmail.getText();
             System.out.println(nickName + password + email);
-            if (Validator.isValid(nickName) && Validator.isValid(password) && Validator.isValid(email)) {
+            if (StringConverter.isValid(nickName) && StringConverter.isValid(password) && StringConverter.isValid(email)) {
                 UserRegistrationForm form = new UserRegistrationForm(
                         email, password, nickName
                 );
@@ -70,13 +68,13 @@ public class RegistrationController {
                 }
             }
         } catch (MismatchedClassException | BadResponseException | IOException | ClientRegistrationException |
-                 ClientEmptyFieldException e) {
+                 ClientInputException e) {
             ErrorAlert.show(e.getMessage());
         }
     }
 
 
     public void openLoginScene(ActionEvent actionEvent) throws IOException {
-        destinationsManager.openLoginScene(actionEvent);
+        destinationsManager.switchToLoginScene();
     }
 }

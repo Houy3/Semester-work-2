@@ -1,5 +1,6 @@
 package com.example.clientgameapp;
 
+import exceptions.ClientConnectionException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -9,9 +10,11 @@ import java.io.IOException;
 
 public class GameApp extends Application {
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException, ClientConnectionException {
         FXMLLoader fxmlLoader = new FXMLLoader(GameApp.class.getResource("register-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 600, 600);
+        DestinationsManager destinationsManager = DestinationsManager.getInstance();
+        destinationsManager.init(stage);
         stage.setTitle("Strategy Game");
         stage.setScene(scene);
         stage.show();
