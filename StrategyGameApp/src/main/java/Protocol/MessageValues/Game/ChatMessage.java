@@ -3,13 +3,13 @@ package Protocol.MessageValues.Game;
 import Protocol.MessageValues.MessageValue;
 import Protocol.MessageValues.User.User;
 
-public final class GameChatMessage implements MessageValue {
+public final class ChatMessage implements MessageValue {
 
     private User user;
 
     private String message;
 
-    public GameChatMessage(User user, String message) {
+    public ChatMessage(User user, String message) {
         this.user = user;
         this.message = message;
     }
