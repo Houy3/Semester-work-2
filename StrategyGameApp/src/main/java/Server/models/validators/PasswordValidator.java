@@ -1,4 +1,4 @@
-package Server.DB.models.validators;
+package Server.models.validators;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

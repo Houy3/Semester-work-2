@@ -1,4 +1,4 @@
-package Server.DB.models.validators;
+package Server.models.validators;
 
 public class ValidatorException extends Exception {
     public ValidatorException() {

@@ -27,25 +27,32 @@ public class MessageManager {
         RESPONSE_ERROR((byte)-1),//содержит Error
         RESPONSE_SUCCESS((byte)0), //содержит Success с объектом
 
+//этап входа
         USER_REGISTER((byte)11), //ничего не возвращает
-        USER_LOGIN((byte)12), //возвращает UserData
+        USER_LOGIN((byte)12), //возвращает User
+
+//этап главного лобби
         USER_LOGOUT((byte)13), //ничего не возвращает
-        USER_DATA_GET((byte)13), //возвращает UserData
-        USER_DATA_SET((byte)14), //ничего не возвращает
+        USER_UPDATE((byte)14), //ничего не возвращает
+        USER_PROFILE_DATA_GET((byte)15), //возвращает UserProfileData
 
         ROOM_INITIALIZE((byte)21), //возвращает Room
         ROOM_CONNECT((byte)22), //возвращает Room
+
+//этап лобби комнаты
         ROOM_DISCONNECT((byte)23), //ничего не возвращает
 
         ROOM_I_AM_READY_TO_START((byte)24), //ничего не возвращает
         ROOM_I_AM_NOT_READY_TO_START((byte)25), //ничего не возвращает
 
         ROOM_PARAMETERS_GET((byte)26), //возвращает Room
-        ROOM_PARAMETERS_SET((byte)26), //возвращает Room
+        ROOM_PARAMETERS_SET((byte)26), //ничего не возвращает
 
+        GET_OPEN_ROOMS((byte)51), //возвращает List<Room>
 
 
         GAME_START((byte)31), //ничего не возвращает
+//этап игры
         GAME_RECONNECT((byte)32), //возвращает Game
         GAME_DISCONNECT((byte)33), //ничего не возвращает
         GAME_STARTED((byte)34), //ничего не возвращает (приходит клиенту)
@@ -53,11 +60,11 @@ public class MessageManager {
 
         GAME_ACTION_ARMY_MOVEMENT((byte)41), //ничего не возвращает (приходит клиенту)
         GAME_ACTION_CITY_CAPTURE((byte)42), //ничего не возвращает (приходит клиенту)
-        GAME_CHAT_MESSAGE((byte)43), //ничего не возвращает (приходит клиенту)
+        CHAT_MESSAGE((byte)43), //ничего не возвращает (приходит клиенту)
         GAME_DATA_GET((byte)44), //возвращает Game
 
 
-        GET_OPEN_ROOMS((byte)51), //возвращает List<Room>
+//можно отправить всегда
         EXIT((byte)52); //ничего не возвращает
 
         final byte value;
@@ -76,8 +83,8 @@ public class MessageManager {
         typeToClassMap.put(USER_REGISTER, UserRegistrationForm.class);
         typeToClassMap.put(USER_LOGIN, UserLoginForm.class);
         typeToClassMap.put(USER_LOGOUT, null);
-        typeToClassMap.put(USER_DATA_GET, null);
-        typeToClassMap.put(USER_DATA_SET, UserDataSetForm.class);
+        typeToClassMap.put(USER_UPDATE, UserUpdateForm.class);
+        typeToClassMap.put(USER_PROFILE_DATA_GET, null);
 
 
         typeToClassMap.put(ROOM_INITIALIZE, RoomInitializationForm.class);
@@ -86,7 +93,7 @@ public class MessageManager {
         typeToClassMap.put(ROOM_I_AM_READY_TO_START, null);
         typeToClassMap.put(ROOM_I_AM_NOT_READY_TO_START, null);
         typeToClassMap.put(ROOM_PARAMETERS_GET, null);
-        typeToClassMap.put(ROOM_PARAMETERS_SET, null);
+        typeToClassMap.put(ROOM_PARAMETERS_SET, RoomParametersSetForm.class);
 
 
 
@@ -99,11 +106,11 @@ public class MessageManager {
 
         typeToClassMap.put(GAME_ACTION_ARMY_MOVEMENT, ArmyMovement.class);
         typeToClassMap.put(GAME_ACTION_CITY_CAPTURE, CityCapture.class);
-        typeToClassMap.put(GAME_CHAT_MESSAGE, GameChatMessage.class);
         typeToClassMap.put(GAME_DATA_GET, null);
 
 
         typeToClassMap.put(GET_OPEN_ROOMS, null);
+        typeToClassMap.put(CHAT_MESSAGE, ChatMessage.class);
         typeToClassMap.put(EXIT, null);
 
         if (values().length != typeToClassMap.size()) {

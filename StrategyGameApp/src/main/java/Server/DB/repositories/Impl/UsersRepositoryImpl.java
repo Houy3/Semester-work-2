@@ -3,7 +3,7 @@ package Server.DB.repositories.Impl;
 import Server.DB.exceptions.DBException;
 import Server.DB.exceptions.NotFoundException;
 import Server.DB.exceptions.NullException;
-import Server.DB.models.UserDB;
+import Server.models.UserDB;
 import Server.DB.repositories.Inter.UsersRepository;
 import Server.DB.repositories.RepositoryImpl;
 import Server.services.exceptions.ServiceException;

@@ -1,18 +1,18 @@
 package Protocol.MessageValues.Game.GameActions;
 
-import Protocol.MessageValues.Game.CitiesMap.City;
+import Protocol.MessageValues.User.User;
+import Protocol.MessageValues.models.CitiesMap.City;
 import Protocol.MessageValues.MessageValue;
-import Protocol.MessageValues.User.UserPublicData;
 
 public final class CityCapture implements MessageValue {
 
     private City city;
 
-    private UserPublicData user;
+    private User user;
 
     private int armyCount;
 
-    public CityCapture(City city, UserPublicData user, int armyCount) {
+    public CityCapture(City city, User user, int armyCount) {
         this.city = city;
         this.user = user;
         this.armyCount = armyCount;
@@ -26,11 +26,11 @@ public final class CityCapture implements MessageValue {
         this.city = city;
     }
 
-    public UserPublicData getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(UserPublicData user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

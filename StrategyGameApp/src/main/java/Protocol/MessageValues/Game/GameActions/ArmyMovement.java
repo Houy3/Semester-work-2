@@ -1,6 +1,6 @@
 package Protocol.MessageValues.Game.GameActions;
 
-import Protocol.MessageValues.Game.CitiesMap.Way;
+import Protocol.MessageValues.models.CitiesMap.Way;
 import Protocol.MessageValues.MessageValue;
 
 public final class ArmyMovement implements MessageValue {

@@ -2,11 +2,11 @@ package Protocol.MessageValues.User;
 
 import Protocol.MessageValues.MessageValue;
 
-public final class UserDataSetForm implements MessageValue {
+public final class User implements MessageValue {
 
     private String nickname;
 
-    public UserDataSetForm(String nickname) {
+    public User(String nickname) {
         this.nickname = nickname;
     }
 
@@ -20,7 +20,7 @@ public final class UserDataSetForm implements MessageValue {
 
     @Override
     public String toString() {
-        return "UserDataUpdateForm{" +
+        return "User{" +
                 "nickname='" + nickname + '\'' +
                 '}';
     }

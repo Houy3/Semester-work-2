@@ -8,7 +8,7 @@ import Server.services.exceptions.ServiceException;
 
 import java.util.Collection;
 
-public interface Service {
+public interface ServiceWithDB {
 
     void add(Object object) throws NotUniqueException, DBException, NullException, ServiceException;
     void add(Collection<Object> objects) throws NotUniqueException, DBException, NullException, ServiceException;

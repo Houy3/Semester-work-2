@@ -4,22 +4,20 @@ import Protocol.Message;
 import Protocol.MessageManager;
 import Protocol.MessageValues.Response.Error;
 import Protocol.MessageValues.Response.Success;
-import Protocol.MessageValues.User.UserData;
-import Protocol.MessageValues.User.UserLoginForm;
-import Protocol.MessageValues.User.UserRegistrationForm;
+import Protocol.MessageValues.Room.Room;
+import Protocol.MessageValues.User.*;
 import Protocol.exceptions.MismatchedClassException;
 import Protocol.exceptions.ProtocolVersionException;
 import Server.DB.exceptions.DBException;
 import Server.DB.exceptions.NotFoundException;
 import Server.DB.exceptions.NotUniqueException;
 import Server.DB.exceptions.NullException;
-import Server.DB.models.UserDB;
-import Server.DB.models.validators.ValidatorException;
+import Server.models.UserDB;
+import Server.models.validators.ValidatorException;
 import Server.services.Inter.UsersService;
 import Server.services.exceptions.ServiceException;
 import Server.services.ServicesToolKit;
 import Server.services.exceptions.UserAlreadyLoginException;
-import Server.services.exceptions.UserLogoutException;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -37,51 +35,53 @@ public class UserConnectionThread implements Runnable {
 
     private UserDB userDB;
 
+    private Room room;
+
+    private boolean isExit = false;
+    private boolean isLogout = false;
+
+
     @Override
     public void run() {
         try {
-            while (true) {
+            while (!isExit) {
                 loginOrRegister();
-                System.out.println(userDB);
-                try {
-                    roomConnection();
-                } catch (UserLogoutException e) {
-                    continue;
-                }
-                gameCreation();
+                mainLobby();
             }
         } catch (MismatchedClassException | ProtocolVersionException e) {
             errorMessageLog(e);
-        } catch (UserDisconnectException | IOException e) {}
+        } catch (UserDisconnectException e) {}
         disconnectUser();
     }
 
 
-    private void loginOrRegister() throws MismatchedClassException, ProtocolVersionException, UserDisconnectException, IOException {
-        while (true) {
-            Message message = MessageManager.readMessage(socket.getInputStream());
-            switch (message.type()) {
-                case USER_REGISTER -> {
-                    registerUserWithResponse(message);
+    private void loginOrRegister() throws MismatchedClassException, ProtocolVersionException, UserDisconnectException {
+        try {
+            while (userDB == null) {
+                Message message = MessageManager.readMessage(socket.getInputStream());
+                switch (message.type()) {
+                    case USER_REGISTER -> {
+                        UserRegistrationForm userRegistrationForm = (UserRegistrationForm) message.value();
+                        registerUserWithResponse(userRegistrationForm);
+                    }
+                    case USER_LOGIN -> {
+                        UserLoginForm userLoginForm = (UserLoginForm) message.value();
+                        loginUserWithResponse(userLoginForm);
+                    }
+                    case EXIT -> {
+                        isExit = true;
+                    }
+                    default -> MessageManager.sendErrorResponse(new Error("Firstly you need login or register"), socket.getOutputStream());
                 }
-                case USER_LOGIN -> {
-                    loginUserWithResponse(message);
-                }
-                case EXIT -> {
-                    throw new UserDisconnectException();
-                }
-                default -> MessageManager.sendErrorResponse(new Error("Firstly you need login or register"), socket.getOutputStream());
             }
-
-            if (userDB != null) {
-                break;
-            }
+        } catch (IOException e) {
+            throw new UserDisconnectException();
         }
     }
 
-    private void registerUserWithResponse(Message message) throws IOException {
+    private void registerUserWithResponse(UserRegistrationForm form) throws IOException {
         try {
-            usersService.register(new UserDB((UserRegistrationForm) message.value()));
+            usersService.register(new UserDB(form));
             MessageManager.sendSuccessResponse(new Success(null), socket.getOutputStream());
         } catch (NotUniqueException e) {
             MessageManager.sendErrorResponse(new Error(e.getMessage() + " is already taken"), socket.getOutputStream());
@@ -95,12 +95,12 @@ public class UserConnectionThread implements Runnable {
         }
     }
 
-    private void loginUserWithResponse(Message message) throws IOException {
-        userDB = new UserDB((UserLoginForm) message.value());
+    private void loginUserWithResponse(UserLoginForm form) throws IOException {
         try {
+            userDB = new UserDB(form);
             usersService.login(userDB);
-            UserData userData = new UserData(userDB.getNickname(), 19);
-            MessageManager.sendSuccessResponse(new Success(userData), socket.getOutputStream());
+            User user = new User(userDB.getNickname());
+            MessageManager.sendSuccessResponse(new Success(user), socket.getOutputStream());
             return;
         } catch (NullException e) {
             MessageManager.sendErrorResponse(new Error(e.getMessage() + " can't be empty"), socket.getOutputStream());
@@ -116,29 +116,62 @@ public class UserConnectionThread implements Runnable {
     }
 
 
-    private void roomConnection() throws IOException, UserDisconnectException, MismatchedClassException, ProtocolVersionException, UserLogoutException {
-        while (true) {
-            Message message = MessageManager.readMessage(socket.getInputStream());
-            switch (message.type()) {
-                case USER_LOGOUT -> {
-                    logoutUserWithResponse();
-                }
-                case EXIT -> {
-                    throw new UserDisconnectException();
-                }
-                default -> MessageManager.sendErrorResponse(new Error("later"), socket.getOutputStream());
-            }
+    private void mainLobby() throws UserDisconnectException, MismatchedClassException, ProtocolVersionException {
+        try {
 
-            if (userDB == null) {
-                break;
+            while (true) {
+                Message message = MessageManager.readMessage(socket.getInputStream());
+                switch (message.type()) {
+                    case USER_LOGOUT -> {
+                        isLogout = true;
+                        logoutUserWithResponse();
+                    }
+                    case USER_UPDATE -> {
+                        UserUpdateForm userUpdateForm = (UserUpdateForm) message.value();
+                        userUpdateWithResponse(userUpdateForm);
+                    }
+                    case USER_PROFILE_DATA_GET -> {
+                        UserProfileData userProfileData = new UserProfileData(19);
+                        MessageManager.sendSuccessResponse(new Success(userProfileData), socket.getOutputStream());
+                    }
+                    case EXIT -> {
+                        isExit = true;
+                        throw new UserDisconnectException();
+                    }
+                    default -> MessageManager.sendErrorResponse(new Error("later"), socket.getOutputStream());
+                }
+
+                if (isLogout || isExit) {
+                    break;
+                }
             }
+        } catch (IOException e) {
+            throw new UserDisconnectException();
         }
     }
 
-    private void logoutUserWithResponse() throws IOException, UserLogoutException {
+    private void logoutUserWithResponse() throws IOException {
         logoutUser();
         MessageManager.sendSuccessResponse(new Success(null), socket.getOutputStream());
     }
+
+    private void userUpdateWithResponse(UserUpdateForm form) throws IOException {
+        try {
+            usersService.update(form, userDB);
+            MessageManager.sendSuccessResponse(new Success(null), socket.getOutputStream());
+        } catch (ValidatorException e) {
+            MessageManager.sendErrorResponse(new Error(e.getMessage()), socket.getOutputStream());
+        } catch (NotUniqueException e) {
+            MessageManager.sendErrorResponse(new Error(e.getMessage() + " is already taken"), socket.getOutputStream());
+        } catch (NullException e) {
+            MessageManager.sendErrorResponse(new Error(e.getMessage() + " can't be empty"), socket.getOutputStream());
+        } catch (DBException | ServiceException | NotFoundException e) {
+            errorMessageLog(e);
+            MessageManager.sendErrorResponse(new Error("Unexpected error"), socket.getOutputStream());
+        }
+
+    }
+
 
 
     private void gameCreation() {
@@ -146,10 +179,9 @@ public class UserConnectionThread implements Runnable {
     }
 
 
-    private void logoutUser() throws UserLogoutException {
+    private void logoutUser() {
         usersService.logout(userDB);
         userDB = null;
-        throw new UserLogoutException();
     }
 
     private void disconnectUser() {

@@ -2,7 +2,7 @@ package Protocol.MessageValues.Room;
 
 import Protocol.MessageValues.Game.GameInitializationForm;
 import Protocol.MessageValues.MessageValue;
-import Protocol.MessageValues.User.UserPublicData;
+import Protocol.MessageValues.User.User;
 
 import java.awt.*;
 import java.util.Map;
@@ -13,8 +13,8 @@ public final class Room implements MessageValue {
     private Integer maxCountOfPlayers;
     private RoomAccess access;
 
-    private Map<UserPublicData, Color> users;
-    private Map<UserPublicData, Boolean> isReady;
+    private Map<User, Color> users;
+    private Map<User, Boolean> isReady;
 
     private GameInitializationForm gameInitializationForm;
 
@@ -22,7 +22,7 @@ public final class Room implements MessageValue {
     public Room() {
     }
 
-    public Room(String code, Integer maxCountOfPlayers, RoomAccess access, Map<UserPublicData, Color> users, Map<UserPublicData, Boolean> isReady, GameInitializationForm gameInitializationForm) {
+    public Room(String code, Integer maxCountOfPlayers, RoomAccess access, Map<User, Color> users, Map<User, Boolean> isReady, GameInitializationForm gameInitializationForm) {
         this.code = code;
         this.maxCountOfPlayers = maxCountOfPlayers;
         this.access = access;
@@ -55,11 +55,11 @@ public final class Room implements MessageValue {
         this.access = access;
     }
 
-    public Map<UserPublicData, Color> getUsers() {
+    public Map<User, Color> getUsers() {
         return users;
     }
 
-    public void setUsers(Map<UserPublicData, Color> users) {
+    public void setUsers(Map<User, Color> users) {
         this.users = users;
     }
 
@@ -67,11 +67,11 @@ public final class Room implements MessageValue {
         return gameInitializationForm;
     }
 
-    public Map<UserPublicData, Boolean> getIsReady() {
+    public Map<User, Boolean> getIsReady() {
         return isReady;
     }
 
-    public void setIsReady(Map<UserPublicData, Boolean> isReady) {
+    public void setIsReady(Map<User, Boolean> isReady) {
         this.isReady = isReady;
     }
 

@@ -5,6 +5,7 @@ import Protocol.MessageManager;
 import Protocol.MessageValues.Response.Error;
 import Protocol.MessageValues.User.UserLoginForm;
 import Protocol.MessageValues.User.UserRegistrationForm;
+import Protocol.MessageValues.User.UserUpdateForm;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import Protocol.exceptions.ProtocolVersionException;
@@ -36,11 +37,10 @@ public class Test {
                 System.out.println("кривой ответ");
             }
 
-            Scanner scanner = new Scanner(System.in);
-            scanner.nextLine();
 
+            UserUpdateForm form = new UserUpdateForm("Houy3");
             message = MessageManager.sendMessage(
-                    new Message(MessageManager.MessageType.USER_LOGOUT, null),
+                    new Message(MessageManager.MessageType.USER_UPDATE, form),
                     socket
             );
             if (message.type() == MessageManager.MessageType.RESPONSE_SUCCESS) {
@@ -50,6 +50,21 @@ public class Test {
             } else {
                 System.out.println("кривой ответ");
             }
+
+
+            message = MessageManager.sendMessage(
+                    new Message(MessageManager.MessageType.USER_PROFILE_DATA_GET, null),
+                    socket
+            );
+            if (message.type() == MessageManager.MessageType.RESPONSE_SUCCESS) {
+                System.out.println("Success");
+            } else if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                System.out.println(((Error)message.value()).getErrorMessage());
+            } else {
+                System.out.println("кривой ответ");
+            }
+
+
             System.out.println("end");
 
         } catch (IOException | MismatchedClassException e) {
