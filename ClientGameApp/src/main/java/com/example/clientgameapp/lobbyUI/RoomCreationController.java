@@ -55,44 +55,41 @@ public class RoomCreationController {
     }
 
     public void createRoom(ActionEvent actionEvent) {
-        new Thread(
-                () -> {
-                    try {
-                        int citiesAmount = StringConverter.convertToInt((String) spinnerCitiesAmount.getValue());
-                        int growthRate = StringConverter.convertToInt((String) spinnerArmyGrowthRate.getValue());
-                        int armySpeed = StringConverter.convertToInt((String) spinnerArmySpeed.getValue());
-                        boolean isPrivate = togglePrivate.isSelected();
-                        RoomAccess access;
-                        GameInitializationForm gameInitializationForm = new GameInitializationForm(
-                                citiesAmount, growthRate, armySpeed
-                        );
-                        if (isPrivate) {
-                            access = RoomAccess.PRIVATE;
-                        } else {
-                            access = RoomAccess.PUBLIC;
-                        }
-                        RoomInitializationForm newRoom = new RoomInitializationForm(
-                                2, access, color, gameInitializationForm
-                        );
-                        Message roomInitializedMessage = HighLevelMessageManager.initializeRoom(newRoom, socket);
-                        if (color == null) {
-                            throw new ClientException("You need to choose a color");
-                        }
-                        if (roomInitializedMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
-                            ResponseError error = (ResponseError) roomInitializedMessage.value();
-                            destinationsManager.navigateRoomListScene();
-                            throw new GameException(error.getErrorMessage());
-                        } else {
-                            destinationsManager.navigateLobbyScene();
-                        }
-                    } catch (ClientException | ClientInputException | GameException | RuntimeException |
-                             BadResponseException |
-                             IOException |
-                             MismatchedClassException e) {
-                        ErrorAlert.show(e.getMessage());
-                    }
-                }
-        ).start();
+
+        try {
+            int citiesAmount = (int) spinnerCitiesAmount.getValue();
+            int growthRate = (int) spinnerArmyGrowthRate.getValue();
+            int armySpeed = (int) spinnerArmySpeed.getValue();
+            boolean isPrivate = togglePrivate.isSelected();
+            RoomAccess access;
+            GameInitializationForm gameInitializationForm = new GameInitializationForm(
+                    citiesAmount, growthRate, armySpeed
+            );
+            if (isPrivate) {
+                access = RoomAccess.PRIVATE;
+            } else {
+                access = RoomAccess.PUBLIC;
+            }
+            RoomInitializationForm newRoom = new RoomInitializationForm(
+                    2, access, color, gameInitializationForm
+            );
+            Message roomInitializedMessage = HighLevelMessageManager.initializeRoom(newRoom, socket);
+            if (color == null) {
+                throw new ClientException("You need to choose a color");
+            }
+            if (roomInitializedMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                ResponseError error = (ResponseError) roomInitializedMessage.value();
+                destinationsManager.navigateRoomListScene();
+                throw new GameException(error.getErrorMessage());
+            } else {
+                destinationsManager.navigateLobbyScene();
+            }
+        } catch (ClientException | GameException | RuntimeException |
+                 BadResponseException |
+                 IOException |
+                 MismatchedClassException e) {
+            ErrorAlert.show(e.getMessage());
+        }
     }
 
     public void navigateProfile(ActionEvent actionEvent) {
