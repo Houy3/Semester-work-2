@@ -92,6 +92,7 @@ public class RoomsServiceImpl implements RoomsService {
 
     private RoomDB createRoom(RoomInitializationForm form) {
         RoomDB room = new RoomDB(form);
+        room.setAccess(RoomAccess.PUBLIC);
 
         String code = generateCode();
         room.setCode(code);
