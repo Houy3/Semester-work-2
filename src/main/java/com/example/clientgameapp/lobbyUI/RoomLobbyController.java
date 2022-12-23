@@ -8,9 +8,12 @@ import Protocol.MessageValues.Room.Room;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
+import com.example.clientgameapp.util.RoomCell;
 import com.example.clientgameapp.util.RoomCellFactory;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
@@ -18,6 +21,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import util.ErrorAlert;
@@ -28,9 +32,6 @@ import java.util.List;
 
 public class RoomLobbyController {
     public ListView<Room> roomsList;
-
-    private Stage stage;
-    private Scene scene;
 
     private ClientConnectionSingleton connection;
     private HighLevelMessageManager mManager;
@@ -45,38 +46,18 @@ public class RoomLobbyController {
             socket = connection.getSocket();
             destinationsManager = DestinationsManager.getInstance();
             Message message = HighLevelMessageManager.getOpenRooms(socket);
-            ResponseSuccess responseSuccess =(ResponseSuccess) message.value();
+            ResponseSuccess responseSuccess = (ResponseSuccess) message.value();
             OpenRoomsList list = (OpenRoomsList) responseSuccess.getResponseValue();
             List<Room> rooms = list.getOpenRooms();
-            roomsList.setCellFactory(param -> new ListCell<Room>() {
+            ObservableList<Room> roomList = FXCollections.observableArrayList();
+            roomList.addAll(rooms);
+            System.out.println(roomList + " " + rooms);
+            roomsList.setItems(roomList);
+            roomsList.setCellFactory(studentListView -> new RoomCell());
 
-                private final Label labelAvailableSpacesCount = new Label("ImageURL");
-                private final Label labelGrowthRate = new Label("Text");
-                private final Label labelArmySpeed = new Label("Button");
-                private final Label labelCitiesCount = new Label("text");
-                private final BorderPane layout = new BorderPane(labelCitiesCount, labelArmySpeed, labelGrowthRate, labelAvailableSpacesCount, null);
 
-                @Override
-                protected void updateItem(Room item, boolean empty) {
-
-                    if (empty || item == null) {
-                        setText(null);
-                        setGraphic(null);
-                    } else {
-                        labelAvailableSpacesCount.setText(String.valueOf(item.getMaxCountOfPlayers() - item.getUsers().size()));
-                        labelArmySpeed.setText(String.valueOf(item.getGameInitializationForm().getArmySpeed()));
-                        labelCitiesCount.setText(String.valueOf(item.getGameInitializationForm().getCountOfCities()));
-                        labelGrowthRate.setText(String.valueOf(item.getGameInitializationForm().getArmyGrowthRate()));
-                        setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-                        setGraphic(layout);
-                    }
-                }
-            });
-
-            for (Room room : rooms) {
-                roomsList.getItems().add(room);
-            }
         } catch (ClientConnectionException | MismatchedClassException | BadResponseException | IOException ex) {
+            System.out.println(ex.getMessage());
             ErrorAlert.show(ex.getMessage());
         }
     }
