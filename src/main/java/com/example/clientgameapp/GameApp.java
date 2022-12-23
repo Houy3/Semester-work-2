@@ -1,6 +1,6 @@
 package com.example.clientgameapp;
 
-import com.example.clientgameapp.util.CommonValues;
+import com.example.clientgameapp.util.StorageSingleton;
 import exceptions.ClientConnectionException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -14,7 +14,7 @@ public class GameApp extends Application {
     public void start(Stage stage) throws IOException, ClientConnectionException {
         FXMLLoader fxmlLoader = new FXMLLoader(GameApp.class.getResource("register-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 600, 600);
-        CommonValues commonValues = CommonValues.getInstance();
+        StorageSingleton storageSingleton = StorageSingleton.getInstance();
         DestinationsManager destinationsManager = DestinationsManager.getInstance();
         destinationsManager.init(stage);
         stage.setTitle("Strategy Game");

@@ -36,7 +36,10 @@
         <FlowPane maxWidth="300" orientation="VERTICAL" vgap="10" hgap="10">
             <Label text="Choose a room"/>
             <ListView fx:id="roomsList"/>
-            <Button styleClass="gameStartBtn" text="Connect" onAction="#connectToRoom"/>
+            <HBox>
+                <Button styleClass="gameStartBtn" text="Connect" onAction="#connectToRoom"/>
+                <ColorPicker fx:id="gameColorPicker" onAction="#getColor" styleClass="colorPicker"/>
+            </HBox>
         </FlowPane>
     </center>
 

@@ -8,25 +8,19 @@ import Protocol.MessageValues.Room.Room;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
-import com.example.clientgameapp.util.CommonValues;
+import com.example.clientgameapp.util.StorageSingleton;
 import com.example.clientgameapp.util.RoomCell;
-import com.example.clientgameapp.util.RoomCellFactory;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
+import exceptions.ClientException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.scene.Scene;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
-import javafx.util.Callback;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
 import util.ErrorAlert;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
@@ -36,7 +30,11 @@ public class RoomLobbyController {
 
     private ClientConnectionSingleton connection;
     private HighLevelMessageManager mManager;
+
+    @FXML
+    private ColorPicker gameColorPicker;
     private Socket socket;
+    private Color color;
 
     private DestinationsManager destinationsManager;
 
@@ -73,10 +71,35 @@ public class RoomLobbyController {
 
     }
 
-    public void connectToRoom(ActionEvent actionEvent) throws MismatchedClassException, BadResponseException, IOException {
-        Room currentRoom = roomsList.getSelectionModel().getSelectedItems().get(0);
-        CommonValues commonValues = CommonValues.getInstance();
-        commonValues.setRoomId(currentRoom.getCode());
-        System.out.println(roomsList.getSelectionModel().getSelectedItems());
+    public void connectToRoom(ActionEvent actionEvent) {
+        try {
+            if (color == null) {
+                throw new ClientException("You need to choose a color!");
+            }else {
+                Room currentRoom = roomsList.getSelectionModel().getSelectedItems().get(0);
+                StorageSingleton storageSingleton = StorageSingleton.getInstance();
+                storageSingleton.setRoomId(currentRoom.getCode());
+                storageSingleton.setColor(color);
+                destinationsManager.navigateLobbyScene();
+                System.out.println(roomsList.getSelectionModel().getSelectedItems());
+            }
+        } catch (ClientException ex) {
+            ErrorAlert.show(ex.getMessage());
+        }
     }
+
+    public void getColor(ActionEvent actionEvent) {
+        javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
+        color = new Color(
+                convertColorNumber(originalColor.getRed()),
+                convertColorNumber(originalColor.getGreen()),
+                convertColorNumber(originalColor.getBlue())
+        );
+
+    }
+
+    private int convertColorNumber(Double num) {
+        return (int) (num * 255);
+    }
+
 }

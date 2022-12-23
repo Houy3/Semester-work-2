@@ -88,3 +88,8 @@
 
 .readyBtn {
 }
+
+.gameBtn {
+    -fx-min-width: 200px;
+    -fx-min-height: 40px;
+}

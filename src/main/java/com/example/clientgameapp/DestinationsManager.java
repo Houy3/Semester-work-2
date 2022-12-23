@@ -1,5 +1,6 @@
 package com.example.clientgameapp;
 
+import com.example.clientgameapp.util.StorageSingleton;
 import exceptions.ClientConnectionException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -66,6 +67,7 @@ public class DestinationsManager {
     }
 
     public void navigateRoomListScene()  {
+        StorageSingleton.getInstance().nullifyAll();
         showScene(GameApp.class.getResource("room-lobby-view.fxml"));
 
     }

@@ -28,11 +28,11 @@
                 <padding>
                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                 </padding>
-                <Button styleClass="readyBtn" mnemonicParsing="false" text="Ready" onAction="#setReadyStatus"/>
+                <Button styleClass="gameBtn" mnemonicParsing="false" text="Ready" onAction="#setReadyStatus"/>
 
-                <Button styleClass="readyBtn" mnemonicParsing="false" text="Start game" onAction="#startGame"/>
+                <Button styleClass="gameBtn" mnemonicParsing="false" text="Start game" onAction="#startGame"/>
 
-                <Button styleClass="readyBtn" mnemonicParsing="false" text="Start game" onAction="#updateLobby"/>
+                <Button styleClass="gameBtn" mnemonicParsing="false" text="Refresh Lobby" onAction="#updateLobby"/>
 
             </VBox>
         </right>
