@@ -87,7 +87,6 @@ public class UserConnectionThread implements Runnable {
                     case USER_LOGIN -> {
                         UserLoginForm form = (UserLoginForm) message.value();
                         loginUserWithResponse(form);
-                        isLogout = false;
                     }
                     case EXIT -> {
                         exitUser();
