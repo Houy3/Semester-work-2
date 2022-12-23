@@ -2,7 +2,6 @@ package Server.app;
 
 import Protocol.Message;
 import Protocol.MessageManager;
-
 import Protocol.MessageValues.Response.ResponseError;
 import Protocol.MessageValues.Response.ResponseSuccess;
 import Protocol.MessageValues.Room.*;
@@ -106,7 +105,6 @@ public class UserConnectionThread implements Runnable {
             usersService.register(new UserDB(form));
             MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
         } catch (NotUniqueException e) {
-
             MessageManager.sendErrorResponse(new ResponseError(e.getMessage() + " is already taken"), socket.getOutputStream());
         } catch (NullException e) {
             MessageManager.sendErrorResponse(new ResponseError(e.getMessage() + " can't be empty"), socket.getOutputStream());
