@@ -6,7 +6,7 @@ import Protocol.MessageValues.Game.GameActions.CityCapture;
 import Protocol.MessageValues.MessageValue;
 import Protocol.MessageValues.Game.*;
 import Protocol.MessageValues.Response.*;
-import Protocol.MessageValues.Response.Error;
+import Protocol.MessageValues.Response.ResponseError;
 import Protocol.MessageValues.Room.*;
 import Protocol.MessageValues.User.*;
 import Protocol.exceptions.*;
@@ -47,8 +47,8 @@ public class MessageManager {
         ROOM_I_AM_READY_TO_START((byte)24), //ничего не возвращает
         ROOM_I_AM_NOT_READY_TO_START((byte)25), //ничего не возвращает
 
-        ROOM_PARAMETERS_GET((byte)26), //возвращает Room
-        ROOM_PARAMETERS_SET((byte)26), //ничего не возвращает
+        ROOM_SET_COLOR((byte) 26),
+        ROOM_GET((byte)27), //возвращает Room
 
 
         GAME_START((byte)31), //ничего не возвращает
@@ -60,8 +60,7 @@ public class MessageManager {
 
         GAME_ACTION_ARMY_MOVEMENT((byte)41), //ничего не возвращает (приходит клиенту)
         GAME_ACTION_CITY_CAPTURE((byte)42), //ничего не возвращает (приходит клиенту)
-        CHAT_MESSAGE((byte)43), //ничего не возвращает (приходит клиенту)
-        GAME_DATA_GET((byte)44), //возвращает Game
+        GAME_DATA_GET((byte)43), //возвращает Game
 
 
 //можно отправить всегда
@@ -76,8 +75,8 @@ public class MessageManager {
     //если null, то передавай null.
     private static final Map<MessageType, Class> typeToClassMap = new HashMap<>();;
     static {
-        typeToClassMap.put(RESPONSE_ERROR, Error.class);
-        typeToClassMap.put(RESPONSE_SUCCESS, Success.class);
+        typeToClassMap.put(RESPONSE_ERROR, ResponseError.class);
+        typeToClassMap.put(RESPONSE_SUCCESS, ResponseSuccess.class);
 
 
         typeToClassMap.put(USER_REGISTER, UserRegistrationForm.class);
@@ -92,8 +91,8 @@ public class MessageManager {
         typeToClassMap.put(ROOM_DISCONNECT, null);
         typeToClassMap.put(ROOM_I_AM_READY_TO_START, null);
         typeToClassMap.put(ROOM_I_AM_NOT_READY_TO_START, null);
-        typeToClassMap.put(ROOM_PARAMETERS_GET, null);
-        typeToClassMap.put(ROOM_PARAMETERS_SET, RoomParametersSetForm.class);
+        typeToClassMap.put(ROOM_SET_COLOR, RoomUserColor.class);
+        typeToClassMap.put(ROOM_GET, null);
 
 
 
@@ -110,7 +109,6 @@ public class MessageManager {
 
 
         typeToClassMap.put(GET_OPEN_ROOMS, null);
-        typeToClassMap.put(CHAT_MESSAGE, ChatMessage.class);
         typeToClassMap.put(EXIT, null);
 
         if (values().length != typeToClassMap.size()) {
@@ -146,12 +144,12 @@ public class MessageManager {
 
     }
 
-    public static void sendErrorResponse(Error error, OutputStream out) throws IOException {
-        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_ERROR, error), out);
+    public static void sendErrorResponse(ResponseError responseError, OutputStream out) throws IOException {
+        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_ERROR, responseError), out);
     }
 
-    public static void sendSuccessResponse(Success success, OutputStream out) throws IOException {
-        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_SUCCESS, success), out);
+    public static void sendSuccessResponse(ResponseSuccess responseSuccess, OutputStream out) throws IOException {
+        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_SUCCESS, responseSuccess), out);
     }
 
 

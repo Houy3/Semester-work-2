@@ -9,13 +9,16 @@ import Server.models.validators.RoomInitValidator;
 import Server.models.validators.ValidatorException;
 import Server.services.Inter.RoomsService;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class RoomsServiceImpl implements RoomsService {
 
     private final List<RoomDB> activeRooms;
     private final Set<String> takenCodes;
+
 
     private final RoomInitValidator roomInitValidator;
 
@@ -30,9 +33,9 @@ public class RoomsServiceImpl implements RoomsService {
     public RoomDB initialize(RoomInitializationForm form, UserDB user) throws ValidatorException {
         roomInitValidator.check(form);
 
-        RoomDB room = initialize(form);
-        List<UserDB> roomUsers = room.getUsers();
-        roomUsers.add(user);
+        RoomDB room = createRoom(form);
+        registerRoom(room);
+        addUserToRoom(room, user, form.getCreatorColor());
         return room;
     }
 
@@ -49,7 +52,7 @@ public class RoomsServiceImpl implements RoomsService {
                 if (room.getUsers().size() >= room.getMaxCountOfPlayers()) {
                     throw new ValidatorException("Room is full");
                 }
-                room.getUsers().add(user);
+                addUserToRoom(room, user, form.getColor());
                 return room;
             }
         }
@@ -63,7 +66,7 @@ public class RoomsServiceImpl implements RoomsService {
         for (RoomDB room : activeRooms) {
             List<UserDB> roomUsers = room.getUsers();
             if (roomUsers.contains(user)) {
-                roomUsers.remove(user);
+                disconnectUserFromRoom(room, user);
                 if (roomUsers.isEmpty()) {
                     deactivateRoomDB = room;
                 }
@@ -83,7 +86,7 @@ public class RoomsServiceImpl implements RoomsService {
 
 
 
-    private RoomDB initialize(RoomInitializationForm form) {
+    private RoomDB createRoom(RoomInitializationForm form) {
         RoomDB room = new RoomDB(form);
 
         String code = generateCode();
@@ -93,11 +96,30 @@ public class RoomsServiceImpl implements RoomsService {
         return room;
     }
 
+    private void registerRoom(RoomDB room) {
+        activeRooms.add(room);
+    }
+
+    private void addUserToRoom(RoomDB room, UserDB user, Color color) {
+        room.getUsers().add(user);
+        room.getUsersIsReady().put(user, false);
+        room.getUsersColor().put(user, color);
+    }
+
+    private void disconnectUserFromRoom(RoomDB room, UserDB user) {
+        room.getUsers().remove(user);
+        room.getUsersIsReady().remove(user);
+        room.getUsersColor().remove(user);
+    }
+
+
     private String generateCode() {
-        String code = "";
-        while (takenCodes.contains(code)) {
+        String code;
+        do {
             code = UUID.randomUUID().toString().substring(0,8);
-        }
+        } while (takenCodes.contains(code));
         return code;
     }
+
+
 }

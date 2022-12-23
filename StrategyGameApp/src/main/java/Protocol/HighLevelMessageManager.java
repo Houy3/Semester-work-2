@@ -1,19 +1,19 @@
 package Protocol;
 
-import Protocol.MessageValues.Game.ChatMessage;
 import Protocol.MessageValues.Game.Game;
 import Protocol.MessageValues.Game.GameActions.ArmyMovement;
 import Protocol.MessageValues.Game.GameActions.CityCapture;
 import Protocol.MessageValues.Game.GameResults;
 import Protocol.MessageValues.Room.RoomConnectionForm;
 import Protocol.MessageValues.Room.RoomInitializationForm;
-import Protocol.MessageValues.Room.RoomParametersSetForm;
+import Protocol.MessageValues.Room.RoomUserColor;
 import Protocol.MessageValues.User.UserLoginForm;
 import Protocol.MessageValues.User.UserRegistrationForm;
 import Protocol.MessageValues.User.UserUpdateForm;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -62,13 +62,14 @@ public class HighLevelMessageManager extends MessageManager {
     public Message notReadyToStart(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
         return sendMessage(new Message(ROOM_I_AM_NOT_READY_TO_START, null), socket);
     }
+    /**пустой ответ*/
+    public Message setColor(Socket socket, Color color) throws MismatchedClassException, BadResponseException, IOException {
+        return sendMessage(new Message(ROOM_SET_COLOR, new RoomUserColor(color)), socket);
+    }
+
     /**Возвращает Room*/
     public Message getRoomParameters(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(ROOM_PARAMETERS_GET, null), socket);
-    }
-    /**пустой ответ*/
-    public Message setRoomParameters(RoomParametersSetForm value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(ROOM_PARAMETERS_SET, value), socket);
+        return sendMessage(new Message(ROOM_GET, null), socket);
     }
     /**пустой ответ*/
     public Message startGame(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
@@ -108,10 +109,7 @@ public class HighLevelMessageManager extends MessageManager {
     public Message getOpenRooms(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
         return sendMessage(new Message(GET_OPEN_ROOMS, null), socket);
     }
-    /**пустой ответ. Принимает клиент*/
-    public Message sendChatMessage(ChatMessage value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(CHAT_MESSAGE, value), socket);
-    }
+
     /**пустой ответ*/
     public Message exit(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
         return sendMessage(new Message(EXIT, null), socket);
