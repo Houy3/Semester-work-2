@@ -1,6 +1,7 @@
-package com.example.clientgameapp;
+package com.example.clientgameapp.lobbyUI;
 
 import Protocol.HighLevelMessageManager;
+import com.example.clientgameapp.DestinationsManager;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import javafx.event.ActionEvent;
@@ -30,26 +31,16 @@ public class ChoiceController {
     }
 
     public void connectToRoom(ActionEvent actionEvent) {
-        try {
-            destinationsManager.switchToRoomLobbyScene();
-        } catch (IOException ex) {
-            ErrorAlert.show(ex.getMessage());
-        }
+        destinationsManager.navigateRoomListScene();
+
     }
 
     public void createRoom(ActionEvent actionEvent) {
-        try {
-            destinationsManager.switchToRoomCreationScene();
-        } catch (IOException ex) {
-            ErrorAlert.show(ex.getMessage());
-        }
+        destinationsManager.navigateRoomCreationScene();
+
     }
 
     public void openProfile(ActionEvent actionEvent) {
-        try {
-            destinationsManager.switchToProfileScene();
-        } catch (IOException ex) {
-            ErrorAlert.show(ex.getMessage());
-        }
+        destinationsManager.navigateProfileScene();
     }
 }

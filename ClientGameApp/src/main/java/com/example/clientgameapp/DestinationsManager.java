@@ -1,27 +1,19 @@
 package com.example.clientgameapp;
 
-import Protocol.Message;
-import Protocol.MessageManager;
-import Protocol.exceptions.MismatchedClassException;
-import Protocol.exceptions.ProtocolVersionException;
-import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import util.ErrorAlert;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
 import java.net.URL;
 
 public class DestinationsManager {
 
-    private  Stage stage;
-    private  Scene scene;
+    private Stage stage;
+    private Scene scene;
 
     private static DestinationsManager instance;
 
@@ -41,42 +33,49 @@ public class DestinationsManager {
         return instance;
     }
 
-    public void init(Stage stage) throws ClientConnectionException {
-       this.stage = stage;
+    public void init(Stage stage) {
+        this.stage = stage;
     }
 
-    public void switchToChoiceScene() throws IOException {
+    public void navigateChoiceScene()  {
         showScene(GameApp.class.getResource("choice-view.fxml"));
     }
 
-    private void showScene(URL destiny) throws IOException {
-        Parent root = FXMLLoader.load(destiny);
-        scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
+    private void showScene(URL destiny) {
+        try {
+            Parent root = FXMLLoader.load(destiny);
+            scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException ex) {
+            ErrorAlert.show(ex.getMessage());
+        }
     }
 
-    public void switchToLoginScene() throws IOException {
+    public void navigateLoginScene() {
         showScene(GameApp.class.getResource("login-view.fxml"));
     }
 
-    public void switchToRegistration() throws IOException {
+    public void navigateRegistrationScene() {
         showScene(GameApp.class.getResource("register-view.fxml"));
     }
 
-    public void switchToRoomCreationScene() throws IOException {
+    public void navigateRoomCreationScene() {
         showScene(GameApp.class.getResource("room-creation-view.fxml"));
+
     }
 
-    public void switchToRoomLobbyScene() throws IOException {
+    public void navigateRoomListScene()  {
         showScene(GameApp.class.getResource("room-lobby-view.fxml"));
+
     }
 
-    public void switchToProfileScene() throws IOException {
+    public void navigateProfileScene() {
         showScene(GameApp.class.getResource("profile-view.fxml"));
+
     }
 
-    public void switchToLobbyScene() throws IOException {
+    public void navigateLobbyScene()  {
         showScene(GameApp.class.getResource("lobby-view.fxml"));
     }
 

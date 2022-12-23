@@ -5,21 +5,69 @@
 <?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.*?>
 
-<FlowPane hgap="10" vgap="10" alignment="CENTER" orientation="VERTICAL" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.clientgameapp.lobbyUI.RoomCreationController">
-    <padding>
-        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-    </padding>
+<?import java.net.URL?>
+<BorderPane
+        prefHeight="600.0" prefWidth="600.0"
+        xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="com.example.clientgameapp.lobbyUI.RoomCreationController">
 
-    <Slider fx:id="sliderPlayerCount" blockIncrement="1" majorTickUnit="1" max="4" min="2" minorTickCount="1" showTickLabels="true" showTickMarks="true" />
+    <stylesheets>
+        <URL value="@styles/main.css"/>
+    </stylesheets>
 
-    <ToggleSwitch fx:id="togglePrivate" text="Private" />
+    <right>
+        <VBox spacing="10" styleClass="rightMenuBox">
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+            </padding>
+            <Button styleClass="navBtn" text="Profile" onAction="#navigateProfile" prefWidth="100"/>
+            <Button styleClass="navBtn" text="Find room" onAction="#navigateRoomList" prefWidth="100"/>
+        </VBox>
+    </right>
+    <center>
+        <FlowPane hgap="10" vgap="10" orientation="VERTICAL" alignment="CENTER">
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+            </padding>
 
-    <TextField fx:id="textFieldCitiesAmount" promptText="Amount of cities"/>
-    <TextField fx:id="textFieldArmySpeed" promptText="Speed of army"/>
-    <TextField fx:id="textFieldArmyGrowthRate" promptText="Army growth rate"/>
+            <HBox alignment="CENTER_LEFT" styleClass="hBox">
+                <Label text="Choose game color" styleClass="secondaryLabel"/>
+                <ColorPicker fx:id="gameColorPicker" onAction="#getColor" styleClass="colorPicker"/>
+            </HBox>
+
+            <!--
+            <Slider fx:id="sliderPlayerCount" blockIncrement="1" majorTickUnit="1" max="4" min="2" minorTickCount="1"
+                    showTickLabels="true" showTickMarks="true"/> !-->
+
+            <ToggleSwitch fx:id="togglePrivate" text="Private" styleClass="toggle"/>
+            <HBox alignment="BASELINE_LEFT" styleClass="hBox">
+                <Label text="Cities amount" styleClass="secondaryLabel"/>
+                <Spinner fx:id="spinnerCitiesAmount" styleClass="spinner">
+                    <valueFactory>
+                        <SpinnerValueFactory.IntegerSpinnerValueFactory min="6" max="10"/>
+                    </valueFactory>
+                </Spinner>
+            </HBox>
+            <HBox alignment="BASELINE_LEFT" styleClass="hBox">
+                <Label text="Army speed" styleClass="secondaryLabel"/>
+                <Spinner fx:id="spinnerArmySpeed" styleClass="spinner">
+                    <valueFactory>
+                        <SpinnerValueFactory.IntegerSpinnerValueFactory min="5" max="20"/>
+                    </valueFactory>
+                </Spinner>
+            </HBox>
+            <HBox alignment="BASELINE_LEFT" styleClass="hBox">
+                <Label text="Army growth rate" styleClass="secondaryLabel"/>
+                <Spinner fx:id="spinnerArmyGrowthRate" styleClass="spinner">
+                    <valueFactory>
+                        <SpinnerValueFactory.IntegerSpinnerValueFactory min="5" max="20"/>
+                    </valueFactory>
+                </Spinner>
+            </HBox>
 
 
-    <Button mnemonicParsing="false" onAction="#createRoom" prefHeight="26.0" prefWidth="151.0" text="Register" />
-
-
-</FlowPane>
+            <Button styleClass="gameStartBtn" mnemonicParsing="false" onAction="#createRoom"
+                    text="Create room"/>
+        </FlowPane>
+    </center>
+</BorderPane>

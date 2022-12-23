@@ -1,8 +1,8 @@
 package Protocol.MessageValues.Game.GameActions;
 
-import Protocol.MessageValues.MessageValue;
 import Protocol.MessageValues.User.User;
 import Protocol.MessageValues.models.CitiesMap.City;
+import Protocol.MessageValues.MessageValue;
 
 public final class CityCapture implements MessageValue {
 

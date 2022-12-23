@@ -1,23 +1,15 @@
 package Protocol;
 
 
-import Protocol.MessageValues.Game.Game;
 import Protocol.MessageValues.Game.GameActions.ArmyMovement;
 import Protocol.MessageValues.Game.GameActions.CityCapture;
-import Protocol.MessageValues.Game.GameChatMessage;
-import Protocol.MessageValues.Game.GameResults;
 import Protocol.MessageValues.MessageValue;
-import Protocol.MessageValues.Response.ErrorResponse;
-import Protocol.MessageValues.Response.Success;
-import Protocol.MessageValues.Room.RoomConnectionForm;
-import Protocol.MessageValues.Room.RoomInitializationForm;
-import Protocol.MessageValues.Room.RoomParametersSetForm;
-import Protocol.MessageValues.User.UserLoginForm;
-import Protocol.MessageValues.User.UserRegistrationForm;
-import Protocol.MessageValues.User.UserUpdateForm;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
-import Protocol.exceptions.ProtocolVersionException;
+import Protocol.MessageValues.Game.*;
+import Protocol.MessageValues.Response.*;
+import Protocol.MessageValues.Response.ResponseError;
+import Protocol.MessageValues.Room.*;
+import Protocol.MessageValues.User.*;
+import Protocol.exceptions.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -27,13 +19,12 @@ import java.util.Map;
 
 import static Protocol.MessageManager.MessageType.*;
 
-
 public class MessageManager {
 
     public final static byte VERSION = 2;
 
     public enum MessageType {
-        RESPONSE_ERROR((byte)-1),//содержит ErrorResponse
+        RESPONSE_ERROR((byte)-1),//содержит Error
         RESPONSE_SUCCESS((byte)0), //содержит Success с объектом
 
 //этап входа
@@ -48,16 +39,16 @@ public class MessageManager {
         ROOM_INITIALIZE((byte)21), //возвращает Room
         ROOM_CONNECT((byte)22), //возвращает Room
 
+        GET_OPEN_ROOMS((byte)51), //возвращает List<Room>
+
 //этап лобби комнаты
         ROOM_DISCONNECT((byte)23), //ничего не возвращает
 
         ROOM_I_AM_READY_TO_START((byte)24), //ничего не возвращает
         ROOM_I_AM_NOT_READY_TO_START((byte)25), //ничего не возвращает
 
-        ROOM_PARAMETERS_GET((byte)26), //возвращает Room
-        ROOM_PARAMETERS_SET((byte)26), //ничего не возвращает
-
-        GET_OPEN_ROOMS((byte)51), //возвращает List<Room>
+        ROOM_SET_COLOR((byte) 26),
+        ROOM_GET((byte)27), //возвращает Room
 
 
         GAME_START((byte)31), //ничего не возвращает
@@ -69,8 +60,7 @@ public class MessageManager {
 
         GAME_ACTION_ARMY_MOVEMENT((byte)41), //ничего не возвращает (приходит клиенту)
         GAME_ACTION_CITY_CAPTURE((byte)42), //ничего не возвращает (приходит клиенту)
-        CHAT_MESSAGE((byte)43), //ничего не возвращает (приходит клиенту)
-        GAME_DATA_GET((byte)44), //возвращает Game
+        GAME_DATA_GET((byte)43), //возвращает Game
 
 
 //можно отправить всегда
@@ -85,8 +75,8 @@ public class MessageManager {
     //если null, то передавай null.
     private static final Map<MessageType, Class> typeToClassMap = new HashMap<>();;
     static {
-        typeToClassMap.put(RESPONSE_ERROR, ErrorResponse.class);
-        typeToClassMap.put(RESPONSE_SUCCESS, Success.class);
+        typeToClassMap.put(RESPONSE_ERROR, ResponseError.class);
+        typeToClassMap.put(RESPONSE_SUCCESS, ResponseSuccess.class);
 
 
         typeToClassMap.put(USER_REGISTER, UserRegistrationForm.class);
@@ -101,8 +91,8 @@ public class MessageManager {
         typeToClassMap.put(ROOM_DISCONNECT, null);
         typeToClassMap.put(ROOM_I_AM_READY_TO_START, null);
         typeToClassMap.put(ROOM_I_AM_NOT_READY_TO_START, null);
-        typeToClassMap.put(ROOM_PARAMETERS_GET, null);
-        typeToClassMap.put(ROOM_PARAMETERS_SET, RoomParametersSetForm.class);
+        typeToClassMap.put(ROOM_SET_COLOR, RoomUserColor.class);
+        typeToClassMap.put(ROOM_GET, null);
 
 
 
@@ -119,10 +109,9 @@ public class MessageManager {
 
 
         typeToClassMap.put(GET_OPEN_ROOMS, null);
-        typeToClassMap.put(CHAT_MESSAGE, GameChatMessage.class);
         typeToClassMap.put(EXIT, null);
 
-        if (MessageType.values().length != typeToClassMap.size()) {
+        if (values().length != typeToClassMap.size()) {
             throw new RuntimeException("Protocol is bad");
         }
     }
@@ -155,12 +144,12 @@ public class MessageManager {
 
     }
 
-    public static void sendErrorResponse(ErrorResponse errorResponse, OutputStream out) throws IOException {
-        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_ERROR, errorResponse), out);
+    public static void sendErrorResponse(ResponseError responseError, OutputStream out) throws IOException {
+        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_ERROR, responseError), out);
     }
 
-    public static void sendSuccessResponse(Success success, OutputStream out) throws IOException {
-        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_SUCCESS, success), out);
+    public static void sendSuccessResponse(ResponseSuccess responseSuccess, OutputStream out) throws IOException {
+        sendMessageWithoutWaitingForResponse(new Message(RESPONSE_SUCCESS, responseSuccess), out);
     }
 
 

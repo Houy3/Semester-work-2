@@ -4,23 +4,41 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<FlowPane
-        prefWidth="600" prefHeight="600"
-        vgap="10" hgap="10" alignment="CENTER" orientation="VERTICAL"
-        xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
-        fx:controller="com.example.clientgameapp.userUI.RegistrationController">
-    <padding>
-        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-    </padding>
-    <Label text="Registration form"/>
+<?import java.net.URL?>
 
-    <TextField fx:id="textFieldEmail" promptText="Email"/>
-    <TextField fx:id="textFieldNickName" promptText="Nickname"/>
-    <TextField fx:id="textFieldPassword" promptText="Password"/>
+<BorderPane fx:controller="com.example.clientgameapp.userUI.RegistrationController"
+            styleClass="mainScene"
+            prefWidth="600" prefHeight="600"
+            xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+    <stylesheets>
+        <URL value="@styles/main.css"/>
+    </stylesheets>
 
-    <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="150.0" text="Register" onAction="#registerUser"/>
+    <right>
+        <VBox spacing="10" styleClass="rightMenuBox">
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+            </padding>
+            <Button styleClass="navBtn" mnemonicParsing="false" text="Login" onAction="#openLoginScene"/>
+        </VBox>
+    </right>
 
 
-    <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="150.0" text="Login" onAction="#openLoginScene"/>
+    <center>
+        <FlowPane
+                vgap="10" hgap="10" alignment="CENTER" orientation="VERTICAL">
 
-</FlowPane>
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+            </padding>
+
+            <Label text="Registration form"/>
+
+            <TextField styleClass="mainTextField" fx:id="textFieldEmail" promptText="Email" />
+            <TextField styleClass="mainTextField" fx:id="textFieldNickName" promptText="Nickname"/>
+            <PasswordField styleClass="mainTextField" fx:id="textFieldPassword" promptText="Password"/>
+
+            <Button styleClass="mainBtn" mnemonicParsing="false" text="Register" onAction="#registerUser"/>
+        </FlowPane>
+    </center>
+</BorderPane>

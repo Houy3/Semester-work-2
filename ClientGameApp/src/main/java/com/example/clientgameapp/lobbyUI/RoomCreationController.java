@@ -4,7 +4,7 @@ import Protocol.HighLevelMessageManager;
 import Protocol.Message;
 import Protocol.MessageManager;
 import Protocol.MessageValues.Game.GameInitializationForm;
-import Protocol.MessageValues.Response.ErrorResponse;
+import Protocol.MessageValues.Response.ResponseError;
 import Protocol.MessageValues.Room.RoomAccess;
 import Protocol.MessageValues.Room.RoomInitializationForm;
 import Protocol.exceptions.BadResponseException;
@@ -12,30 +12,34 @@ import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
+import exceptions.ClientException;
 import exceptions.ClientInputException;
-import exceptions.ClientRegistrationException;
 import exceptions.GameException;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Slider;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import org.controlsfx.control.ToggleSwitch;
 import util.ErrorAlert;
 import utils.StringConverter;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.Socket;
 
 public class RoomCreationController {
-    public Slider sliderPlayerCount;
-    public TextField textFieldCitiesAmount;
-    public TextField textFieldArmySpeed;
     public ToggleSwitch togglePrivate;
-    public TextField textFieldArmyGrowthRate;
+
+    public ColorPicker gameColorPicker;
+    public Spinner spinnerArmySpeed;
+    public Spinner spinnerArmyGrowthRate;
+    public Spinner spinnerCitiesAmount;
 
     private ClientConnectionSingleton connection;
     private HighLevelMessageManager mManager;
     private Socket socket;
 
+    private Color color;
     private DestinationsManager destinationsManager;
 
 
@@ -54,10 +58,9 @@ public class RoomCreationController {
         new Thread(
                 () -> {
                     try {
-                        double maxPlayerCount = sliderPlayerCount.getValue();
-                        int citiesAmount = StringConverter.convertToInt(textFieldCitiesAmount.getText());
-                        int growthRate = StringConverter.convertToInt(textFieldArmyGrowthRate.getText());
-                        int armySpeed = StringConverter.convertToInt(textFieldArmySpeed.getText());
+                        int citiesAmount = StringConverter.convertToInt((String) spinnerCitiesAmount.getValue());
+                        int growthRate = StringConverter.convertToInt((String) spinnerArmyGrowthRate.getValue());
+                        int armySpeed = StringConverter.convertToInt((String) spinnerArmySpeed.getValue());
                         boolean isPrivate = togglePrivate.isSelected();
                         RoomAccess access;
                         GameInitializationForm gameInitializationForm = new GameInitializationForm(
@@ -69,22 +72,50 @@ public class RoomCreationController {
                             access = RoomAccess.PUBLIC;
                         }
                         RoomInitializationForm newRoom = new RoomInitializationForm(
-                                (int) maxPlayerCount, access, gameInitializationForm
+                                2, access, color, gameInitializationForm
                         );
-                        Message roomInitializedMessage = mManager.initializeRoom(newRoom, socket);
+                        Message roomInitializedMessage = HighLevelMessageManager.initializeRoom(newRoom, socket);
+                        if (color == null) {
+                            throw new ClientException("You need to choose a color");
+                        }
                         if (roomInitializedMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
-                            ErrorResponse error = (ErrorResponse) roomInitializedMessage.value();
-                            destinationsManager.switchToRoomLobbyScene();
+                            ResponseError error = (ResponseError) roomInitializedMessage.value();
+                            destinationsManager.navigateRoomListScene();
                             throw new GameException(error.getErrorMessage());
                         } else {
-                            destinationsManager.switchToRoomLobbyScene();
+                            destinationsManager.navigateLobbyScene();
                         }
-                    } catch (ClientInputException | GameException | RuntimeException | BadResponseException |
+                    } catch (ClientException | ClientInputException | GameException | RuntimeException |
+                             BadResponseException |
                              IOException |
                              MismatchedClassException e) {
                         ErrorAlert.show(e.getMessage());
                     }
                 }
         ).start();
+    }
+
+    public void navigateProfile(ActionEvent actionEvent) {
+        destinationsManager.navigateProfileScene();
+
+    }
+
+    public void navigateRoomList(ActionEvent actionEvent) {
+        destinationsManager.navigateRoomListScene();
+
+    }
+
+    public void getColor(ActionEvent actionEvent) {
+        javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
+        color = new Color(
+                convertColorNumber(originalColor.getRed()),
+                convertColorNumber(originalColor.getGreen()),
+                convertColorNumber(originalColor.getBlue())
+        );
+
+    }
+
+    private int convertColorNumber(Double num) {
+        return (int) (num * 255);
     }
 }

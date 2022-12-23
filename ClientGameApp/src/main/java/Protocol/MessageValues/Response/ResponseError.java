@@ -2,11 +2,11 @@ package Protocol.MessageValues.Response;
 
 import Protocol.MessageValues.MessageValue;
 
-public final class ErrorResponse implements MessageValue {
+public final class ResponseError implements MessageValue {
 
     private String errorMessage;
 
-    public ErrorResponse(String errorMessage) {
+    public ResponseError(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
@@ -16,5 +16,13 @@ public final class ErrorResponse implements MessageValue {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+
+    @Override
+    public String toString() {
+        return "ResponseError{" +
+                "errorMessage='" + errorMessage + '\'' +
+                '}';
     }
 }

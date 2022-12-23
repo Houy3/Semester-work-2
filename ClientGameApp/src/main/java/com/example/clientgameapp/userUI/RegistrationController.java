@@ -1,9 +1,9 @@
 package com.example.clientgameapp.userUI;
 
 
-import Protocol.MessageValues.Response.ErrorResponse;
+import Protocol.MessageValues.Response.ResponseError;
 import com.example.clientgameapp.DestinationsManager;
-import exceptions.ClientRegistrationException;
+import exceptions.ClientException;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
@@ -61,13 +61,13 @@ public class RegistrationController {
                 );
                 Message registerMessage = mManager.registerUser(form, socket);
                 if (registerMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
-                    ErrorResponse error = (ErrorResponse) registerMessage.value();
-                    throw new ClientRegistrationException(error.getErrorMessage());
+                    ResponseError error = (ResponseError) registerMessage.value();
+                    throw new ClientException(error.getErrorMessage());
                 } else {
                     openLoginScene(actionEvent);
                 }
             }
-        } catch (MismatchedClassException | BadResponseException | IOException | ClientRegistrationException |
+        } catch (MismatchedClassException | BadResponseException | IOException | ClientException |
                  ClientInputException e) {
             ErrorAlert.show(e.getMessage());
         }
@@ -75,6 +75,6 @@ public class RegistrationController {
 
 
     public void openLoginScene(ActionEvent actionEvent) throws IOException {
-        destinationsManager.switchToLoginScene();
+        destinationsManager.navigateLoginScene();
     }
 }

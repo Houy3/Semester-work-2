@@ -1,9 +1,9 @@
 package Protocol.MessageValues.Game;
 
-import Protocol.MessageValues.MessageValue;
 import Protocol.MessageValues.User.User;
 import Protocol.MessageValues.models.CitiesMap.CitiesMap;
 import Protocol.MessageValues.models.CitiesMap.City;
+import Protocol.MessageValues.MessageValue;
 
 import java.awt.*;
 import java.util.Date;
