@@ -8,6 +8,7 @@ import Protocol.MessageValues.Room.Room;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
+import com.example.clientgameapp.util.CommonValues;
 import com.example.clientgameapp.util.RoomCell;
 import com.example.clientgameapp.util.RoomCellFactory;
 import connection.ClientConnectionSingleton;
@@ -50,7 +51,6 @@ public class RoomLobbyController {
             OpenRoomsList list = (OpenRoomsList) responseSuccess.getResponseValue();
             List<Room> rooms = list.getOpenRooms();
 
-
             ObservableList<Room> roomList = FXCollections.observableArrayList();
             roomList.addAll(rooms);
             roomsList.setItems(roomList);
@@ -74,7 +74,9 @@ public class RoomLobbyController {
     }
 
     public void connectToRoom(ActionEvent actionEvent) throws MismatchedClassException, BadResponseException, IOException {
-
-        //destinationsManager.navigateLobbyScene();
+        Room currentRoom = roomsList.getSelectionModel().getSelectedItems().get(0);
+        CommonValues commonValues = CommonValues.getInstance();
+        commonValues.setRoomId(currentRoom.getCode());
+        System.out.println(roomsList.getSelectionModel().getSelectedItems());
     }
 }

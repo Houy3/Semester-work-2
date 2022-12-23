@@ -54,8 +54,7 @@ public class ClientCell extends ListCell<UserModel> {
             labelUserId.setText(String.valueOf(item.getIndex()));
             labelColor.setStyle("-fx-background-color: rgb(" + item.getUserColor().getRed() + ","
                     + item.getUserColor().getGreen() + "," + item.getUserColor().getBlue() + ");");
-            labelStatus.setText("Ready: " + String.valueOf(item.getUserStatus()));
-            labelUserName.setText(String.valueOf(item.getUser().getNickname()));
+            labelStatus.setText(item.getUserStatus() ? "(готов)" : "(не готов)");            labelUserName.setText(String.valueOf(item.getUser().getNickname()));
             setText(null);
             setGraphic(borderPane);
         }

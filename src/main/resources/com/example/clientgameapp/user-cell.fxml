@@ -18,8 +18,8 @@
     </center>
     <right>
         <HBox>
+            <Label fx:id="labelStatus" />
             <Label fx:id="labelColor" minHeight="20" minWidth="20"/>
-            <Label fx:id="labelStatus"/>
         </HBox>
     </right>
 </BorderPane>
