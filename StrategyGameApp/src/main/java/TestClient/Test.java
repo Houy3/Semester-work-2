@@ -3,11 +3,17 @@ package TestClient;
 import Protocol.HighLevelMessageManager;
 import Protocol.Message;
 import Protocol.MessageManager;
+
+import Protocol.MessageValues.Game.GameInitializationForm;
+import Protocol.MessageValues.Response.ResponseError;
+import Protocol.MessageValues.Room.RoomAccess;
+import Protocol.MessageValues.Room.RoomInitializationForm;
 import Protocol.MessageValues.User.UserLoginForm;
-import Protocol.MessageValues.User.UserRegistrationForm;
+import Protocol.MessageValues.User.UserUpdateForm;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -22,7 +28,14 @@ public class Test {
             Socket socket =  new Socket("localhost", 8888);
 
             System.out.println(Message.class);
-
+            
+            if (message.type() == MessageManager.MessageType.RESPONSE_SUCCESS) {
+                System.out.println("Success");
+            } else if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                System.out.println(((ResponseError)message.value()).getErrorMessage());
+            } else {
+                System.out.println("кривой ответ");
+            }
 
             UserRegistrationForm userRegistrationForm  = new UserRegistrationForm(
                     "naursdsduz@gmail.com",
@@ -30,22 +43,51 @@ public class Test {
                     "asdasdasd"
             );
 
-            Message register = MessageManager.sendMessage(
-                    new Message(MessageManager.MessageType.USER_REGISTER, userRegistrationForm),
-                    socket
-                    );
+
+//            UserUpdateForm form = new UserUpdateForm("Houy3");
+//            message = MessageManager.sendMessage(
+//                    new Message(MessageManager.MessageType.USER_UPDATE, form),
+//                    socket
+//            );
+//            if (message.type() == MessageManager.MessageType.RESPONSE_SUCCESS) {
+//                System.out.println("Success");
+//            } else if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+//                System.out.println(((ResponseError)message.value()).getErrorMessage());
+//            } else {
+//                System.out.println("кривой ответ");
+//            }
 
 
-            UserLoginForm user = new UserLoginForm("ompopjfpjpo@mail.ru", "987h98u98g98g9");
-
-            Message message = MessageManager.sendMessage(
-                    new Message(MessageManager.MessageType.USER_LOGIN, user),
+            message = MessageManager.sendMessage(
+                    new Message(MessageManager.MessageType.USER_PROFILE_DATA_GET, null),
                     socket
             );
-            MessageManager.sendMessage(register, socket);
-            MessageManager.sendMessage(message, socket);
+            if (message.type() == MessageManager.MessageType.RESPONSE_SUCCESS) {
+                System.out.println("Success");
+                System.out.println(message.value().toString());
+            } else if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                System.out.println(((ResponseError)message.value()).getErrorMessage());
+            } else {
+                System.out.println("кривой ответ");
+            }
 
-            System.out.println(MessageManager.sendMessage(register, socket));
+            message = MessageManager.sendMessage(
+                    new Message(MessageManager.MessageType.ROOM_INITIALIZE,
+                            new RoomInitializationForm(
+                                    4,
+                                    RoomAccess.PUBLIC,
+                                    Color.BLUE,
+                                    new GameInitializationForm(10, 40, 35))),
+                    socket
+            );
+            if (message.type() == MessageManager.MessageType.RESPONSE_SUCCESS) {
+                System.out.println("Success");
+                System.out.println(message.value().toString());
+            } else if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                System.out.println(((ResponseError)message.value()).getErrorMessage());
+            } else {
+                System.out.println("кривой ответ");
+            }
 
             System.out.println(register.type());
          //   System.out.println(MessageManager.readMessage(socket.getInputStream()));

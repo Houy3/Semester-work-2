@@ -1,6 +1,7 @@
 package Server.models;
 
 
+import Protocol.MessageValues.User.User;
 import Protocol.MessageValues.User.UserLoginForm;
 import Protocol.MessageValues.User.UserRegistrationForm;
 import Protocol.MessageValues.User.UserUpdateForm;
@@ -53,6 +54,10 @@ public class UserDB {
     public UserDB(UserLoginForm form) {
         this.email = form.getEmail();
         this.password = form.getPassword();
+    }
+
+    public User toUser() {
+        return new User(getNickname());
     }
 
     public Long getId() {

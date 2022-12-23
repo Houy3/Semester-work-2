@@ -2,11 +2,11 @@ package Protocol.MessageValues.Response;
 
 import Protocol.MessageValues.MessageValue;
 
-public final class Success implements MessageValue {
+public final class ResponseSuccess implements MessageValue {
 
     private MessageValue responseValue;
 
-    public Success(MessageValue responseValue) {
+    public ResponseSuccess(MessageValue responseValue) {
         this.responseValue = responseValue;
     }
 
@@ -16,5 +16,12 @@ public final class Success implements MessageValue {
 
     public void setResponseValue(MessageValue responseValue) {
         this.responseValue = responseValue;
+    }
+
+    @Override
+    public String toString() {
+        return "ResponseSuccess{" +
+                "responseValue=" + responseValue +
+                '}';
     }
 }

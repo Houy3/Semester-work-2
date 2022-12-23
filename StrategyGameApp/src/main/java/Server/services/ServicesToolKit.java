@@ -1,12 +1,12 @@
 package Server.services;
 
-import Server.models.validators.EmailValidator;
-import Server.models.validators.NicknameValidator;
-import Server.models.validators.PasswordValidator;
+import Server.models.validators.*;
 import Server.DB.repositories.Impl.UsersRepositoryImpl;
 import Server.DB.repositories.RepositoryImpl;
 import Server.app.ServerApp;
+import Server.services.Impl.RoomsServiceImpl;
 import Server.services.Impl.UsersServiceImpl;
+import Server.services.Inter.RoomsService;
 import Server.services.Inter.UsersService;
 
 import javax.sql.DataSource;
@@ -16,14 +16,13 @@ import java.util.Properties;
 public class ServicesToolKit {
 
 
-    private final DataSource dataSource;
-
     private final ServiceWithDB service;
     private final UsersService usersService;
 
+    private final RoomsService roomsService;
+
 
     public ServicesToolKit(DataSource dataSource) {
-        this.dataSource = dataSource;
 
         service = new ServiceWithDBImpl(new RepositoryImpl(dataSource));
 
@@ -51,6 +50,23 @@ public class ServicesToolKit {
                 emailValidator,
                 passwordValidator,
                 nicknameValidator);
+
+        GameInitValidator gameInitValidator = new GameInitValidator(
+                Integer.parseInt(properties.getProperty("gameInit.minArmySpeed")),
+                Integer.parseInt(properties.getProperty("gameInit.maxArmySpeed")),
+                Integer.parseInt(properties.getProperty("gameInit.minArmyGrowthRate")),
+                Integer.parseInt(properties.getProperty("gameInit.maxArmyGrowthRate")),
+                Integer.parseInt(properties.getProperty("gameInit.minCountOfCities")),
+                Integer.parseInt(properties.getProperty("gameInit.maxCountOfCities"))
+        );
+
+        RoomInitValidator roomInitValidator = new RoomInitValidator(
+                Integer.parseInt(properties.getProperty("roomInit.minCountOfPlayers")),
+                Integer.parseInt(properties.getProperty("roomInit.maxCountOfPlayers")),
+                gameInitValidator
+        );
+
+        roomsService = new RoomsServiceImpl(roomInitValidator);
     }
 
     public ServiceWithDB getMainService() {
@@ -60,4 +76,10 @@ public class ServicesToolKit {
     public UsersService getUsersService() {
         return usersService;
     }
+
+    public RoomsService getRoomService() {
+        return roomsService;
+    }
+
+
 }

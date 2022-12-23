@@ -4,7 +4,9 @@ import Protocol.MessageValues.Game.GameInitializationForm;
 import Protocol.MessageValues.MessageValue;
 import Protocol.MessageValues.User.User;
 
+
 import java.awt.*;
+import java.util.List;
 import java.util.Map;
 
 public final class Room implements MessageValue {
@@ -13,23 +15,13 @@ public final class Room implements MessageValue {
     private Integer maxCountOfPlayers;
     private RoomAccess access;
 
-    private Map<User, Color> users;
-    private Map<User, Boolean> isReady;
+    private List<User> users;
+    private Map<User, Color> usersColor;
+    private Map<User, Boolean> usersIsReady;
 
     private GameInitializationForm gameInitializationForm;
 
-
-    public Room() {
-    }
-
-    public Room(String code, Integer maxCountOfPlayers, RoomAccess access, Map<User, Color> users, Map<User, Boolean> isReady, GameInitializationForm gameInitializationForm) {
-        this.code = code;
-        this.maxCountOfPlayers = maxCountOfPlayers;
-        this.access = access;
-        this.users = users;
-        this.isReady = isReady;
-        this.gameInitializationForm = gameInitializationForm;
-    }
+    public Room() {}
 
     public String getCode() {
         return code;
@@ -55,24 +47,32 @@ public final class Room implements MessageValue {
         this.access = access;
     }
 
-    public Map<User, Color> getUsers() {
+    public List<User> getUsers() {
         return users;
     }
 
-    public void setUsers(Map<User, Color> users) {
+    public void setUsers(List<User> users) {
         this.users = users;
+    }
+
+    public Map<User, Color> getUsersColor() {
+        return usersColor;
+    }
+
+    public void setUsersColor(Map<User, Color> usersColor) {
+        this.usersColor = usersColor;
+    }
+
+    public Map<User, Boolean> getUsersIsReady() {
+        return usersIsReady;
+    }
+
+    public void setUsersIsReady(Map<User, Boolean> usersIsReady) {
+        this.usersIsReady = usersIsReady;
     }
 
     public GameInitializationForm getGameInitializationForm() {
         return gameInitializationForm;
-    }
-
-    public Map<User, Boolean> getIsReady() {
-        return isReady;
-    }
-
-    public void setIsReady(Map<User, Boolean> isReady) {
-        this.isReady = isReady;
     }
 
     public void setGameInitializationForm(GameInitializationForm gameInitializationForm) {
@@ -86,7 +86,8 @@ public final class Room implements MessageValue {
                 ", maxCountOfPlayers=" + maxCountOfPlayers +
                 ", access=" + access +
                 ", users=" + users +
-                ", isReady=" + isReady +
+                ", usersColor=" + usersColor +
+                ", isReady=" + usersIsReady +
                 ", gameInitializationForm=" + gameInitializationForm +
                 '}';
     }
