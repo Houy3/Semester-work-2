@@ -3,6 +3,7 @@ package Protocol;
 import Protocol.MessageValues.Game.Game;
 import Protocol.MessageValues.Game.GameActions.ArmyMovement;
 import Protocol.MessageValues.Game.GameActions.CityCapture;
+import Protocol.MessageValues.Game.GameChatMessage;
 import Protocol.MessageValues.Game.GameResults;
 import Protocol.MessageValues.Room.RoomConnectionForm;
 import Protocol.MessageValues.Room.RoomInitializationForm;
@@ -109,7 +110,6 @@ public class HighLevelMessageManager extends MessageManager {
     public static Message getOpenRooms(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
         return sendMessage(new Message(GET_OPEN_ROOMS, null), socket);
     }
-
     /**пустой ответ*/
     public static Message exit(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
         return sendMessage(new Message(EXIT, null), socket);
