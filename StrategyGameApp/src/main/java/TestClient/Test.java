@@ -1,9 +1,7 @@
 package TestClient;
 
-import Protocol.HighLevelMessageManager;
 import Protocol.Message;
 import Protocol.MessageManager;
-
 import Protocol.MessageValues.Game.GameInitializationForm;
 import Protocol.MessageValues.Response.ResponseError;
 import Protocol.MessageValues.Room.RoomAccess;
@@ -23,12 +21,15 @@ public class Test {
 
 
         try {
-            HighLevelMessageManager messageManager = new HighLevelMessageManager();
+            Socket socket = new Socket("localhost", 8080);
 
-            Socket socket =  new Socket("localhost", 8888);
+            UserLoginForm user = new UserLoginForm("email@mail.ru", "password");
 
-            System.out.println(Message.class);
-            
+            Message message = MessageManager.sendMessage(
+                    new Message(MessageManager.MessageType.USER_LOGIN, user),
+                    socket
+            );
+
             if (message.type() == MessageManager.MessageType.RESPONSE_SUCCESS) {
                 System.out.println("Success");
             } else if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
@@ -36,12 +37,6 @@ public class Test {
             } else {
                 System.out.println("кривой ответ");
             }
-
-            UserRegistrationForm userRegistrationForm  = new UserRegistrationForm(
-                    "naursdsduz@gmail.com",
-                    "nauruz0304",
-                    "asdasdasd"
-            );
 
 
 //            UserUpdateForm form = new UserUpdateForm("Houy3");
@@ -89,9 +84,8 @@ public class Test {
                 System.out.println("кривой ответ");
             }
 
-            System.out.println(register.type());
-         //   System.out.println(MessageManager.readMessage(socket.getInputStream()));
 
+            System.out.println("end");
 
         } catch (IOException | MismatchedClassException e) {
             System.out.println(e.getMessage());

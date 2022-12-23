@@ -9,9 +9,5 @@
         <module name="StrategyGameApp" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="ClientApp" target="19" />
-      <module name="ClientGameApp" target="19" />
-    </bytecodeTargetLevel>
   </component>
 </project>

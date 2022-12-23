@@ -1,18 +1,15 @@
 package Protocol;
 
 
-import Protocol.MessageValues.Game.Game;
 import Protocol.MessageValues.Game.GameActions.ArmyMovement;
 import Protocol.MessageValues.Game.GameActions.CityCapture;
-import Protocol.MessageValues.Game.GameChatMessage;
-import Protocol.MessageValues.Game.GameResults;
 import Protocol.MessageValues.MessageValue;
 import Protocol.MessageValues.Game.*;
 import Protocol.MessageValues.Response.*;
 import Protocol.MessageValues.Response.ResponseError;
 import Protocol.MessageValues.Room.*;
 import Protocol.MessageValues.User.*;
-import Protocol.exceptions.*
+import Protocol.exceptions.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -27,7 +24,7 @@ public class MessageManager {
     public final static byte VERSION = 2;
 
     public enum MessageType {
-        RESPONSE_ERROR((byte)-1),//содержит ErrorResponse
+        RESPONSE_ERROR((byte)-1),//содержит Error
         RESPONSE_SUCCESS((byte)0), //содержит Success с объектом
 
 //этап входа
