@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -25,28 +22,28 @@
     </stylesheets>
 
     <BorderPane>
+
         <right>
-            <VBox prefHeight="50" prefWidth="50">
-                <Label text="Player 2"/>
+            <VBox spacing="10" styleClass="rightMenuBox">
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                </padding>
+                <Button styleClass="readyBtn" mnemonicParsing="false" text="Ready" onAction="#setReadyStatus"/>
+
+                <Button styleClass="readyBtn" mnemonicParsing="false" text="Start game" onAction="#startGame"/>
+
+                <Button styleClass="readyBtn" mnemonicParsing="false" text="Start game" onAction="#updateLobby"/>
+
             </VBox>
         </right>
 
-        <left>
-            <VBox prefHeight="50" prefWidth="50">
-                <Label text="Player 1"/>
-            </VBox>
-        </left>
 
-        <top>
-            <VBox prefHeight="50" prefWidth="50">
-                <Label text="Player 3"/>
-            </VBox>
-        </top>
+        <center>
+            <ListView fx:id="usersList"/>
+        </center>
 
         <bottom>
-            <VBox prefHeight="50" prefWidth="50">
-                <Label text="Player 4"/>
-            </VBox>
+
         </bottom>
     </BorderPane>
 </FlowPane>

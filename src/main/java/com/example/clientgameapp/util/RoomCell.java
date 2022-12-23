@@ -27,8 +27,7 @@ public class RoomCell extends ListCell<Room> {
     @FXML
     public Label labelCitiesCount;
 
-    @FXML
-    public Label labelId;
+
 
     public FXMLLoader mLLoader;
 

@@ -49,9 +49,10 @@ public class RoomLobbyController {
             ResponseSuccess responseSuccess = (ResponseSuccess) message.value();
             OpenRoomsList list = (OpenRoomsList) responseSuccess.getResponseValue();
             List<Room> rooms = list.getOpenRooms();
+
+
             ObservableList<Room> roomList = FXCollections.observableArrayList();
             roomList.addAll(rooms);
-            System.out.println(roomList + " " + rooms);
             roomsList.setItems(roomList);
             roomsList.setCellFactory(studentListView -> new RoomCell());
 

@@ -11,6 +11,10 @@ module com.example.clientgameapp {
     exports com.example.clientgameapp;
     exports com.example.clientgameapp.userUI;
     exports Protocol.MessageValues.Room;
+    exports com.example.clientgameapp.models;
+    exports Protocol.MessageValues.User;
+    exports Protocol.MessageValues.Response;
+    exports Protocol.MessageValues.Game;
     exports util;
     exports com.example.clientgameapp.util;
     opens com.example.clientgameapp.userUI to javafx.fxml;
