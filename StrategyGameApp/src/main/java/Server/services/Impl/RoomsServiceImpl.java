@@ -82,7 +82,10 @@ public class RoomsServiceImpl implements RoomsService {
 
     @Override
     public List<RoomDB> getOpenRooms() {
-        return activeRooms.stream().filter(room -> room.getAccess().equals(RoomAccess.PUBLIC)).collect(Collectors.toList());
+        return activeRooms.stream()
+                .filter(room -> room.getAccess().equals(RoomAccess.PUBLIC)
+                && room.getUsers().size() < room.getMaxCountOfPlayers())
+                .collect(Collectors.toList());
     }
 
 

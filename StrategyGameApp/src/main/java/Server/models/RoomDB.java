@@ -42,6 +42,7 @@ public class RoomDB {
         room.setCode(code);
         room.setMaxCountOfPlayers(maxCountOfPlayers);
         room.setAccess(access);
+        room.setGameInitializationForm(gameInitializationForm);
 
         room.setUsers(users.stream().map(UserDB::toUser).collect(Collectors.toList()));
 
