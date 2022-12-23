@@ -75,6 +75,7 @@ public class RoomsServiceImpl implements RoomsService {
         }
 
         if (deactivateRoomDB != null) {
+            takenCodes.remove(deactivateRoomDB.getCode());
             activeRooms.remove(deactivateRoomDB);
         }
     }

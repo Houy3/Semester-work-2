@@ -54,20 +54,24 @@ public class UserConnectionThread implements Runnable {
     public void run() {
         try {
             while (!isExit) {
+                System.out.println("этап входа");
                 loginOrRegister();
-                if (isExit) {break;}
+                if (isExit) {continue;}
+                System.out.println("этап лобби");
                 mainLobby();
-                if (!isLogout) {continue;}
+                if (isLogout) {continue;}
                 while (!isExit) {
+                    System.out.println("этап комнаты");
                     roomLobby();
                     if (isExit) {break;}
+                    System.out.println("этап игры");
                     gameLobby();
                 }
             }
-        } catch (MismatchedClassException | ProtocolVersionException e) {
+        } catch (MismatchedClassException | ProtocolVersionException | UserDisconnectException e) {
             errorMessageLog(e);
-        } catch (UserDisconnectException e) {}
-        disconnectUser();
+            disconnectUser();
+        }
     }
 
 
@@ -92,7 +96,7 @@ public class UserConnectionThread implements Runnable {
                 }
             }
         } catch (IOException e) {
-            throw new UserDisconnectException();
+            throw new UserDisconnectException("socket closed");
         }
     }
 
@@ -165,7 +169,7 @@ public class UserConnectionThread implements Runnable {
 
             }
         } catch (IOException e) {
-            throw new UserDisconnectException();
+            throw new UserDisconnectException("socket closed");
         }
     }
 
@@ -252,7 +256,7 @@ public class UserConnectionThread implements Runnable {
 
             }
         } catch (IOException e) {
-            throw new UserDisconnectException();
+            throw new UserDisconnectException("socket closed");
         }
     }
 
@@ -316,13 +320,14 @@ public class UserConnectionThread implements Runnable {
         isExit = true;
     }
     private void disconnectUser() {
-       exitUser();
+        logoutUser();
+        closeConnection();
     }
 
     private void closeConnection() {
         try {
-            exitUser();
-        } catch (Exception ignored) {}
+            socket.close();
+        } catch (IOException ignored) {}
     }
 
     private void errorMessageLog(Exception e) {
