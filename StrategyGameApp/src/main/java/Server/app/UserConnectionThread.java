@@ -89,7 +89,7 @@ public class UserConnectionThread implements Runnable {
                         loginUserWithResponse(form);
                     }
                     case EXIT -> {
-                        exitUser();
+                        exitUserWithResponse();
                     }
                     default -> MessageManager.sendErrorResponse(new ResponseError("Firstly you need login or register"), socket.getOutputStream());
                 }
@@ -161,7 +161,7 @@ public class UserConnectionThread implements Runnable {
                         getOpenRoomsWithResponse();
                     }
                     case EXIT -> {
-                        exitUser();
+                        exitUserWithResponse();
                     }
                     default -> MessageManager.sendErrorResponse(new ResponseError("later"), socket.getOutputStream());
                 }
@@ -241,6 +241,10 @@ public class UserConnectionThread implements Runnable {
                     case ROOM_I_AM_NOT_READY_TO_START -> {
                         setNotReadyToStartWithResponse();
                     }
+                    case ROOM_SET_COLOR -> {
+                        RoomUserColor roomUserColor = (RoomUserColor) message.value();
+                        setUserColorInRoom(roomUserColor);
+                    }
                     case ROOM_GET -> {
                         getRoomParametersWithResponse();
                     }
@@ -248,7 +252,7 @@ public class UserConnectionThread implements Runnable {
                         startGameWithResponse();
                     }
                     case EXIT -> {
-                        exitUser();
+                        exitUserWithResponse();
                     }
                     default -> MessageManager.sendErrorResponse(new ResponseError("later"), socket.getOutputStream());
                 }
@@ -273,6 +277,12 @@ public class UserConnectionThread implements Runnable {
         roomDB.getUsersIsReady().replace(userDB, false);
         MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
     }
+
+    private void setUserColorInRoom(RoomUserColor roomUserColor) throws IOException {
+        roomDB.getUsersColor().replace(userDB, roomUserColor.getColor());
+        MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
+    }
+
 
     private void getRoomParametersWithResponse() throws IOException {
         MessageManager.sendSuccessResponse(new ResponseSuccess(roomDB.toRoom()), socket.getOutputStream());
@@ -318,8 +328,14 @@ public class UserConnectionThread implements Runnable {
         closeConnection();
         isExit = true;
     }
+
+    private void exitUserWithResponse() throws IOException {
+        MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
+        exitUser();
+    }
+
     private void disconnectUser() {
-        logoutUser();
+        exitUser();
         closeConnection();
     }
 
