@@ -5,6 +5,7 @@ import Protocol.Message;
 import Protocol.MessageManager;
 import Protocol.MessageValues.Game.GameInitializationForm;
 import Protocol.MessageValues.Response.ResponseError;
+import Protocol.MessageValues.Response.ResponseSuccess;
 import Protocol.MessageValues.Room.RoomAccess;
 import Protocol.MessageValues.Room.RoomInitializationForm;
 import Protocol.exceptions.BadResponseException;
@@ -57,6 +58,7 @@ public class RoomCreationController {
     public void createRoom(ActionEvent actionEvent) {
 
         try {
+            System.out.println(socket.isClosed());
             int citiesAmount = (int) spinnerCitiesAmount.getValue();
             int growthRate = (int) spinnerArmyGrowthRate.getValue();
             int armySpeed = (int) spinnerArmySpeed.getValue();
@@ -74,12 +76,17 @@ public class RoomCreationController {
                     2, access, color, gameInitializationForm
             );
             Message roomInitializedMessage = HighLevelMessageManager.initializeRoom(newRoom, socket);
+
+            Message userInfo = HighLevelMessageManager.getUserProfileData(socket);
+            ResponseError success = (ResponseError) userInfo.value();
+            System.out.println(success.getErrorMessage());
+
+
             if (color == null) {
                 throw new ClientException("You need to choose a color");
             }
             if (roomInitializedMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
                 ResponseError error = (ResponseError) roomInitializedMessage.value();
-                destinationsManager.navigateRoomListScene();
                 throw new GameException(error.getErrorMessage());
             } else {
                 destinationsManager.navigateLobbyScene();

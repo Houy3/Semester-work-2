@@ -4,7 +4,6 @@ import Protocol.MessageValues.Game.GameInitializationForm;
 import Protocol.MessageValues.MessageValue;
 import Protocol.MessageValues.User.User;
 
-
 import java.awt.*;
 import java.util.List;
 import java.util.Map;

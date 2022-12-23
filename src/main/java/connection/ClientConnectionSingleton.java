@@ -16,6 +16,7 @@ public class ClientConnectionSingleton {
     private static Socket socket;
     private static final int PORT = 8888;
     private static InputStream inputStream;
+    private static boolean isInitialized = false;
 
     private ClientConnectionSingleton() {
     }
@@ -30,7 +31,10 @@ public class ClientConnectionSingleton {
     }
 
     public static ClientConnectionSingleton getInstance() throws ClientConnectionException {
-        init();
+        if(!isInitialized) {
+            init();
+            isInitialized = true;
+        }
         return instance;
     }
 

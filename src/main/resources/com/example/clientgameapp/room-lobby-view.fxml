@@ -34,7 +34,9 @@
     <center>
         <FlowPane maxWidth="300" orientation="VERTICAL" vgap="10" hgap="10">
             <Label text="Choose a room"/>
-            <ListView fx:id="roomsList" />
+            <ListView fx:id="roomsList">
+
+            </ListView>
             <Button styleClass="gameStartBtn" text="Connect" onAction="#connectToRoom"/>
         </FlowPane>
     </center>

@@ -1,15 +1,22 @@
 package Protocol;
 
 
+import Protocol.MessageValues.Game.Game;
 import Protocol.MessageValues.Game.GameActions.ArmyMovement;
 import Protocol.MessageValues.Game.GameActions.CityCapture;
+import Protocol.MessageValues.Game.GameResults;
 import Protocol.MessageValues.MessageValue;
-import Protocol.MessageValues.Game.*;
-import Protocol.MessageValues.Response.*;
 import Protocol.MessageValues.Response.ResponseError;
-import Protocol.MessageValues.Room.*;
-import Protocol.MessageValues.User.*;
-import Protocol.exceptions.*;
+import Protocol.MessageValues.Response.ResponseSuccess;
+import Protocol.MessageValues.Room.RoomConnectionForm;
+import Protocol.MessageValues.Room.RoomInitializationForm;
+import Protocol.MessageValues.Room.RoomUserColor;
+import Protocol.MessageValues.User.UserLoginForm;
+import Protocol.MessageValues.User.UserRegistrationForm;
+import Protocol.MessageValues.User.UserUpdateForm;
+import Protocol.exceptions.BadResponseException;
+import Protocol.exceptions.MismatchedClassException;
+import Protocol.exceptions.ProtocolVersionException;
 
 import java.io.*;
 import java.net.Socket;
