@@ -1,10 +1,12 @@
 package Protocol.MessageValues.models.CitiesMap;
 
+import java.io.Serializable;
+
 /**
  * @param x от 5 до 95 условных единиц
  * @param y от 5 до 95 условных единиц
  */
-public record City(int number, int x, int y) {
+public record City(int number, int x, int y)   implements Serializable {
 
     @Override
     public String toString() {

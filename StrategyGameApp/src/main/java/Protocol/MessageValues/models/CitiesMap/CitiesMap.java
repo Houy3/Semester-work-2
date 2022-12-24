@@ -1,8 +1,9 @@
 package Protocol.MessageValues.models.CitiesMap;
 
+import java.io.Serializable;
 import java.util.Set;
 
-public record CitiesMap(Set<City> cities, Set<Way> ways) {
+public record CitiesMap(Set<City> cities, Set<Way> ways)  implements Serializable {
 
     @Override
     public String toString() {

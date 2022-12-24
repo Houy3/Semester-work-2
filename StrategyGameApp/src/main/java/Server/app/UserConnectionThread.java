@@ -247,7 +247,8 @@ public class UserConnectionThread implements Runnable {
 
     private void roomLobby() throws UserDisconnectException, MismatchedClassException, ProtocolVersionException {
         try {
-            while (!isExit && isRoomConnected) {
+            boolean gameStart = false;
+            while (!isExit && isRoomConnected && !gameStart) {
                 Message message = MessageManager.readMessage(socket.getInputStream());
                 switch (message.type()) {
                     case ROOM_DISCONNECT -> {
@@ -268,6 +269,7 @@ public class UserConnectionThread implements Runnable {
                     }
                     case GAME_START -> {
                         startGameWithResponse();
+                        gameStart = true;
                     }
                     case EXIT -> {
                         exitUserWithResponse();
@@ -322,6 +324,7 @@ public class UserConnectionThread implements Runnable {
         try {
             startGame(gameService.initialize(roomDB.getGameInitializationForm(), roomDB));
             roomDB.sendMessageToAllUsersInRoom(new Message(GAME_STARTED, gameDB.toGame()));
+            System.out.println(roomDB.getSockets());
             while (isGameEnded) {
                 Message message = MessageManager.readMessage(socket.getInputStream());
                 switch (message.type()) {
@@ -338,6 +341,7 @@ public class UserConnectionThread implements Runnable {
                     case EXIT -> {
                         exitUserWithResponse();
                     }
+                    default -> MessageManager.sendErrorResponse(new ResponseError("I don't know what you want in game"),socket.getOutputStream());
                 }
             }
 
