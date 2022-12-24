@@ -7,12 +7,13 @@ public final class GameResults implements MessageValue {
 
     private User winner;
 
-    private Long gameTime; //сколько времени длилась игра
+    private long gameTime; //сколько времени длилась игра в миллисекундах
 
     public GameResults(User winner, Long gameTime) {
         this.winner = winner;
         this.gameTime = gameTime;
     }
+
 
     public User getWinner() {
         return winner;

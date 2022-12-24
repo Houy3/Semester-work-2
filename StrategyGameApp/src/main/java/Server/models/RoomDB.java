@@ -118,6 +118,19 @@ public class RoomDB {
     public void setGameInitializationForm(GameInitializationForm gameInitializationForm) {
         this.gameInitializationForm = gameInitializationForm;
     }
+    public Map<UserDB, Socket> getSockets() {
+        return sockets;
+    }
+
+    public Boolean getInGame() {
+        return inGame;
+    }
+
+    public void setInGame(Boolean inGame) {
+        this.inGame = inGame;
+    }
+
+
 
     private final Lock lock = new ReentrantLock();
     public void addSocket(UserDB user, Socket socket) {
@@ -132,22 +145,17 @@ public class RoomDB {
         lock.unlock();
     }
 
-    public Map<UserDB, Socket> getSockets() {
-        return sockets;
-    }
-
-    public Boolean getInGame() {
-        return inGame;
-    }
-
-    public void setInGame(Boolean inGame) {
-        this.inGame = inGame;
-    }
-
-
-    public synchronized void sendMessageToAllUsersInRoom(Message message) throws MismatchedClassException, BadResponseException, IOException {
+    public synchronized void sendMessageToAllUsersInRoom(Message message) {
         for (Socket socket : sockets.values()) {
-            MessageManager.sendMessage(message, socket);
+            new Thread(() -> {
+                try {
+                    MessageManager.sendMessage(message, socket);
+                } catch (IOException | BadResponseException | MismatchedClassException ignored) {
+                    try {
+                        socket.close();
+                    } catch (IOException ignored1) {}
+                }
+            }).start();
         }
     }
 
