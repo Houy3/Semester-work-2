@@ -307,7 +307,11 @@ public class UserConnectionThread implements Runnable {
 
 
     private void startGameWithResponse() throws IOException {
-        MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
+        if (roomDB.getUsers().size() < 2) {
+            MessageManager.sendErrorResponse(new ResponseError("Insufficient number of players"),socket.getOutputStream());
+        } else {
+            MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
+        }
     }
 
     private void gameLobby() throws UserDisconnectException, MismatchedClassException, ProtocolVersionException {
