@@ -145,9 +145,11 @@ public class RoomDB {
     }
 
 
-    public synchronized void sendMessageToAllUsersInRoom(Message message) throws MismatchedClassException, BadResponseException, IOException {
+    public synchronized void sendMessageToAllUsersInRoom(Message message) throws MismatchedClassException, IOException {
         for (Socket socket : sockets.values()) {
-            MessageManager.sendMessage(message, socket);
+            try {
+                MessageManager.sendMessage(message, socket);
+            } catch (BadResponseException ignored) {}
         }
     }
 

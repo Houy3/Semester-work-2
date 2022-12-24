@@ -9,6 +9,8 @@ import Protocol.MessageValues.models.CitiesMap.City;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class GameDB {
 
@@ -21,10 +23,10 @@ public class GameDB {
     private Map<City, UserDB> usersCities;
 
     //Скорость армии, когда она идет от одного города к другому. усл.ед./с.
-    private int armySpeed;
+    private final int armySpeed;
 
     //Скорость роста армии игрока в городе ед./с.
-    private int armyGrowthRate;
+    private final int armyGrowthRate;
 
 
     public GameDB(GameInitializationForm form) {
@@ -50,6 +52,18 @@ public class GameDB {
         game.setArmyGrowthRate(armyGrowthRate);
 
         return game;
+    }
+
+    private AutoIncrement autoIncrement;
+    private boolean isStarted = false;
+    public void start() {
+        isStarted = true;
+        autoIncrement = new AutoIncrement(this);
+        autoIncrement.start();
+    }
+
+    public void end() {
+        isStarted = false;
     }
 
     public CitiesMap getCitiesMap() {
@@ -88,16 +102,29 @@ public class GameDB {
         return armySpeed;
     }
 
-    public void setArmySpeed(int armySpeed) {
-        this.armySpeed = armySpeed;
-    }
-
     public int getArmyGrowthRate() {
         return armyGrowthRate;
     }
 
-    public void setArmyGrowthRate(int armyGrowthRate) {
-        this.armyGrowthRate = armyGrowthRate;
+
+    private final Lock lock = new ReentrantLock();
+
+    public void disconnectUser(UserDB user) {
+        lock.lock();
+        for (City city : usersCities.keySet()) {
+            if (usersCities.get(city).equals(user)) {
+                usersCities.remove(city);
+            }
+        }
+        lock.unlock();
+    }
+
+    public void incrementArmies() {
+        lock.lock();
+        for (City city : citiesArmies.keySet()) {
+            citiesArmies.replace(city, citiesArmies.get(city) + armyGrowthRate);
+        }
+        lock.unlock();
     }
 
     @Override
@@ -110,5 +137,28 @@ public class GameDB {
                 ", armySpeed=" + armySpeed +
                 ", armyGrowthRate=" + armyGrowthRate +
                 '}';
+    }
+
+
+
+    private class AutoIncrement extends Thread {
+
+        private final GameDB game;
+
+        public AutoIncrement(GameDB game) {
+            this.game = game;
+        }
+
+        @Override
+        public void run() {
+            while (isStarted) {
+                if ((new Date()).getTime() < startTime.getTime()) {
+                    game.incrementArmies();
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignored) {}
+            }
+        }
     }
 }

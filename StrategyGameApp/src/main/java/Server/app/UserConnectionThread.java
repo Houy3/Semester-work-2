@@ -30,7 +30,7 @@ import java.net.Socket;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-import static Protocol.MessageManager.MessageType.GAME_STARTED;
+import static Protocol.MessageManager.MessageType.*;
 
 public class UserConnectionThread implements Runnable {
 
@@ -295,7 +295,6 @@ public class UserConnectionThread implements Runnable {
         MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
     }
 
-
     private void getRoomParametersWithResponse() throws IOException {
         MessageManager.sendSuccessResponse(new ResponseSuccess(roomDB.toRoom()), socket.getOutputStream());
     }
@@ -306,17 +305,51 @@ public class UserConnectionThread implements Runnable {
         MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
     }
 
-    private void gameLobby() throws UserDisconnectException {
-//        Game game = gameDB.toGame();
-//
-//        try {
-//            roomDB.sendMessageToAllUsersInRoom(new Message(GAME_STARTED, game));
-//        } catch (MismatchedClassException e) {
-//            errorMessageLog(new Exception("Wrong class sended"));
-//        } catch (BadResponseException | IOException e) {
-//            throw new UserDisconnectException("socket closed or bad response");
-//        }
+    private void gameLobby() throws UserDisconnectException, MismatchedClassException, ProtocolVersionException {
+        Game game = gameDB.toGame();
+        System.out.println(game);
+        try {
+            roomDB.sendMessageToAllUsersInRoom(new Message(GAME_STARTED, game));
+
+            while (true) {
+                Message message = MessageManager.readMessage(socket.getInputStream());
+                switch (message.type()) {
+                    case GAME_DISCONNECT -> {
+                        disconnectUserFromGameWithResponse();
+                    }
+                    case GAME_ACTION_ARMY_MOVEMENT ->  {
+
+                    }
+                    case GAME_ACTION_CITY_CAPTURE -> {
+
+                    }
+                    case GAME_DATA_GET -> {
+                        getGameWithResponse();
+                    }
+                    case EXIT -> {
+                        exitUserWithResponse();
+                    }
+                }
+                break;
+            }
+
+            endGame();
+            roomDB.sendMessageToAllUsersInRoom(new Message(GAME_ENDED, null));
+        } catch (IOException e) {
+            throw new UserDisconnectException("Socket closed. ");
+        }
     }
+
+    private void disconnectUserFromGameWithResponse() throws IOException {
+        disconnectFromGame();
+        disconnectFromRoom();
+        MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
+    }
+
+    private void getGameWithResponse() throws IOException {
+        MessageManager.sendSuccessResponse(new ResponseSuccess(gameDB.toGame()), socket.getOutputStream());
+    }
+
 
 
 
@@ -359,6 +392,10 @@ public class UserConnectionThread implements Runnable {
     private void endGame() {
         gameDB = null;
         roomDB.setInGame(false);
+    }
+
+    private void disconnectFromGame() {
+        gameDB.disconnectUser(userDB);
     }
 
     private void exitUser() {
