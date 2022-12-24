@@ -81,4 +81,8 @@ public class DestinationsManager {
         showScene(GameApp.class.getResource("lobby-view.fxml"));
     }
 
+    public void navigateGameScene() {
+        showScene(GameApp.class.getResource("game-view.fxml"));
+    }
+
 }

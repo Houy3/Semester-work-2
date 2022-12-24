@@ -17,6 +17,7 @@ import com.example.clientgameapp.util.RoomCell;
 import com.example.clientgameapp.util.StorageSingleton;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
+import exceptions.ClientException;
 import exceptions.GameException;
 import exceptions.ServerException;
 import javafx.application.Platform;
@@ -71,11 +72,11 @@ public class LobbyController {
             );
             if (existingRoom.type() == MessageManager.MessageType.RESPONSE_ERROR) {
                 ResponseError error = (ResponseError) existingRoom.value();
-                throw new GameException(error.getErrorMessage());
+                throw new ServerException(error.getErrorMessage());
             } else {
                 initializeList(existingRoom);
             }
-        } catch (IOException | GameException | MismatchedClassException | BadResponseException ex) {
+        } catch (IOException | MismatchedClassException | BadResponseException | ServerException ex) {
             ErrorAlert.show(ex.getMessage());
         }
     }
@@ -108,7 +109,6 @@ public class LobbyController {
             userModelList.add(model);
             i++;
         }
-
         ObservableList<UserModel> list = FXCollections.observableArrayList();
         list.addAll(userModelList);
         usersList.setItems(list);
@@ -116,9 +116,41 @@ public class LobbyController {
     }
 
     public void setReadyStatus(ActionEvent actionEvent) {
+        try {
+            Message readyMessage = HighLevelMessageManager.readyToStart(socket);
+            if (readyMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                ResponseError error = (ResponseError) readyMessage.value();
+                throw new ServerException(error.getErrorMessage());
+            } else {
+                ResponseSuccess success = (ResponseSuccess) readyMessage.value();
+                System.out.println(success.getResponseValue());
+            }
+        } catch (Exception ex) {
+            ErrorAlert.show(ex.getMessage());
+        }
     }
 
     public void startGame(ActionEvent actionEvent) {
+        try {
+            Message gameStart = HighLevelMessageManager.getRoomParameters(socket);
+            if (gameStart.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                ResponseError error = (ResponseError) gameStart.value();
+                throw new ServerException(error.getErrorMessage());
+            } else {
+                ResponseSuccess success = (ResponseSuccess) gameStart.value();
+                Room room = (Room) success.getResponseValue();
+                for (Object userStatus : room.getUsersIsReady().values().toArray()) {
+                    if (!(boolean) userStatus) {
+                        throw new ClientException("Not all users are ready");
+                    }
+                }
+                destinationsManager.navigateGameScene();
+                System.out.println(success.getResponseValue());
+            }
+        } catch (IOException | MismatchedClassException | BadResponseException | ServerException |
+                 ClientException ex) {
+            ErrorAlert.show(ex.getMessage());
+        }
     }
 
     public void updateLobby(ActionEvent actionEvent) {
@@ -142,7 +174,6 @@ public class LobbyController {
         try {
             ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
             Runnable helloRunnable = () -> {
-                System.out.println("RUNNING");
                 try {
                     Message updatedData = HighLevelMessageManager.getRoomParameters(socket);
                     if (updatedData.type() == MessageManager.MessageType.RESPONSE_ERROR) {

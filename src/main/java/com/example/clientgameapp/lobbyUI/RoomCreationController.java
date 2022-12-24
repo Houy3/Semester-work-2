@@ -8,9 +8,12 @@ import Protocol.MessageValues.Response.ResponseError;
 import Protocol.MessageValues.Response.ResponseSuccess;
 import Protocol.MessageValues.Room.RoomAccess;
 import Protocol.MessageValues.Room.RoomInitializationForm;
+import Protocol.MessageValues.User.User;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
+import com.example.clientgameapp.util.Converter;
+import com.example.clientgameapp.util.StorageSingleton;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientException;
@@ -77,10 +80,6 @@ public class RoomCreationController {
             );
             Message roomInitializedMessage = HighLevelMessageManager.initializeRoom(newRoom, socket);
 
-            Message userInfo = HighLevelMessageManager.getUserProfileData(socket);
-            ResponseError success = (ResponseError) userInfo.value();
-            System.out.println(success.getErrorMessage());
-
 
             if (color == null) {
                 throw new ClientException("You need to choose a color");
@@ -89,6 +88,7 @@ public class RoomCreationController {
                 ResponseError error = (ResponseError) roomInitializedMessage.value();
                 throw new GameException(error.getErrorMessage());
             } else {
+                StorageSingleton.getInstance().setColor(color);
                 destinationsManager.navigateLobbyScene();
             }
         } catch (ClientException | GameException | RuntimeException |
@@ -106,20 +106,10 @@ public class RoomCreationController {
 
     public void navigateRoomList(ActionEvent actionEvent) {
         destinationsManager.navigateRoomListScene();
-
     }
 
     public void getColor(ActionEvent actionEvent) {
         javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
-        color = new Color(
-                convertColorNumber(originalColor.getRed()),
-                convertColorNumber(originalColor.getGreen()),
-                convertColorNumber(originalColor.getBlue())
-        );
-
-    }
-
-    private int convertColorNumber(Double num) {
-        return (int) (num * 255);
+        color = Converter.getColor(originalColor);
     }
 }

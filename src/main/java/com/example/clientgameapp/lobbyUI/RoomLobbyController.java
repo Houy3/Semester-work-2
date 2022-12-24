@@ -8,6 +8,7 @@ import Protocol.MessageValues.Room.Room;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
+import com.example.clientgameapp.util.Converter;
 import com.example.clientgameapp.util.StorageSingleton;
 import com.example.clientgameapp.util.RoomCell;
 import connection.ClientConnectionSingleton;
@@ -90,16 +91,9 @@ public class RoomLobbyController {
 
     public void getColor(ActionEvent actionEvent) {
         javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
-        color = new Color(
-                convertColorNumber(originalColor.getRed()),
-                convertColorNumber(originalColor.getGreen()),
-                convertColorNumber(originalColor.getBlue())
-        );
+        color = Converter.getColor(originalColor);
 
     }
 
-    private int convertColorNumber(Double num) {
-        return (int) (num * 255);
-    }
 
 }
