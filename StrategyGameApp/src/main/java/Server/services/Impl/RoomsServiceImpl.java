@@ -12,6 +12,8 @@ import Server.services.Inter.RoomsService;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class RoomsServiceImpl implements RoomsService {
@@ -19,14 +21,17 @@ public class RoomsServiceImpl implements RoomsService {
     private final List<RoomDB> activeRooms;
     private final Set<String> takenCodes;
 
-
     private final RoomInitValidator roomInitValidator;
 
+    private final Lock lock;
 
     public RoomsServiceImpl(RoomInitValidator roomInitValidator) {
+        this.activeRooms = new ArrayList<>();
+        this.takenCodes = new HashSet<>();
+
         this.roomInitValidator = roomInitValidator;
-        activeRooms = new ArrayList<>();
-        takenCodes = new HashSet<>();
+
+        lock = new ReentrantLock();
     }
 
     @Override
@@ -34,7 +39,9 @@ public class RoomsServiceImpl implements RoomsService {
         roomInitValidator.check(form);
 
         RoomDB room = createRoom(form);
+        lock.lock();
         registerRoom(room);
+        lock.unlock();
         addUserToRoom(room, user, form.getCreatorColor());
         return room;
     }
@@ -47,15 +54,18 @@ public class RoomsServiceImpl implements RoomsService {
             throw new ValidatorException("Code is empty");
         }
 
+        lock.lock();
         for (RoomDB room : activeRooms) {
             if (room.getCode().equals(code)) {
                 if (room.getUsers().size() >= room.getMaxCountOfPlayers()) {
+                    lock.unlock();
                     throw new ValidatorException("Room is full");
                 }
                 addUserToRoom(room, user, form.getColor());
                 return room;
             }
         }
+        lock.unlock();
         throw new ValidatorException("No room found with this code");
     }
 
@@ -63,6 +73,7 @@ public class RoomsServiceImpl implements RoomsService {
     public void disconnect(UserDB user) {
         RoomDB deactivateRoomDB = null;
 
+        lock.lock();
         for (RoomDB room : activeRooms) {
             List<UserDB> roomUsers = room.getUsers();
             if (roomUsers.contains(user)) {
@@ -78,14 +89,18 @@ public class RoomsServiceImpl implements RoomsService {
             takenCodes.remove(deactivateRoomDB.getCode());
             activeRooms.remove(deactivateRoomDB);
         }
+        lock.unlock();
     }
 
     @Override
     public List<RoomDB> getOpenRooms() {
-        return activeRooms.stream()
+        lock.lock();
+        List<RoomDB> rooms = activeRooms.stream()
                 .filter(room -> room.getAccess().equals(RoomAccess.PUBLIC)
                 && room.getUsers().size() < room.getMaxCountOfPlayers())
                 .collect(Collectors.toList());
+        lock.unlock();
+        return rooms;
     }
 
 
