@@ -1,6 +1,8 @@
 package Protocol.MessageValues.models.CitiesMap;
 
-public class Way {
+import java.io.Serializable;
+
+public class Way implements Serializable {
 
     private final City start;
     private final City end;
