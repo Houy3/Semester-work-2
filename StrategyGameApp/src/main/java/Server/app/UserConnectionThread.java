@@ -310,7 +310,11 @@ public class UserConnectionThread implements Runnable {
         if (roomDB.getUsers().size() < 2) {
             MessageManager.sendErrorResponse(new ResponseError("Insufficient number of players"),socket.getOutputStream());
         } else {
-            MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
+            if (roomDB.everybodyIsReady()) {
+                MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
+            } else {
+                MessageManager.sendErrorResponse(new ResponseError("Someone is not ready"),socket.getOutputStream());
+            }
         }
     }
 

@@ -130,7 +130,13 @@ public class RoomDB {
         this.inGame = inGame;
     }
 
-
+    public boolean everybodyIsReady() {
+        boolean flag = true;
+        for (boolean f : usersIsReady.values()) {
+            flag = flag && f;
+        }
+        return flag;
+    }
 
     private final Lock lock = new ReentrantLock();
     public void addSocket(UserDB user, Socket socket) {
