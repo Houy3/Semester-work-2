@@ -97,7 +97,8 @@ public class RoomsServiceImpl implements RoomsService {
         lock.lock();
         List<RoomDB> rooms = activeRooms.stream()
                 .filter(room -> room.getAccess().equals(RoomAccess.PUBLIC)
-                && room.getUsers().size() < room.getMaxCountOfPlayers())
+                && room.getUsers().size() < room.getMaxCountOfPlayers()
+                && !room.getInGame())
                 .collect(Collectors.toList());
         lock.unlock();
         return rooms;
@@ -107,7 +108,6 @@ public class RoomsServiceImpl implements RoomsService {
 
     private RoomDB createRoom(RoomInitializationForm form) {
         RoomDB room = new RoomDB(form);
-        room.setAccess(RoomAccess.PUBLIC);
 
         String code = generateCode();
         room.setCode(code);

@@ -2,19 +2,23 @@ package Server.app;
 
 import Protocol.Message;
 import Protocol.MessageManager;
+import Protocol.MessageValues.Game.Game;
 import Protocol.MessageValues.Response.ResponseError;
 import Protocol.MessageValues.Response.ResponseSuccess;
 import Protocol.MessageValues.Room.*;
 import Protocol.MessageValues.User.*;
+import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import Protocol.exceptions.ProtocolVersionException;
 import Server.DB.exceptions.DBException;
 import Server.DB.exceptions.NotFoundException;
 import Server.DB.exceptions.NotUniqueException;
 import Server.DB.exceptions.NullException;
+import Server.models.GameDB;
 import Server.models.RoomDB;
 import Server.models.UserDB;
 import Server.models.validators.ValidatorException;
+import Server.services.Inter.GameService;
 import Server.services.Inter.RoomsService;
 import Server.services.Inter.UsersService;
 import Server.services.ServicesToolKit;
@@ -26,6 +30,8 @@ import java.net.Socket;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import static Protocol.MessageManager.MessageType.GAME_STARTED;
+
 public class UserConnectionThread implements Runnable {
 
     private final Socket socket;
@@ -33,22 +39,25 @@ public class UserConnectionThread implements Runnable {
 
     private final RoomsService roomsService;
 
+    private final GameService gameService;
+
 
     public UserConnectionThread(Socket socket, ServicesToolKit servicesToolKit) {
         this.socket = socket;
+
         this.usersService = servicesToolKit.getUsersService();
         this.roomsService = servicesToolKit.getRoomService();
+        this.gameService = servicesToolKit.getGameService();
     }
 
     private UserDB userDB;
-
     private RoomDB roomDB;
+    private GameDB gameDB;
 
     private boolean isExit = false;
     private boolean isLogout = true;
 
     private boolean isRoomConnected = false;
-
 
     @Override
     public void run() {
@@ -56,16 +65,19 @@ public class UserConnectionThread implements Runnable {
             while (!isExit) {
                 System.out.println("этап входа");
                 loginOrRegister();
-                if (isExit) {continue;}
-                System.out.println("этап лобби");
-                mainLobby();
-                if (isLogout) {continue;}
-                while (!isExit) {
-                    System.out.println("этап комнаты");
-                    roomLobby();
-                    if (isExit) {break;}
-                    System.out.println("этап игры");
-                    gameLobby();
+
+                while (!isLogout && !isExit) {
+                    System.out.println("этап лобби");
+                    mainLobby();
+                    if (isLogout) { break; }
+                    while (isRoomConnected && !isExit) {
+                        System.out.println("этап комнаты");
+                        roomLobby();
+
+                        if (!isRoomConnected || isExit) { break; }
+                        System.out.println("этап игры");
+                        gameLobby();
+                    }
                 }
             }
         } catch (MismatchedClassException | ProtocolVersionException | UserDisconnectException e) {
@@ -163,7 +175,7 @@ public class UserConnectionThread implements Runnable {
                     case EXIT -> {
                         exitUserWithResponse();
                     }
-                    default -> MessageManager.sendErrorResponse(new ResponseError("later"), socket.getOutputStream());
+                    default -> MessageManager.sendErrorResponse(new ResponseError("You need to choose or create room"), socket.getOutputStream());
                 }
 
             }
@@ -254,7 +266,7 @@ public class UserConnectionThread implements Runnable {
                     case EXIT -> {
                         exitUserWithResponse();
                     }
-                    default -> MessageManager.sendErrorResponse(new ResponseError("later"), socket.getOutputStream());
+                    default -> MessageManager.sendErrorResponse(new ResponseError("I don't understand what you want"), socket.getOutputStream());
                 }
 
             }
@@ -290,13 +302,23 @@ public class UserConnectionThread implements Runnable {
 
 
     private void startGameWithResponse() throws IOException {
+        startGame(gameService.initialize(roomDB.getGameInitializationForm(), roomDB));
         MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
-        //TODO
     }
 
-    private void gameLobby() {
-
+    private void gameLobby() throws UserDisconnectException {
+//        Game game = gameDB.toGame();
+//
+//        try {
+//            roomDB.sendMessageToAllUsersInRoom(new Message(GAME_STARTED, game));
+//        } catch (MismatchedClassException e) {
+//            errorMessageLog(new Exception("Wrong class sended"));
+//        } catch (BadResponseException | IOException e) {
+//            throw new UserDisconnectException("socket closed or bad response");
+//        }
     }
+
+
 
 
     private void loginUser(UserDB user) throws DBException, UserAlreadyLoginException, ServiceException, NotFoundException, NullException {
@@ -311,15 +333,32 @@ public class UserConnectionThread implements Runnable {
         isLogout = true;
     }
 
-    private void connectToRoom(RoomDB room) {
+    private void connectToRoom(RoomDB room) throws ValidatorException {
+        if (room.getInGame()) {
+            roomsService.disconnect(userDB);
+            throw new ValidatorException("Room in game.");
+        }
+
         roomDB = room;
+        roomDB.addSocket(userDB, socket);
         isRoomConnected = true;
     }
 
     private void disconnectFromRoom() {
         roomsService.disconnect(userDB);
+        roomDB.removeSocket(userDB);
         roomDB = null;
         isRoomConnected = false;
+    }
+
+    private void startGame(GameDB game) {
+        gameDB = game;
+        roomDB.setInGame(true);
+    }
+
+    private void endGame() {
+        gameDB = null;
+        roomDB.setInGame(false);
     }
 
     private void exitUser() {

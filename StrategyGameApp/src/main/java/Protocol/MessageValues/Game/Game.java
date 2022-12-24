@@ -12,7 +12,6 @@ import java.util.Map;
 public final class Game implements MessageValue {
 
     private CitiesMap citiesMap;
-    private Map<User, Color> usersColor;
     private Date startTime;
 
 
@@ -31,11 +30,10 @@ public final class Game implements MessageValue {
     public Game() {
     }
 
-    public Game(CitiesMap citiesMap, Map<City, Integer> citiesArmies, Map<City, User> usersCities, Map<User, Color> usersColor, Date startTime, int armySpeed, int armyGrowthRate) {
+    public Game(CitiesMap citiesMap, Map<City, Integer> citiesArmies, Map<City, User> usersCities, Date startTime, int armySpeed, int armyGrowthRate) {
         this.citiesMap = citiesMap;
         this.citiesArmies = citiesArmies;
         this.usersCities = usersCities;
-        this.usersColor = usersColor;
         this.startTime = startTime;
         this.armySpeed = armySpeed;
         this.armyGrowthRate = armyGrowthRate;
@@ -64,14 +62,6 @@ public final class Game implements MessageValue {
 
     public void setUsersCities(Map<City, User> usersCities) {
         this.usersCities = usersCities;
-    }
-
-    public Map<User, Color> getUsersColor() {
-        return usersColor;
-    }
-
-    public void setUsersColor(Map<User, Color> usersColor) {
-        this.usersColor = usersColor;
     }
 
     public Date getStartTime() {
@@ -104,7 +94,6 @@ public final class Game implements MessageValue {
                 "citiesMap=" + citiesMap +
                 ", citiesArmies=" + citiesArmies +
                 ", usersCities=" + usersCities +
-                ", usersColor=" + usersColor +
                 ", startTime=" + startTime +
                 ", armySpeed=" + armySpeed +
                 ", armyGrowthRate=" + armyGrowthRate +

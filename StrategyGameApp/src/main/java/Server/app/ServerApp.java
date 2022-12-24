@@ -5,9 +5,11 @@ import java.net.ServerSocket;
 
 public class ServerApp {
 
+    private final static int PORT = 8888;
+
     public static void main(String[] args) {
         try {
-            ServerApp serverApp = new ServerApp(8080);
+            ServerApp serverApp = new ServerApp(PORT);
             serverApp.start();
         } catch (Exception e) {
             ErrorLogger.log(e.getMessage());
