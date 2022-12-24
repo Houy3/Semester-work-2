@@ -1,17 +1,25 @@
 package Server.models;
 
+import Protocol.Message;
+import Protocol.MessageManager;
 import Protocol.MessageValues.Game.GameInitializationForm;
 import Protocol.MessageValues.Room.Room;
 import Protocol.MessageValues.Room.RoomAccess;
 import Protocol.MessageValues.Room.RoomInitializationForm;
 import Protocol.MessageValues.User.User;
+import Protocol.exceptions.BadResponseException;
+import Protocol.exceptions.MismatchedClassException;
 
 
 import java.awt.*;
+import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class RoomDB {
@@ -24,6 +32,10 @@ public class RoomDB {
     private final Map<UserDB, Color> usersColor;
     private final Map<UserDB, Boolean> usersIsReady;
 
+
+    private final Map<UserDB, Socket> sockets;
+    private Boolean inGame;
+
     private GameInitializationForm gameInitializationForm;
 
     public RoomDB(RoomInitializationForm form) {
@@ -34,6 +46,8 @@ public class RoomDB {
         this.users = new ArrayList<>();
         this.usersColor = new HashMap<>();
         this.usersIsReady = new HashMap<>();
+        this.sockets = new HashMap<>();
+        this.inGame = false;
     }
 
     public Room toRoom() {
@@ -105,6 +119,38 @@ public class RoomDB {
         this.gameInitializationForm = gameInitializationForm;
     }
 
+    private final Lock lock = new ReentrantLock();
+    public void addSocket(UserDB user, Socket socket) {
+        lock.lock();
+        sockets.put(user, socket);
+        lock.unlock();
+    }
+
+    public void removeSocket(UserDB user) {
+        lock.lock();
+        sockets.remove(user);
+        lock.unlock();
+    }
+
+    public Map<UserDB, Socket> getSockets() {
+        return sockets;
+    }
+
+    public Boolean getInGame() {
+        return inGame;
+    }
+
+    public void setInGame(Boolean inGame) {
+        this.inGame = inGame;
+    }
+
+
+    public synchronized void sendMessageToAllUsersInRoom(Message message) throws MismatchedClassException, BadResponseException, IOException {
+        for (Socket socket : sockets.values()) {
+            MessageManager.sendMessage(message, socket);
+        }
+    }
+
     @Override
     public String toString() {
         return "RoomDB{" +
@@ -114,7 +160,10 @@ public class RoomDB {
                 ", users=" + users +
                 ", usersColor=" + usersColor +
                 ", usersIsReady=" + usersIsReady +
+                ", sockets=" + sockets +
+                ", inGame=" + inGame +
                 ", gameInitializationForm=" + gameInitializationForm +
+                ", lock=" + lock +
                 '}';
     }
 }

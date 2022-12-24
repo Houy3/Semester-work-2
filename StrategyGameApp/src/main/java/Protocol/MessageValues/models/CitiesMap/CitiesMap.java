@@ -1,32 +1,8 @@
 package Protocol.MessageValues.models.CitiesMap;
 
-import java.util.List;
+import java.util.Set;
 
-public class CitiesMap {
-
-    private List<City> cities;
-    private List<Way> ways;
-
-    public CitiesMap(List<City> cities, List<Way> ways) {
-        this.cities = cities;
-        this.ways = ways;
-    }
-
-    public List<City> getCities() {
-        return cities;
-    }
-
-    public void setCities(List<City> cities) {
-        this.cities = cities;
-    }
-
-    public List<Way> getWays() {
-        return ways;
-    }
-
-    public void setWays(List<Way> ways) {
-        this.ways = ways;
-    }
+public record CitiesMap(Set<City> cities, Set<Way> ways) {
 
     @Override
     public String toString() {
