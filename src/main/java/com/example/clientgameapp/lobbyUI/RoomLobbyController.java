@@ -56,9 +56,12 @@ public class RoomLobbyController {
             roomsList.setCellFactory(studentListView -> new RoomCell());
 
 
-        } catch (ClientConnectionException | MismatchedClassException | BadResponseException | IOException ex) {
+        } catch (ClientConnectionException | MismatchedClassException | BadResponseException ex) {
             System.out.println(ex.getMessage());
             ErrorAlert.show(ex.getMessage());
+        } catch (IOException e) {
+            ErrorAlert.show(e.getMessage());
+            StorageSingleton.getInstance().getMainApp().closeGame();
         }
     }
 

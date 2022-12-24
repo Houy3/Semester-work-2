@@ -40,10 +40,12 @@ public class ClientConnectionSingleton {
 
     private static void init() throws ClientConnectionException {
         try {
-            socket =  new Socket("localhost", 8888);
-            inputStream = socket.getInputStream();
+            if (socket == null) {
+                socket = new Socket("localhost", PORT);
+                inputStream = socket.getInputStream();
+            }
         } catch (IOException ex) {
-            throw new ClientConnectionException("Couldn't connect due to:" + ex.getMessage());
+            throw new ClientConnectionException("Couldn't connect. Server is closed!");
         }
     }
 

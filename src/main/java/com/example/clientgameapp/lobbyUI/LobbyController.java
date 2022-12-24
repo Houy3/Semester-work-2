@@ -13,6 +13,7 @@ import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.models.UserModel;
 import com.example.clientgameapp.util.ClientCell;
+import com.example.clientgameapp.util.Converter;
 import com.example.clientgameapp.util.RoomCell;
 import com.example.clientgameapp.util.StorageSingleton;
 import connection.ClientConnectionSingleton;
@@ -24,9 +25,11 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ListView;
 import util.ErrorAlert;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -37,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 public class LobbyController {
     public ListView<UserModel> usersList;
+    public ColorPicker gameColorPicker;
     private ClientConnectionSingleton connection;
     private HighLevelMessageManager mManager;
     private Socket socket;
@@ -44,6 +48,8 @@ public class LobbyController {
     private DestinationsManager destinationsManager;
 
     private ScheduledExecutorService scheduler;
+
+    private boolean isReady = false;
 
 
     public void initialize() {
@@ -79,8 +85,11 @@ public class LobbyController {
             } else {
                 initializeList(existingRoom);
             }
-        } catch (IOException | MismatchedClassException | BadResponseException | ServerException ex) {
+        } catch (MismatchedClassException | BadResponseException | ServerException ex) {
             ErrorAlert.show(ex.getMessage());
+        } catch (IOException e) {
+            ErrorAlert.show(e.getMessage());
+            StorageSingleton.getInstance().getMainApp().closeGame();
         }
     }
 
@@ -93,8 +102,11 @@ public class LobbyController {
             } else {
                 initializeList(newRoom);
             }
-        } catch (IOException | GameException | MismatchedClassException | BadResponseException ex) {
+        } catch (GameException | MismatchedClassException | BadResponseException ex) {
             ErrorAlert.show(ex.getMessage());
+        } catch (IOException e) {
+            ErrorAlert.show(e.getMessage());
+            StorageSingleton.getInstance().getMainApp().closeGame();
         }
     }
 
@@ -120,16 +132,32 @@ public class LobbyController {
 
     public void setReadyStatus(ActionEvent actionEvent) {
         try {
-            Message readyMessage = HighLevelMessageManager.readyToStart(socket);
-            if (readyMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
-                ResponseError error = (ResponseError) readyMessage.value();
-                throw new ServerException(error.getErrorMessage());
+            if (!isReady) {
+                Message readyMessage = HighLevelMessageManager.readyToStart(socket);
+                if (readyMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                    ResponseError error = (ResponseError) readyMessage.value();
+                    throw new ServerException(error.getErrorMessage());
+                } else {
+                    ResponseSuccess success = (ResponseSuccess) readyMessage.value();
+                    System.out.println(success.getResponseValue());
+                }
+                isReady = true;
             } else {
-                ResponseSuccess success = (ResponseSuccess) readyMessage.value();
-                System.out.println(success.getResponseValue());
+                Message readyMessage = HighLevelMessageManager.notReadyToStart(socket);
+                if (readyMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                    ResponseError error = (ResponseError) readyMessage.value();
+                    throw new ServerException(error.getErrorMessage());
+                } else {
+                    ResponseSuccess success = (ResponseSuccess) readyMessage.value();
+                    System.out.println(success.getResponseValue());
+                }
+                isReady = false;
             }
-        } catch (Exception ex) {
-            ErrorAlert.show(ex.getMessage());
+        } catch (ServerException | MismatchedClassException | BadResponseException e) {
+            ErrorAlert.show(e.getMessage());
+        } catch (IOException e) {
+            ErrorAlert.show(e.getMessage());
+            StorageSingleton.getInstance().getMainApp().closeGame();
         }
     }
 
@@ -150,9 +178,12 @@ public class LobbyController {
                 destinationsManager.navigateGameScene();
                 scheduler.shutdownNow();
             }
-        } catch (IOException | MismatchedClassException | BadResponseException | ServerException |
+        } catch (MismatchedClassException | BadResponseException | ServerException |
                  ClientException ex) {
             ErrorAlert.show(ex.getMessage());
+        } catch (IOException e) {
+            ErrorAlert.show(e.getMessage());
+            StorageSingleton.getInstance().getMainApp().closeGame();
         }
     }
 
@@ -168,33 +199,76 @@ public class LobbyController {
                 System.out.println(updatedData.type());
             }
 
-        } catch (ServerException | MismatchedClassException | BadResponseException | IOException e) {
+        } catch (ServerException | MismatchedClassException | BadResponseException e) {
             ErrorAlert.show(e.getMessage());
+        } catch (IOException e) {
+            ErrorAlert.show(e.getMessage());
+            StorageSingleton.getInstance().getMainApp().closeGame();
         }
     }
 
     private void updateList() {
-        try {
-            Runnable helloRunnable = () -> {
-                try {
-                    Message updatedData = HighLevelMessageManager.getRoomParameters(socket);
-                    if (updatedData.type() == MessageManager.MessageType.RESPONSE_ERROR) {
-                        ResponseError error = (ResponseError) updatedData.value();
-                        throw new ServerException(error.getErrorMessage());
-                    } else {
-                        Platform.runLater(() -> {
-                            initializeList(updatedData);
-                        });
-                        System.out.println(updatedData.type());
-                    }
-
-                } catch (ServerException | MismatchedClassException | BadResponseException | IOException e) {
-                    ErrorAlert.show(e.getMessage());
+        Runnable helloRunnable = () -> {
+            try {
+                Message updatedData = HighLevelMessageManager.getRoomParameters(socket);
+                if (updatedData.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                    ResponseError error = (ResponseError) updatedData.value();
+                    throw new ServerException(error.getErrorMessage());
+                } else {
+                    Platform.runLater(() -> {
+                        initializeList(updatedData);
+                    });
+                    System.out.println(updatedData.type());
                 }
-            };
-            scheduler.scheduleAtFixedRate(helloRunnable, 0, 4, TimeUnit.SECONDS);
-        } catch (Exception ex) {
-            ErrorAlert.show(ex.getMessage());
+
+            } catch (ServerException | MismatchedClassException | BadResponseException e) {
+                ErrorAlert.show(e.getMessage());
+            } catch (IOException e) {
+                ErrorAlert.show(e.getMessage());
+                StorageSingleton.getInstance().getMainApp().closeGame();
+            }
+        };
+        scheduler.scheduleAtFixedRate(helloRunnable, 0, 4, TimeUnit.SECONDS);
+    }
+
+    public void leaveLobby(ActionEvent actionEvent) {
+        new Thread(
+                () -> {
+                    try {
+                        Message message = HighLevelMessageManager.disconnectRoom(socket);
+                        if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                            ResponseError error = (ResponseError) message.value();
+                            throw new ServerException(error.getErrorMessage());
+                        } else {
+                            StorageSingleton.getInstance().nullifyAll();
+                            destinationsManager.navigateChoiceScene();
+                        }
+                    } catch (MismatchedClassException | BadResponseException | ServerException e) {
+                        ErrorAlert.show(e.getMessage());
+                    } catch (IOException e) {
+                        ErrorAlert.show(e.getMessage());
+                        StorageSingleton.getInstance().getMainApp().closeGame();
+                    }
+                }
+        ).start();
+    }
+
+    public void changeColor(ActionEvent actionEvent) {
+        try {
+            javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
+            Color color = Converter.getColor(originalColor);
+            Message message = HighLevelMessageManager.setColor(socket, color);
+            if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                ResponseError error = (ResponseError) message.value();
+                throw new ServerException(error.getErrorMessage());
+            } else {
+                System.out.println((ResponseSuccess) message.value());
+            }
+        } catch (MismatchedClassException | BadResponseException | ServerException e) {
+            ErrorAlert.show(e.getMessage());
+        } catch (IOException e) {
+            ErrorAlert.show(e.getMessage());
+            StorageSingleton.getInstance().getMainApp().closeGame();
         }
     }
 }

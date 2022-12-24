@@ -93,9 +93,11 @@ public class RoomCreationController {
             }
         } catch (ClientException | GameException | RuntimeException |
                  BadResponseException |
-                 IOException |
                  MismatchedClassException e) {
             ErrorAlert.show(e.getMessage());
+        } catch (IOException e) {
+            ErrorAlert.show(e.getMessage());
+            StorageSingleton.getInstance().getMainApp().closeGame();
         }
     }
 

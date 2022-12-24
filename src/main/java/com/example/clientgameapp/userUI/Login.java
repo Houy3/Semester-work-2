@@ -5,10 +5,14 @@ import Protocol.Message;
 import Protocol.MessageManager;
 import Protocol.MessageValues.Response.ResponseError;
 import Protocol.MessageValues.User.UserLoginForm;
+import Protocol.exceptions.BadResponseException;
+import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
+import com.example.clientgameapp.util.StorageSingleton;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientException;
+import exceptions.ClientInputException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -71,8 +75,11 @@ public class Login {
                     navigateChoiceScene(actionEvent);
                 }
             }
-        } catch (Exception ex) {
-            ErrorAlert.show(ex.getMessage());
+        } catch (ClientInputException | ClientException | MismatchedClassException | BadResponseException e) {
+            ErrorAlert.show(e.getMessage());
+        } catch (IOException e) {
+            ErrorAlert.show(e.getMessage());
+            StorageSingleton.getInstance().getMainApp().closeGame();
         }
     }
 

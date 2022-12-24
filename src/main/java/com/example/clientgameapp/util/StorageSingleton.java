@@ -1,5 +1,7 @@
 package com.example.clientgameapp.util;
 
+import com.example.clientgameapp.GameApp;
+
 import java.awt.*;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -7,6 +9,7 @@ public class StorageSingleton {
     private static StorageSingleton instance;
     private String roomId;
 
+    private GameApp gameApp;
     private Color color;
 
     private ScheduledExecutorService scheduler;
@@ -41,6 +44,14 @@ public class StorageSingleton {
 
     public ScheduledExecutorService getScheduler() {
         return scheduler;
+    }
+
+    public GameApp getMainApp() {
+        return gameApp;
+    }
+
+    public void setMainApp(GameApp gameApp) {
+        this.gameApp = gameApp;
     }
 
     public void setScheduler(ScheduledExecutorService scheduler) {

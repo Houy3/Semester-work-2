@@ -2,6 +2,7 @@ package com.example.clientgameapp;
 
 import com.example.clientgameapp.util.StorageSingleton;
 import exceptions.ClientConnectionException;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -39,18 +40,22 @@ public class DestinationsManager {
     }
 
     public void navigateChoiceScene()  {
+
         showScene(GameApp.class.getResource("choice-view.fxml"));
     }
 
     private void showScene(URL destiny) {
-        try {
-            Parent root = FXMLLoader.load(destiny);
-            scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException ex) {
-            ErrorAlert.show(ex.getMessage());
-        }
+
+        Platform.runLater(() -> {
+            try {
+                Parent root = FXMLLoader.load(destiny);
+                scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show();
+            } catch (IOException ex) {
+                ErrorAlert.show(ex.getMessage());
+            }
+        });
     }
 
     public void navigateLoginScene() {
@@ -82,6 +87,7 @@ public class DestinationsManager {
     }
 
     public void navigateGameScene() {
+
         showScene(GameApp.class.getResource("game-view.fxml"));
     }
 

@@ -29,17 +29,17 @@
             </Label>
 
 
-            <Button styleClass="mainGameNavigationButton" contentDisplay="BOTTOM" mnemonicParsing="false" onAction="#connectToRoom" text="Connect to existing room">
+            <Button styleClass="btn-main-navigation" contentDisplay="BOTTOM" mnemonicParsing="false" onAction="#connectToRoom" text="Connect to existing room">
                 <font>
                     <Font size="15.0"/>
                 </font>
             </Button>
-            <Button styleClass="mainGameNavigationButton" contentDisplay="BOTTOM" mnemonicParsing="false" onAction="#createRoom" text="Create a room">
+            <Button styleClass="btn-main-navigation" contentDisplay="BOTTOM" mnemonicParsing="false" onAction="#createRoom" text="Create a room">
                 <font>
                     <Font size="15.0"/>
                 </font>
             </Button>
-            <Button styleClass="mainGameNavigationButton" contentDisplay="BOTTOM" mnemonicParsing="false" onAction="#openProfile" text="Open profile">
+            <Button styleClass="btn-main-navigation" contentDisplay="BOTTOM" mnemonicParsing="false" onAction="#openProfile" text="Open profile">
                 <font>
                     <Font size="15.0"/>
                 </font>

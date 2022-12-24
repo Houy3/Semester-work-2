@@ -3,11 +3,12 @@ package com.example.clientgameapp.userUI;
 
 import Protocol.MessageValues.Response.ResponseError;
 import com.example.clientgameapp.DestinationsManager;
+import com.example.clientgameapp.GameApp;
+import com.example.clientgameapp.util.StorageSingleton;
 import exceptions.ClientException;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import Protocol.HighLevelMessageManager;
 import Protocol.Message;
 import Protocol.MessageManager;
@@ -22,13 +23,14 @@ import utils.StringConverter;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class RegistrationController {
     public TextField textFieldEmail;
     public TextField textFieldNickName;
     public TextField textFieldPassword;
 
-    private Stage stage;
+    private GameApp gameApp;
     private Scene scene;
 
     private ClientConnectionSingleton connection;
@@ -39,12 +41,14 @@ public class RegistrationController {
 
     public void initialize() {
         try {
+            gameApp = StorageSingleton.getInstance().getMainApp();
             connection = ClientConnectionSingleton.getInstance();
             mManager = new HighLevelMessageManager();
             socket = connection.getSocket();
             destinationsManager = DestinationsManager.getInstance();
         } catch (ClientConnectionException ex) {
             ErrorAlert.show(ex.getMessage());
+            gameApp.closeGame();
         }
     }
 
@@ -67,9 +71,12 @@ public class RegistrationController {
                     openLoginScene(actionEvent);
                 }
             }
-        } catch (MismatchedClassException | BadResponseException | IOException | ClientException |
+        } catch (MismatchedClassException | BadResponseException  | ClientException |
                  ClientInputException e) {
             ErrorAlert.show(e.getMessage());
+        } catch (IOException ex) {
+            StorageSingleton.getInstance().getMainApp().closeGame();
+            ErrorAlert.show(ex.getMessage());
         }
     }
 

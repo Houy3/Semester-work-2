@@ -16,6 +16,7 @@ public class ChoiceController {
     private HighLevelMessageManager mManager;
     private Socket socket;
 
+
     private DestinationsManager destinationsManager;
 
 
