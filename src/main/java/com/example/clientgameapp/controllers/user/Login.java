@@ -1,4 +1,4 @@
-package com.example.clientgameapp.userUI;
+package com.example.clientgameapp.controllers.user;
 
 import Protocol.HighLevelMessageManager;
 import Protocol.Message;
@@ -8,7 +8,7 @@ import Protocol.MessageValues.User.UserLoginForm;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
-import com.example.clientgameapp.util.StorageSingleton;
+import com.example.clientgameapp.storage.StorageSingleton;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientException;
@@ -19,8 +19,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import util.ErrorAlert;
-import utils.StringConverter;
+import com.example.clientgameapp.controllers.error.ErrorAlert;
+import utils.Validator;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -59,7 +59,7 @@ public class Login {
         try {
             String email = textFieldEmail.getText();
             String password = textFieldPassword.getText();
-            if (StringConverter.isValid(email) && StringConverter.isValid(password)) {
+            if (Validator.isValid(email) && Validator.isValid(password)) {
 
                 System.out.println(email + "  " + password);
                 UserLoginForm loginForm = new UserLoginForm(

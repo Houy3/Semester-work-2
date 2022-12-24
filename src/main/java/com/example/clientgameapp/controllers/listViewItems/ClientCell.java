@@ -1,4 +1,4 @@
-package com.example.clientgameapp.util;
+package com.example.clientgameapp.controllers.listViewItems;
 
 import Protocol.MessageValues.User.User;
 import com.example.clientgameapp.GameApp;

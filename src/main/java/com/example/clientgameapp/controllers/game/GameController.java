@@ -1,12 +1,10 @@
-package com.example.clientgameapp.lobbyUI;
+package com.example.clientgameapp.controllers.game;
 
-import com.example.clientgameapp.util.StorageSingleton;
 import javafx.animation.PathTransition;
 import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -16,6 +14,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.util.Duration;
+import util.Converter;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -30,6 +29,8 @@ public class GameController implements Initializable {
     public Group group;
     public Pane pane;
     public Canvas canvas;
+
+    private GraphicsContext gc;
     public static final String CHOICE_MESSAGE = "Now choose city to conquer!";
     public static final String START_CITY_MESSAGE = "Start city can be chosen!";
 
@@ -42,14 +43,18 @@ public class GameController implements Initializable {
 
     private int duration = 10;
 
+    private double widthMargin;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         color = Color.RED;
+        drawLines();
     }
 
 
     private void drawBall(Button fromButton, Button toButton, Color color, int durationInSeconds) {
-        Circle ball = new Circle(-fromButton.getLayoutX() - fromButton.getWidth() / 2, -fromButton.getLayoutY() - fromButton.getWidth() / 2, 10);
+        widthMargin = cityBtnFirst.getWidth() / 2;
+        Circle ball = new Circle(-fromButton.getLayoutX() - widthMargin, -fromButton.getLayoutY() - widthMargin, widthMargin / 2);
         ball.fillProperty().set(color);
 
         pane.getChildren().add(ball);
@@ -59,8 +64,8 @@ public class GameController implements Initializable {
 
         setPositionFixed(ball, fromButton);
 
-        double toX = toButton.getLayoutX() + toButton.getWidth() / 2;
-        double toY = toButton.getLayoutY() + toButton.getWidth() / 2;
+        double toX = toButton.getLayoutX() + widthMargin / 2;
+        double toY = toButton.getLayoutY() + widthMargin / 2;
 
         Path path = new Path();
         path.getElements().add(new MoveToAbs(ball));
@@ -69,8 +74,8 @@ public class GameController implements Initializable {
         transition.setPath(path);
         transition.play();
 
-        ball.setTranslateX(toButton.getLayoutX() + toButton.getWidth() / 2);
-        ball.setTranslateY(toButton.getLayoutY() + toButton.getWidth() / 2);
+        ball.setTranslateX(toButton.getLayoutX());
+        ball.setTranslateY(toButton.getLayoutY());
         removeBall(transition, durationInSeconds, ball);
     }
 
@@ -141,7 +146,7 @@ public class GameController implements Initializable {
     }
 
     private void setPositionFixed(Node node, Button fromButton) {
-        node.relocate(fromButton.getTranslateX() - fromButton.getWidth() / 2, fromButton.getTranslateY() - fromButton.getWidth() / 2);
+        node.relocate(fromButton.getTranslateX() - widthMargin, fromButton.getTranslateY() - widthMargin);
     }
 
     public static class LineToAbs extends LineTo {
@@ -166,21 +171,44 @@ public class GameController implements Initializable {
     }
 
     private void drawText(String message) {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gc = canvas.getGraphicsContext2D();
+        gc.clearRect(180, 280, 400, 320);
+        gc.setFill(Color.BLACK);
         gc.setStroke(Color.BLACK);
         gc.fillText(message, 200, 300);
+        widthMargin = (int) (cityBtnFirst.getWidth() / 2);
+
+        drawStrokeLine(cityBtnFirst, cityBtnSecond);
+        drawStrokeLine(cityBtnThird, cityBtnFourth);
+        drawStrokeLine(cityBtnSecond, cityBtnThird);
+        drawStrokeLine(cityBtnFourth, cityBtnFifth);
+        drawStrokeLine(cityBtnFourth, cityBtnSixth);
+        drawStrokeLine(cityBtnFifth, cityBtnSixth);
+        drawStrokeLine(cityBtnFirst, cityBtnSecond);
+        drawStrokeLine(cityBtnFirst, cityBtnThird);
+        drawStrokeLine(cityBtnThird, cityBtnSixth);
+        drawStrokeLine(cityBtnFirst, cityBtnSixth);
+
+    }
+
+    private void drawStrokeLine(Button buttonFrom, Button buttonTo) {
+        gc.strokeLine(
+                buttonFrom.getLayoutX() + widthMargin, buttonFrom.getLayoutY() + widthMargin, buttonTo.getLayoutX() + widthMargin, buttonTo.getLayoutY() + widthMargin
+        );
     }
 
     private void setStyle(Button button, Color color) {
-        button.setStyle("-fx-background-radius: 30px;\n" +
-                "    -fx-min-width: 60px;\n" +
-                "    -fx-min-height: 60px;\n" +
-                "    -fx-max-width: 60px;\n" +
-                "-fx-background-color: rgb(" + color.getRed() + ","
-                + color.getGreen() + "," + color.getBlue() + ");" +
-                "    -fx-max-height: 60px;");
+        java.awt.Color  newColor = Converter.converColor(color);
+        button.setStyle("-fx-background-color: rgb(" + newColor.getRed() + ","
+                + newColor.getGreen() + "," + newColor.getBlue() + ");");
     }
 
+
+    private void drawLines() {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setStroke(Color.BLACK);
+        gc.setFill(Color.RED);
+
+    }
 
 }

@@ -3,14 +3,13 @@ package com.example.clientgameapp;
 import Protocol.HighLevelMessageManager;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
-import com.example.clientgameapp.util.StorageSingleton;
+import com.example.clientgameapp.storage.StorageSingleton;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import util.ErrorAlert;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -50,6 +49,7 @@ public class GameApp extends Application {
         storageSingleton.getScheduler().shutdownNow();
         stage.close();
         try {
+            HighLevelMessageManager.logoutUser(ClientConnectionSingleton.getInstance().getSocket());
             HighLevelMessageManager.exit(ClientConnectionSingleton.getInstance().getSocket());
             ClientConnectionSingleton.getInstance().getSocket().close();
         } catch (IOException | ClientConnectionException | MismatchedClassException | BadResponseException e) {

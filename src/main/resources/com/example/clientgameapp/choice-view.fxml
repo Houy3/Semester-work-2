@@ -8,7 +8,7 @@
 <?import java.net.URL?>
 <BorderPane prefWidth="600" prefHeight="600"
         xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
-        fx:controller="com.example.clientgameapp.lobbyUI.ChoiceController">
+        fx:controller="com.example.clientgameapp.controllers.lobby.ChoiceController">
 
     <stylesheets>
         <URL value="@styles/main.css"/>

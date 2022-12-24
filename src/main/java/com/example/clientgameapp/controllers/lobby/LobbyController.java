@@ -1,4 +1,4 @@
-package com.example.clientgameapp.lobbyUI;
+package com.example.clientgameapp.controllers.lobby;
 
 import Protocol.HighLevelMessageManager;
 import Protocol.Message;
@@ -12,10 +12,9 @@ import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.models.UserModel;
-import com.example.clientgameapp.util.ClientCell;
-import com.example.clientgameapp.util.Converter;
-import com.example.clientgameapp.util.RoomCell;
-import com.example.clientgameapp.util.StorageSingleton;
+import com.example.clientgameapp.controllers.listViewItems.ClientCell;
+import util.Converter;
+import com.example.clientgameapp.storage.StorageSingleton;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientException;
@@ -27,14 +26,13 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ListView;
-import util.ErrorAlert;
+import com.example.clientgameapp.controllers.error.ErrorAlert;
 
 import java.awt.*;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -54,11 +52,13 @@ public class LobbyController {
 
     public void initialize() {
         try {
+
             connection = ClientConnectionSingleton.getInstance();
             mManager = new HighLevelMessageManager();
             socket = connection.getSocket();
             destinationsManager = DestinationsManager.getInstance();
             storage = StorageSingleton.getInstance();
+            storage.setLobbyController(this);
             scheduler = StorageSingleton.getInstance().getScheduler();
             if (storage.getColor() != null && storage.getRoomId() != null) {
                 initializeExistingRoom();
@@ -257,7 +257,7 @@ public class LobbyController {
     public void changeColor(ActionEvent actionEvent) {
         try {
             javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
-            Color color = Converter.getColor(originalColor);
+            Color color = Converter.converColor(originalColor);
             Message message = HighLevelMessageManager.setColor(socket, color);
             if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
                 ResponseError error = (ResponseError) message.value();

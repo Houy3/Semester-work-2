@@ -1,4 +1,4 @@
-package com.example.clientgameapp.lobbyUI;
+package com.example.clientgameapp.controllers.lobby;
 
 import Protocol.HighLevelMessageManager;
 import Protocol.Message;
@@ -8,9 +8,9 @@ import Protocol.MessageValues.Room.Room;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
-import com.example.clientgameapp.util.Converter;
-import com.example.clientgameapp.util.StorageSingleton;
-import com.example.clientgameapp.util.RoomCell;
+import util.Converter;
+import com.example.clientgameapp.storage.StorageSingleton;
+import com.example.clientgameapp.controllers.listViewItems.RoomCell;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientException;
@@ -19,7 +19,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import util.ErrorAlert;
+import com.example.clientgameapp.controllers.error.ErrorAlert;
 
 import java.awt.*;
 import java.io.IOException;
@@ -98,7 +98,7 @@ public class RoomLobbyController {
 
     public void getColor(ActionEvent actionEvent) {
         javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
-        color = Converter.getColor(originalColor);
+        color = Converter.converColor(originalColor);
     }
 
 }
