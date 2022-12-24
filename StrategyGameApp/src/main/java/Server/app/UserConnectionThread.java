@@ -3,6 +3,9 @@ package Server.app;
 import Protocol.Message;
 import Protocol.MessageManager;
 import Protocol.MessageValues.Game.Game;
+import Protocol.MessageValues.Game.GameActions.ArmyMovement;
+import Protocol.MessageValues.Game.GameActions.CityCapture;
+import Protocol.MessageValues.Game.GameResults;
 import Protocol.MessageValues.Response.ResponseError;
 import Protocol.MessageValues.Response.ResponseSuccess;
 import Protocol.MessageValues.Room.*;
@@ -58,6 +61,9 @@ public class UserConnectionThread implements Runnable {
     private boolean isLogout = true;
 
     private boolean isRoomConnected = false;
+
+
+    boolean isGameEnded = false;
 
     @Override
     public void run() {
@@ -301,27 +307,22 @@ public class UserConnectionThread implements Runnable {
 
 
     private void startGameWithResponse() throws IOException {
-        startGame(gameService.initialize(roomDB.getGameInitializationForm(), roomDB));
         MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
     }
 
     private void gameLobby() throws UserDisconnectException, MismatchedClassException, ProtocolVersionException {
-        Game game = gameDB.toGame();
-        System.out.println(game);
         try {
-            roomDB.sendMessageToAllUsersInRoom(new Message(GAME_STARTED, game));
-
-            while (true) {
+            startGame(gameService.initialize(roomDB.getGameInitializationForm(), roomDB));
+            roomDB.sendMessageToAllUsersInRoom(new Message(GAME_STARTED, gameDB.toGame()));
+            while (isGameEnded) {
                 Message message = MessageManager.readMessage(socket.getInputStream());
                 switch (message.type()) {
                     case GAME_DISCONNECT -> {
                         disconnectUserFromGameWithResponse();
                     }
                     case GAME_ACTION_ARMY_MOVEMENT ->  {
-
-                    }
-                    case GAME_ACTION_CITY_CAPTURE -> {
-
+                        ArmyMovement armyMovement = (ArmyMovement) message.value();
+                        moveArmyWithResponse(armyMovement);
                     }
                     case GAME_DATA_GET -> {
                         getGameWithResponse();
@@ -330,11 +331,14 @@ public class UserConnectionThread implements Runnable {
                         exitUserWithResponse();
                     }
                 }
-                break;
             }
 
-            endGame();
-            roomDB.sendMessageToAllUsersInRoom(new Message(GAME_ENDED, null));
+            UserDB winner = endGame();
+            if (winner == null) {
+                winner = new UserDB();
+                winner.setNickname("Unknown");
+            }
+            roomDB.sendMessageToAllUsersInRoom(new Message(GAME_ENDED, new GameResults(winner.toUser(), (new Date()).getTime() - gameDB.getStartTime().getTime())));
         } catch (IOException e) {
             throw new UserDisconnectException("Socket closed. ");
         }
@@ -344,6 +348,22 @@ public class UserConnectionThread implements Runnable {
         disconnectFromGame();
         disconnectFromRoom();
         MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
+    }
+
+    private void moveArmyWithResponse(ArmyMovement armyMovement) throws IOException {
+        try {
+            gameDB.moveArmy(armyMovement, userDB, this);
+            MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
+            roomDB.sendMessageToAllUsersInRoom(new Message(GAME_ACTION_ARMY_MOVEMENT, armyMovement));
+        } catch (ValidatorException e) {
+            MessageManager.sendErrorResponse(new ResponseError(e.getMessage()), socket.getOutputStream());
+        }
+
+    }
+
+    public void captureCityWithResponse(CityCapture cityCapture) {
+        roomDB.sendMessageToAllUsersInRoom(new Message(GAME_ACTION_CITY_CAPTURE, cityCapture));
+        isGameEnded = gameDB.isEnded();
     }
 
     private void getGameWithResponse() throws IOException {
@@ -385,13 +405,17 @@ public class UserConnectionThread implements Runnable {
     }
 
     private void startGame(GameDB game) {
+        isGameEnded = false;
         gameDB = game;
+        gameDB.start();
         roomDB.setInGame(true);
     }
 
-    private void endGame() {
+    private UserDB endGame() {
+        UserDB winner = gameDB.end();
         gameDB = null;
         roomDB.setInGame(false);
+        return winner;
     }
 
     private void disconnectFromGame() {
