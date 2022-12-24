@@ -10,7 +10,7 @@
 <?import java.net.URL?>
 <?import com.example.clientgameapp.util.RoomCellFactory?>
 <BorderPane
-        minHeight="600"
+        minHeight="600" prefWidth="600"
         xmlns="http://javafx.com/javafx"
         xmlns:fx="http://javafx.com/fxml"
         fx:controller="com.example.clientgameapp.lobbyUI.RoomLobbyController"
@@ -34,7 +34,7 @@
     </right>
     <center>
         <VBox>
-            <Label text="Choose a room"/>
+            <Label styleClass="secondary-label" text="Choose room"/>
             <ListView fx:id="roomsList"/>
             <BorderPane>
                 <left>

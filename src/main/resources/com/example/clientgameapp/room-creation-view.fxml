@@ -31,7 +31,7 @@
             </padding>
 
             <HBox alignment="CENTER_LEFT" styleClass="hBox">
-                <Label text="Choose game color" styleClass="secondary-label"/>
+                <Label text="Choose your color" styleClass="secondary-label"/>
                 <ColorPicker fx:id="gameColorPicker" onAction="#getColor" styleClass="color-picker"/>
             </HBox>
 

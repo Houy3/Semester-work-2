@@ -54,7 +54,6 @@ public class GameApp extends Application {
             ClientConnectionSingleton.getInstance().getSocket().close();
         } catch (IOException | ClientConnectionException | MismatchedClassException | BadResponseException e) {
             System.out.println(e.getMessage());
-            System.exit(0);
         }
     }
 

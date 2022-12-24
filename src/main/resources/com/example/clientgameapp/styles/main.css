@@ -103,8 +103,8 @@
     -fx-text-fill: #AF9BB6;
     -fx-background-color: #832d4b;
     -fx-border-radius: 18px;
-    -fx-background-radius: 4px;
     -fx-effect: dropshadow(gaussian, rgba(0.0, 0.0, 0.1, 0.1), 0, 0, 0, 0);
+    -fx-background-radius: 18px;
     -fx-border-color: #440D0F;
 }
 

@@ -241,6 +241,7 @@ public class LobbyController {
                             throw new ServerException(error.getErrorMessage());
                         } else {
                             StorageSingleton.getInstance().nullifyAll();
+                            StorageSingleton.getInstance().getScheduler().shutdownNow();
                             destinationsManager.navigateChoiceScene();
                         }
                     } catch (MismatchedClassException | BadResponseException | ServerException e) {
