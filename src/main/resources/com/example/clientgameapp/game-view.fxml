@@ -8,7 +8,7 @@
 
 <StackPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
            xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.example.clientgameapp.lobbyUI.GameController">
+           fx:controller="com.example.clientgameapp.controllers.game.GameController">
 
     <stylesheets>
         <URL value="@styles/main.css"/>

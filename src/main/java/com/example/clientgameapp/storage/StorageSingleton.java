@@ -1,6 +1,7 @@
-package com.example.clientgameapp.util;
+package com.example.clientgameapp.storage;
 
 import com.example.clientgameapp.GameApp;
+import com.example.clientgameapp.controllers.lobby.LobbyController;
 
 import java.awt.*;
 import java.util.concurrent.ScheduledExecutorService;
@@ -11,6 +12,8 @@ public class StorageSingleton {
 
     private GameApp gameApp;
     private Color color;
+
+   private LobbyController lobbyController;
 
     private ScheduledExecutorService scheduler;
 
@@ -56,6 +59,14 @@ public class StorageSingleton {
 
     public void setScheduler(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
+    }
+
+    public LobbyController getLobbyController() {
+        return lobbyController;
+    }
+
+    public void setLobbyController(LobbyController lobbyController) {
+        this.lobbyController = lobbyController;
     }
 
     public Color getColor() {

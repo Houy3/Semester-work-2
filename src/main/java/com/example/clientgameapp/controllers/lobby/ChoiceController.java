@@ -1,13 +1,12 @@
-package com.example.clientgameapp.lobbyUI;
+package com.example.clientgameapp.controllers.lobby;
 
 import Protocol.HighLevelMessageManager;
 import com.example.clientgameapp.DestinationsManager;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import javafx.event.ActionEvent;
-import util.ErrorAlert;
+import com.example.clientgameapp.controllers.error.ErrorAlert;
 
-import java.io.IOException;
 import java.net.Socket;
 
 public class ChoiceController {

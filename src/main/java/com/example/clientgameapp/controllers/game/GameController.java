@@ -1,12 +1,10 @@
-package com.example.clientgameapp.lobbyUI;
+package com.example.clientgameapp.controllers.game;
 
-import com.example.clientgameapp.util.StorageSingleton;
 import javafx.animation.PathTransition;
 import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;

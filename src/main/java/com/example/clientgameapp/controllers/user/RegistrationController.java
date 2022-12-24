@@ -1,10 +1,10 @@
-package com.example.clientgameapp.userUI;
+package com.example.clientgameapp.controllers.user;
 
 
 import Protocol.MessageValues.Response.ResponseError;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.GameApp;
-import com.example.clientgameapp.util.StorageSingleton;
+import com.example.clientgameapp.storage.StorageSingleton;
 import exceptions.ClientException;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
@@ -18,12 +18,11 @@ import Protocol.exceptions.MismatchedClassException;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientInputException;
-import util.ErrorAlert;
-import utils.StringConverter;
+import com.example.clientgameapp.controllers.error.ErrorAlert;
+import utils.Validator;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
 
 public class RegistrationController {
     public TextField textFieldEmail;
@@ -59,7 +58,7 @@ public class RegistrationController {
             String password = textFieldPassword.getText();
             String email = textFieldEmail.getText();
             System.out.println(nickName + password + email);
-            if (StringConverter.isValid(nickName) && StringConverter.isValid(password) && StringConverter.isValid(email)) {
+            if (Validator.isValid(nickName) && Validator.isValid(password) && Validator.isValid(email)) {
                 UserRegistrationForm form = new UserRegistrationForm(
                         email, password, nickName
                 );

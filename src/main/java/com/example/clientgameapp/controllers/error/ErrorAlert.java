@@ -1,4 +1,4 @@
-package util;
+package com.example.clientgameapp.controllers.error;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;

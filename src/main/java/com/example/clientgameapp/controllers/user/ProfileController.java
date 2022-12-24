@@ -1,4 +1,4 @@
-package com.example.clientgameapp.userUI;
+package com.example.clientgameapp.controllers.user;
 
 import Protocol.HighLevelMessageManager;
 import Protocol.Message;
@@ -7,12 +7,12 @@ import Protocol.MessageValues.Response.ResponseError;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
-import com.example.clientgameapp.util.StorageSingleton;
+import com.example.clientgameapp.storage.StorageSingleton;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ServerException;
 import javafx.event.ActionEvent;
-import util.ErrorAlert;
+import com.example.clientgameapp.controllers.error.ErrorAlert;
 
 import java.io.IOException;
 import java.net.Socket;

@@ -9,7 +9,7 @@
 <BorderPane
         prefHeight="600.0" prefWidth="600.0"
         xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
-        fx:controller="com.example.clientgameapp.lobbyUI.RoomCreationController">
+        fx:controller="com.example.clientgameapp.controllers.lobby.RoomCreationController">
 
     <stylesheets>
         <URL value="@styles/main.css"/>

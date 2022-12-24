@@ -6,6 +6,7 @@
 .root {
     -fx-font-family: 'RUBIK';
 }
+
 #Button {
     --fxbackground-color: black;
 }
@@ -94,7 +95,7 @@
 }
 
 
-.btn-main-navigation:hover{
+.btn-main-navigation:hover {
     -fx-min-width: 300px;
     -fx-font-size: 1.5em;
     -fx-min-height: 64px;
@@ -116,7 +117,6 @@
     -fx-border-color: #0B6E4F;
     -fx-border-radius: 18px;
 }
-
 
 
 .secondary-label {
@@ -165,6 +165,28 @@
     -fx-min-height: 60px;
     -fx-max-width: 60px;
     -fx-max-height: 60px;
+    -fx-border-radius: 30px;
+    -fx-cursor: hand;
+    -fx-text-fill: black;
+    -fx-background-color: #a9a9a9;
+    -fx-effect: dropshadow(gaussian, rgba(0.0, 0.0, 0.1, 0.1), 0, 0, 0, 0);
+    -fx-border-color: #440D0F;
+}
+
+.btn-city:hover {
+    -fx-background-radius: 30px;
+    -fx-min-width: 60px;
+    -fx-font-size: 1.4em;
+    -fx-font-weight: bold;
+    -fx-min-height: 60px;
+    -fx-max-width: 60px;
+    -fx-max-height: 60px;
+    -fx-border-radius: 30px;
+    -fx-cursor: hand;
+    -fx-text-fill: black;
+    -fx-background-color: #a9a9a9;
+    -fx-effect: dropshadow(gaussian, rgba(0.0, 0.0, 0.1, 0.1), 0, 0, 0, 0);
+    -fx-border-color: #440D0F;
 }
 
 .label-main {

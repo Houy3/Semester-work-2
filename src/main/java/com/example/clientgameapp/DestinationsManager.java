@@ -1,16 +1,17 @@
 package com.example.clientgameapp;
 
-import com.example.clientgameapp.util.StorageSingleton;
+import com.example.clientgameapp.storage.StorageSingleton;
 import exceptions.ClientConnectionException;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import util.ErrorAlert;
+import com.example.clientgameapp.controllers.error.ErrorAlert;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.Executors;
 
 public class DestinationsManager {
 
@@ -84,6 +85,10 @@ public class DestinationsManager {
 
     public void navigateLobbyScene()  {
         showScene(GameApp.class.getResource("lobby-view.fxml"));
+        StorageSingleton.getInstance().setScheduler(Executors.newScheduledThreadPool(1));
+        if(StorageSingleton.getInstance().getLobbyController() != null) {
+            StorageSingleton.getInstance().getLobbyController().initialize();
+        }
     }
 
     public void navigateGameScene() {

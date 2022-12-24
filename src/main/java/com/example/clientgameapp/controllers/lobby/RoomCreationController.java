@@ -1,4 +1,4 @@
-package com.example.clientgameapp.lobbyUI;
+package com.example.clientgameapp.controllers.lobby;
 
 import Protocol.HighLevelMessageManager;
 import Protocol.Message;
@@ -6,26 +6,23 @@ import Protocol.MessageManager;
 import Protocol.MessageValues.Game.GameInitializationForm;
 import Protocol.MessageValues.Response.ResponseError;
 import Protocol.MessageValues.Response.ResponseSuccess;
+import Protocol.MessageValues.Room.Room;
 import Protocol.MessageValues.Room.RoomAccess;
 import Protocol.MessageValues.Room.RoomInitializationForm;
-import Protocol.MessageValues.User.User;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
-import com.example.clientgameapp.util.Converter;
-import com.example.clientgameapp.util.StorageSingleton;
+import util.Converter;
+import com.example.clientgameapp.storage.StorageSingleton;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientException;
-import exceptions.ClientInputException;
 import exceptions.GameException;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.TextField;
 import org.controlsfx.control.ToggleSwitch;
-import util.ErrorAlert;
-import utils.StringConverter;
+import com.example.clientgameapp.controllers.error.ErrorAlert;
 
 import java.awt.*;
 import java.io.IOException;
@@ -67,6 +64,9 @@ public class RoomCreationController {
             int armySpeed = (int) spinnerArmySpeed.getValue();
             boolean isPrivate = togglePrivate.isSelected();
             RoomAccess access;
+            if (color == null) {
+                throw new ClientException("You need to choose a color");
+            }
             GameInitializationForm gameInitializationForm = new GameInitializationForm(
                     citiesAmount, growthRate, armySpeed
             );
@@ -80,14 +80,11 @@ public class RoomCreationController {
             );
             Message roomInitializedMessage = HighLevelMessageManager.initializeRoom(newRoom, socket);
 
-
-            if (color == null) {
-                throw new ClientException("You need to choose a color");
-            }
             if (roomInitializedMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
                 ResponseError error = (ResponseError) roomInitializedMessage.value();
                 throw new GameException(error.getErrorMessage());
             } else {
+                StorageSingleton.getInstance().getScheduler().shutdownNow();
                 StorageSingleton.getInstance().setColor(color);
                 destinationsManager.navigateLobbyScene();
             }
@@ -112,6 +109,6 @@ public class RoomCreationController {
 
     public void getColor(ActionEvent actionEvent) {
         javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
-        color = Converter.getColor(originalColor);
+        color = Converter.converColor(originalColor);
     }
 }
