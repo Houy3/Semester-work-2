@@ -51,7 +51,7 @@ public class HighLevelMessageManager extends MessageManager {
         return sendMessage(new Message(ROOM_CONNECT, value), socket);
     }
     /**пустой ответ*/
-    public Message disconnectRoom(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
+    public static Message disconnectRoom(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
         return sendMessage(new Message(ROOM_DISCONNECT, null), socket);
     }
     /**пустой ответ*/
