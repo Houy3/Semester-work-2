@@ -28,8 +28,8 @@
             <padding>
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
             </padding>
-            <Button styleClass="navBtn" text="Create room" onAction="#navigateRoomCreation"/>
-            <Button styleClass="navBtn" text="Find room" onAction="#navigateRoomList"/>
+            <Button styleClass="nav-btn" text="Create room" onAction="#navigateRoomCreation"/>
+            <Button styleClass="nav-btn" text="Find room" onAction="#navigateRoomList"/>
         </VBox>
     </right>
     <center>
@@ -38,7 +38,7 @@
             <ListView fx:id="roomsList"/>
             <HBox>
                 <Button styleClass="gameStartBtn" text="Connect" onAction="#connectToRoom"/>
-                <ColorPicker fx:id="gameColorPicker" onAction="#getColor" styleClass="colorPicker"/>
+                <ColorPicker fx:id="gameColorPicker" onAction="#getColor" styleClass="color-picker"/>
             </HBox>
         </VBox>
     </center>

@@ -36,17 +36,17 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <Button fx:id="cityBtnFirst" mnemonicParsing="false" onAction="#btnFirstClicked" styleClass="cityBtn"
+                <Button fx:id="cityBtnFirst" mnemonicParsing="false" onAction="#btnFirstClicked" styleClass="btn-city"
                         text="1" GridPane.columnIndex="1"/>
-                <Button fx:id="cityBtnSecond" mnemonicParsing="false" onAction="#btnSecondClicked"  styleClass="cityBtn" text="2"
+                <Button fx:id="cityBtnSecond" mnemonicParsing="false" onAction="#btnSecondClicked" styleClass="btn-city" text="2"
                         GridPane.rowIndex="2"/>
-                <Button fx:id="cityBtnThird" mnemonicParsing="false" onAction="#btnThirdClicked"  styleClass="cityBtn" text="3"
+                <Button fx:id="cityBtnThird" mnemonicParsing="false" onAction="#btnThirdClicked" styleClass="btn-city" text="3"
                         GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                <Button fx:id="cityBtnFourth" mnemonicParsing="false" onAction="#btnFourthClicked" styleClass="cityBtn" text="4"
+                <Button fx:id="cityBtnFourth" mnemonicParsing="false" onAction="#btnFourthClicked" styleClass="btn-city" text="4"
                         GridPane.columnIndex="3" GridPane.rowIndex="4"/>
-                <Button fx:id="cityBtnFifth" mnemonicParsing="false" onAction="#btnFifthClicked" styleClass="cityBtn" text="5"
+                <Button fx:id="cityBtnFifth" mnemonicParsing="false" onAction="#btnFifthClicked" styleClass="btn-city" text="5"
                         GridPane.columnIndex="4" GridPane.rowIndex="2"/>
-                <Button fx:id="cityBtnSixth" mnemonicParsing="false" onAction="#btnSixthClicked" styleClass="cityBtn" text="6"
+                <Button fx:id="cityBtnSixth" mnemonicParsing="false" onAction="#btnSixthClicked" styleClass="btn-city" text="6"
                         GridPane.columnIndex="3"/>
                 <StackPane/>
             </children>

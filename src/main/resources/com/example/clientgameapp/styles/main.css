@@ -1,23 +1,60 @@
+
+
+.root {
+    -fx-font-family: RUBIK;
+}
 #Button {
     --fxbackground-color: black;
 }
 
-.mainBtn {
+.btn-main {
+    -fx-font-family: RUBIK;
+    -fx-font-size: 1.3em;
+    -fx-background-color: #972850;
+    -fx-padding: 10px;
     -fx-min-width: 200px;
-    -fx-font-size: 1.4em;
-    -fx-min-height: 40px;
-    -fx-background-radius: 18px;
-    -fx-border-color: #440D0F;
-    -fx-border-radius: 18px;
+    -fx-border-radius: 4px;
+    -fx-text-fill: white;
+    -fx-background-radius: 4px;
+    -fx-border-color: black;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 1, 1, 1, 1);
 }
 
-.navBtn {
+.nav-btn {
+    -fx-font-size: 1.3em;
+
+    -fx-font-family: RUBIK;
     -fx-min-width: 180px;
+    -fx-background-color: transparent;
+    -fx-padding: 10px;
+    -fx-border-radius: 4px;
+    -fx-border-color: black;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 1, 1, 1, 1);
 }
 
-.mainBtn:focused, navBtn:focused {
-    -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;
-    -fx-background-insets: 0, 0, 1, 2;
+.nav-btn:hover {
+    -fx-font-size: 1.3em;
+    -fx-font-family: RUBIK;
+    -fx-cursor: hand;
+    -fx-text-fill: white;
+    -fx-background-color: #B7999C;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-min-width: 180px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 1, 1, 1, 1);
+}
+
+.btn-main:hover {
+    -fx-font-size: 1.3em;
+    -fx-cursor: hand;
+    -fx-text-fill: #AF9BB6;
+    -fx-background-color: #6D1D3A;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 10px;
+    -fx-min-width: 200px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 1, 1, 1, 1);
+    -fx-border-color: #440D0F;
 }
 
 .mainScene {
@@ -27,6 +64,7 @@
 .rightMenuBox {
     -fx-min-width: 200px;
     -fx-min-height: 100%;
+    -fx-background-color: #AF9BB6;
     -fx-border-radius: 1px;
     -fx-border-color: #191716;
     -fx-border-insets: 5;
@@ -51,22 +89,21 @@
 }
 
 .gameStartBtn {
-    -fx-min-width: 300px;
+    -fx-min-width: 240px;
     -fx-font-size: 1.5em;
-    -fx-min-height: 64px;
+    -fx-min-height: 40px;
     -fx-background-radius: 18px;
     -fx-border-color: #0B6E4F;
     -fx-border-radius: 18px;
 }
 
-.hBox {
-    -fx-min-width: 300px;
-}
 
-.secondaryLabel {
+
+.secondary-label {
     -fx-min-height: 40px;
-    -fx-min-width: 220px;
+    -fx-min-width: 120px;
     -fx-font-size: 1.1em;
+    -fx-wrap-text: true;
 }
 
 .spinner {
@@ -76,14 +113,20 @@
     -fx-max-width: 80px;
 }
 
-.colorPicker {
+.color-picker {
     -fx-min-height: 40px;
-    -fx-max-width: 80px;
+    -fx-max-width: 60px;
+    -fx-end-margin: 10px;
+    -fx-start-margin: 10px;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 1, 1, 1, 1);
 }
 
 .toggle {
     -fx-min-height: 40px;
-    -fx-min-width: 300px;
+    -fx-min-width: 200px;
 }
 
 .readyBtn {
@@ -94,10 +137,21 @@
     -fx-min-height: 40px;
 }
 
-.cityBtn {
+.btn-city {
     -fx-background-radius: 30px;
     -fx-min-width: 60px;
     -fx-min-height: 60px;
     -fx-max-width: 60px;
     -fx-max-height: 60px;
+}
+
+.label-main {
+    -fx-alignment: center;
+    -fx-font-size: 1.5em;
+    -fx-font-weight: bold;
+    -fx-max-width: 500px;
+    -fx-wrap-text: true
+}
+
+.hBox {
 }

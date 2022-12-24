@@ -49,7 +49,7 @@ public class GameController implements Initializable {
 
 
     private void drawBall(Button fromButton, Button toButton, Color color, int durationInSeconds) {
-        Circle ball = new Circle(-fromButton.getLayoutX()-fromButton.getWidth()/2, -fromButton.getLayoutY()-fromButton.getWidth()/2, 10);
+        Circle ball = new Circle(-fromButton.getLayoutX() - fromButton.getWidth() / 2, -fromButton.getLayoutY() - fromButton.getWidth() / 2, 10);
         ball.fillProperty().set(color);
 
         pane.getChildren().add(ball);
@@ -59,8 +59,8 @@ public class GameController implements Initializable {
 
         setPositionFixed(ball, fromButton);
 
-        double toX = toButton.getLayoutX() + toButton.getWidth()/2;
-        double toY = toButton.getLayoutY() + toButton.getWidth()/2;
+        double toX = toButton.getLayoutX() + toButton.getWidth() / 2;
+        double toY = toButton.getLayoutY() + toButton.getWidth() / 2;
 
         Path path = new Path();
         path.getElements().add(new MoveToAbs(ball));
@@ -69,8 +69,8 @@ public class GameController implements Initializable {
         transition.setPath(path);
         transition.play();
 
-        ball.setTranslateX(toButton.getLayoutX() + toButton.getWidth()/2);
-        ball.setTranslateY(toButton.getLayoutY() + toButton.getWidth()/2);
+        ball.setTranslateX(toButton.getLayoutX() + toButton.getWidth() / 2);
+        ball.setTranslateY(toButton.getLayoutY() + toButton.getWidth() / 2);
         removeBall(transition, durationInSeconds, ball);
     }
 
@@ -92,8 +92,24 @@ public class GameController implements Initializable {
     }
 
     public void btnFifthClicked(ActionEvent actionEvent) {
-        handleButtonClick(cityBtnFifth, color, duration);
 
+        System.out.println("CITY 1: " + " X: " + getRelativeX(cityBtnFirst.getLayoutX()) + "      Y:      " + getRelativeY(cityBtnFirst.getLayoutY()));
+        System.out.println("CITY 2: " + " X: " + getRelativeX(cityBtnSecond.getLayoutX()) + "     Y:     " + getRelativeY(cityBtnSecond.getLayoutY()));
+        System.out.println("CITY 3: " + " X: " + getRelativeX(cityBtnThird.getLayoutX()) + "      Y:      " + getRelativeY(cityBtnThird.getLayoutY()));
+        System.out.println("CITY 4: " + " X: " + getRelativeX(cityBtnFourth.getLayoutX()) + "     Y:      " + getRelativeY(cityBtnFourth.getLayoutY()));
+        System.out.println("CITY 5: " + " X: " + getRelativeX(cityBtnFifth.getLayoutX()) + "      Y:       " + getRelativeY(cityBtnFifth.getLayoutY()));
+        System.out.println("CITY 6: " + " X: " + getRelativeX(cityBtnSixth.getLayoutX()) + "      Y:       " + getRelativeY(cityBtnSixth.getLayoutY()));
+
+        setStyle(cityBtnFifth, Color.YELLOW);
+        handleButtonClick(cityBtnFifth, color, duration);
+    }
+
+    private int getRelativeX(double x) {
+        return (int) (x / (pane.getWidth()) * (int) 100);
+    }
+
+    private int getRelativeY(double y) {
+        return (int) (y / (pane.getHeight()) * (int) 100);
     }
 
     public void btnSixthClicked(ActionEvent actionEvent) {
@@ -125,7 +141,7 @@ public class GameController implements Initializable {
     }
 
     private void setPositionFixed(Node node, Button fromButton) {
-        node.relocate(fromButton.getTranslateX() - fromButton.getWidth()/2, fromButton.getTranslateY() - fromButton.getWidth()/2);
+        node.relocate(fromButton.getTranslateX() - fromButton.getWidth() / 2, fromButton.getTranslateY() - fromButton.getWidth() / 2);
     }
 
     public static class LineToAbs extends LineTo {
@@ -154,6 +170,16 @@ public class GameController implements Initializable {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.setStroke(Color.BLACK);
         gc.fillText(message, 200, 300);
+    }
+
+    private void setStyle(Button button, Color color) {
+        button.setStyle("-fx-background-radius: 30px;\n" +
+                "    -fx-min-width: 60px;\n" +
+                "    -fx-min-height: 60px;\n" +
+                "    -fx-max-width: 60px;\n" +
+                "-fx-background-color: rgb(" + color.getRed() + ","
+                + color.getGreen() + "," + color.getBlue() + ");" +
+                "    -fx-max-height: 60px;");
     }
 
 

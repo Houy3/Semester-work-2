@@ -43,6 +43,8 @@ public class LobbyController {
     private StorageSingleton storage;
     private DestinationsManager destinationsManager;
 
+    private ScheduledExecutorService scheduler;
+
 
     public void initialize() {
         try {
@@ -51,6 +53,7 @@ public class LobbyController {
             socket = connection.getSocket();
             destinationsManager = DestinationsManager.getInstance();
             storage = StorageSingleton.getInstance();
+            scheduler = StorageSingleton.getInstance().getScheduler();
             if (storage.getColor() != null && storage.getRoomId() != null) {
                 initializeExistingRoom();
             } else {
@@ -145,7 +148,7 @@ public class LobbyController {
                     }
                 }
                 destinationsManager.navigateGameScene();
-                System.out.println(success.getResponseValue());
+                scheduler.shutdownNow();
             }
         } catch (IOException | MismatchedClassException | BadResponseException | ServerException |
                  ClientException ex) {
@@ -172,7 +175,6 @@ public class LobbyController {
 
     private void updateList() {
         try {
-            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
             Runnable helloRunnable = () -> {
                 try {
                     Message updatedData = HighLevelMessageManager.getRoomParameters(socket);
@@ -190,7 +192,7 @@ public class LobbyController {
                     ErrorAlert.show(e.getMessage());
                 }
             };
-            executor.scheduleAtFixedRate(helloRunnable, 0, 4, TimeUnit.SECONDS);
+            scheduler.scheduleAtFixedRate(helloRunnable, 0, 4, TimeUnit.SECONDS);
         } catch (Exception ex) {
             ErrorAlert.show(ex.getMessage());
         }

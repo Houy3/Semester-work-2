@@ -69,20 +69,24 @@ public class RoomLobbyController {
 
     public void navigateRoomList(ActionEvent actionEvent) {
         destinationsManager.navigateRoomListScene();
-
     }
 
     public void connectToRoom(ActionEvent actionEvent) {
         try {
             if (color == null) {
                 throw new ClientException("You need to choose a color!");
-            }else {
-                Room currentRoom = roomsList.getSelectionModel().getSelectedItems().get(0);
-                StorageSingleton storageSingleton = StorageSingleton.getInstance();
-                storageSingleton.setRoomId(currentRoom.getCode());
-                storageSingleton.setColor(color);
-                destinationsManager.navigateLobbyScene();
-                System.out.println(roomsList.getSelectionModel().getSelectedItems());
+            } else {
+                Room selectedRoom = roomsList.getSelectionModel().getSelectedItems().get(0);
+                if (selectedRoom != null) {
+                    Room currentRoom = roomsList.getSelectionModel().getSelectedItems().get(0);
+                    StorageSingleton storageSingleton = StorageSingleton.getInstance();
+                    storageSingleton.setRoomId(currentRoom.getCode());
+                    storageSingleton.setColor(color);
+                    destinationsManager.navigateLobbyScene();
+                    System.out.println(roomsList.getSelectionModel().getSelectedItems());
+                } else {
+                    throw new ClientException("You need to choose a room");
+                }
             }
         } catch (ClientException ex) {
             ErrorAlert.show(ex.getMessage());
@@ -92,8 +96,6 @@ public class RoomLobbyController {
     public void getColor(ActionEvent actionEvent) {
         javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
         color = Converter.getColor(originalColor);
-
     }
-
 
 }
