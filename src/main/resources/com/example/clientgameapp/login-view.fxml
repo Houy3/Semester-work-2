@@ -32,8 +32,8 @@
             </padding>
 
             <Label styleClass="label-main" text="Login"/>
-            <TextField styleClass="mainTextField" fx:id="textFieldEmail" promptText="Email"/>
-            <PasswordField styleClass="mainTextField" fx:id="textFieldPassword" promptText="Password"/>
+            <TextField styleClass="text-field-main" fx:id="textFieldEmail" promptText="Email"/>
+            <PasswordField styleClass="text-field-main" fx:id="textFieldPassword" promptText="Password"/>
             <Button styleClass="btn-main" mnemonicParsing="false" prefHeight="26.0" prefWidth="152.0" text="Login" onAction="#loginUser"/>
 
         </FlowPane>

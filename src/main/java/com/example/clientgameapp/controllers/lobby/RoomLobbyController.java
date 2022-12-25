@@ -8,8 +8,8 @@ import Protocol.MessageValues.Room.Room;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
+import com.example.clientgameapp.storage.GlobalStorage;
 import util.Converter;
-import com.example.clientgameapp.storage.StorageSingleton;
 import com.example.clientgameapp.controllers.listViewItems.RoomCell;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
@@ -61,7 +61,7 @@ public class RoomLobbyController {
             ErrorAlert.show(ex.getMessage());
         } catch (IOException e) {
             ErrorAlert.show(e.getMessage());
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
         }
     }
 
@@ -82,9 +82,9 @@ public class RoomLobbyController {
                 Room selectedRoom = roomsList.getSelectionModel().getSelectedItems().get(0);
                 if (selectedRoom != null) {
                     Room currentRoom = roomsList.getSelectionModel().getSelectedItems().get(0);
-                    StorageSingleton storageSingleton = StorageSingleton.getInstance();
-                    storageSingleton.setRoomId(currentRoom.getCode());
-                    storageSingleton.setColor(color);
+                    GlobalStorage globalStorage = GlobalStorage.getInstance();
+                    globalStorage.setRoomId(currentRoom.getCode());
+                    globalStorage.setColor(color);
                     destinationsManager.navigateLobbyScene();
                     System.out.println(roomsList.getSelectionModel().getSelectedItems());
                 } else {
@@ -98,7 +98,7 @@ public class RoomLobbyController {
 
     public void getColor(ActionEvent actionEvent) {
         javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
-        color = Converter.converColor(originalColor);
+        color = Converter.convertColor(originalColor);
     }
 
 }

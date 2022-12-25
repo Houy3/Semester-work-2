@@ -3,7 +3,7 @@ package com.example.clientgameapp;
 import Protocol.HighLevelMessageManager;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
-import com.example.clientgameapp.storage.StorageSingleton;
+import com.example.clientgameapp.storage.GlobalStorage;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import javafx.application.Application;
@@ -18,18 +18,18 @@ public class GameApp extends Application {
     private Stage stage;
 
     private DestinationsManager destinationsManager;
-    private StorageSingleton storageSingleton;
+    private GlobalStorage globalStorage;
 
     @Override
     public void start(Stage stage) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(GameApp.class.getResource("register-view.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 600, 600);
-            storageSingleton = StorageSingleton.getInstance();
-            storageSingleton.setScheduler(Executors.newScheduledThreadPool(1));
+            FXMLLoader fxmlLoader = new FXMLLoader(GameApp.class.getResource("game-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 600, 400);
+            globalStorage = GlobalStorage.getInstance();
+            globalStorage.setScheduler(Executors.newScheduledThreadPool(1));
             destinationsManager = DestinationsManager.getInstance();
             destinationsManager.init(stage);
-            storageSingleton.setMainApp(this);
+            globalStorage.setMainApp(this);
             this.stage = stage;
             stage.setTitle("Strategy Game");
             stage.setOnCloseRequest(we -> {
@@ -45,8 +45,8 @@ public class GameApp extends Application {
     }
 
     public void closeGame() {
-        storageSingleton.nullifyAll();
-        storageSingleton.getScheduler().shutdownNow();
+        globalStorage.nullifyAll();
+        globalStorage.getScheduler().shutdownNow();
         stage.close();
         try {
             HighLevelMessageManager.logoutUser(ClientConnectionSingleton.getInstance().getSocket());

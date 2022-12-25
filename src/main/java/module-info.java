@@ -11,7 +11,9 @@ module com.example.clientgameapp {
     exports com.example.clientgameapp;
     exports com.example.clientgameapp.controllers.user;
     exports Protocol.MessageValues.Room;
+    exports com.example.clientgameapp.storage.generator;
     exports com.example.clientgameapp.models;
+    exports com.example.clientgameapp.storage;
     exports Protocol.MessageValues.User;
     exports Protocol.MessageValues.Response;
     exports Protocol.MessageValues.Game;
@@ -23,5 +25,4 @@ module com.example.clientgameapp {
     exports com.example.clientgameapp.controllers.game;
     opens com.example.clientgameapp.controllers.game to javafx.fxml;
     exports com.example.clientgameapp.controllers.listViewItems;
-    exports com.example.clientgameapp.storage;
 }

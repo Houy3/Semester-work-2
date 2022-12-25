@@ -13,8 +13,8 @@ import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.models.UserModel;
 import com.example.clientgameapp.controllers.listViewItems.ClientCell;
+import com.example.clientgameapp.storage.GlobalStorage;
 import util.Converter;
-import com.example.clientgameapp.storage.StorageSingleton;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientException;
@@ -42,7 +42,9 @@ public class LobbyController {
     private ClientConnectionSingleton connection;
     private HighLevelMessageManager mManager;
     private Socket socket;
-    private StorageSingleton storage;
+
+    private boolean isFirstStart = true;
+    private GlobalStorage storage;
     private DestinationsManager destinationsManager;
 
     private ScheduledExecutorService scheduler;
@@ -57,9 +59,9 @@ public class LobbyController {
             mManager = new HighLevelMessageManager();
             socket = connection.getSocket();
             destinationsManager = DestinationsManager.getInstance();
-            storage = StorageSingleton.getInstance();
+            storage = GlobalStorage.getInstance();
             storage.setLobbyController(this);
-            scheduler = StorageSingleton.getInstance().getScheduler();
+            scheduler = GlobalStorage.getInstance().getScheduler();
             if (storage.getColor() != null && storage.getRoomId() != null) {
                 initializeExistingRoom();
             } else {
@@ -72,6 +74,7 @@ public class LobbyController {
     }
 
     private void initializeExistingRoom() {
+        read();
         try {
             RoomConnectionForm connectionForm = new RoomConnectionForm(
                     storage.getRoomId(), storage.getColor()
@@ -89,11 +92,12 @@ public class LobbyController {
             ErrorAlert.show(ex.getMessage());
         } catch (IOException e) {
             ErrorAlert.show(e.getMessage());
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
         }
     }
 
     private void initializeNewRoom() {
+        read();
         try {
             Message newRoom = HighLevelMessageManager.getRoomParameters(socket);
             if (newRoom.type() == MessageManager.MessageType.RESPONSE_ERROR) {
@@ -106,7 +110,7 @@ public class LobbyController {
             ErrorAlert.show(ex.getMessage());
         } catch (IOException e) {
             ErrorAlert.show(e.getMessage());
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
         }
     }
 
@@ -157,7 +161,7 @@ public class LobbyController {
             ErrorAlert.show(e.getMessage());
         } catch (IOException e) {
             ErrorAlert.show(e.getMessage());
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
         }
     }
 
@@ -168,6 +172,11 @@ public class LobbyController {
                 ResponseError error = (ResponseError) gameStart.value();
                 throw new ServerException(error.getErrorMessage());
             } else {
+                Message start = HighLevelMessageManager.startGame(socket);
+                if (start.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                    ResponseError error = (ResponseError) start.value();
+                    throw new ServerException(error.getErrorMessage());
+                }
                 ResponseSuccess success = (ResponseSuccess) gameStart.value();
                 Room room = (Room) success.getResponseValue();
                 for (Object userStatus : room.getUsersIsReady().values().toArray()) {
@@ -176,14 +185,13 @@ public class LobbyController {
                     }
                 }
                 destinationsManager.navigateGameScene();
-                scheduler.shutdownNow();
             }
         } catch (MismatchedClassException | BadResponseException | ServerException |
                  ClientException ex) {
             ErrorAlert.show(ex.getMessage());
         } catch (IOException e) {
             ErrorAlert.show(e.getMessage());
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
         }
     }
 
@@ -203,7 +211,7 @@ public class LobbyController {
             ErrorAlert.show(e.getMessage());
         } catch (IOException e) {
             ErrorAlert.show(e.getMessage());
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
         }
     }
 
@@ -220,15 +228,37 @@ public class LobbyController {
                     });
                     System.out.println(updatedData.type());
                 }
-
             } catch (ServerException | MismatchedClassException | BadResponseException e) {
                 ErrorAlert.show(e.getMessage());
             } catch (IOException e) {
                 ErrorAlert.show(e.getMessage());
-                StorageSingleton.getInstance().getMainApp().closeGame();
+                GlobalStorage.getInstance().getMainApp().closeGame();
             }
         };
         scheduler.scheduleAtFixedRate(helloRunnable, 0, 4, TimeUnit.SECONDS);
+    }
+
+    private void read() {
+        /*
+        new Thread(() -> {
+            while (!socket.isClosed()) {
+                try {
+                    Message message = MessageManager.readMessage(socket.getInputStream());
+                    if (message.type() == MessageManager.MessageType.GAME_STARTED) {
+                        GlobalStorage.getInstance().nullifyAll();
+                        GlobalStorage.getInstance().getScheduler().shutdownNow();
+                        destinationsManager.navigateGameScene();
+                    } else if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
+                        ResponseError error = (ResponseError) message.value();
+                        throw new ServerException(error.getErrorMessage());
+                    }
+                } catch (IOException | ProtocolVersionException | MismatchedClassException | ServerException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+
+         */
     }
 
     public void leaveLobby(ActionEvent actionEvent) {
@@ -240,15 +270,15 @@ public class LobbyController {
                             ResponseError error = (ResponseError) message.value();
                             throw new ServerException(error.getErrorMessage());
                         } else {
-                            StorageSingleton.getInstance().nullifyAll();
-                            StorageSingleton.getInstance().getScheduler().shutdownNow();
+                            GlobalStorage.getInstance().nullifyAll();
+                            GlobalStorage.getInstance().getScheduler().shutdownNow();
                             destinationsManager.navigateChoiceScene();
                         }
                     } catch (MismatchedClassException | BadResponseException | ServerException e) {
                         ErrorAlert.show(e.getMessage());
                     } catch (IOException e) {
                         ErrorAlert.show(e.getMessage());
-                        StorageSingleton.getInstance().getMainApp().closeGame();
+                        GlobalStorage.getInstance().getMainApp().closeGame();
                     }
                 }
         ).start();
@@ -257,7 +287,7 @@ public class LobbyController {
     public void changeColor(ActionEvent actionEvent) {
         try {
             javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
-            Color color = Converter.converColor(originalColor);
+            Color color = Converter.convertColor(originalColor);
             Message message = HighLevelMessageManager.setColor(socket, color);
             if (message.type() == MessageManager.MessageType.RESPONSE_ERROR) {
                 ResponseError error = (ResponseError) message.value();
@@ -269,7 +299,7 @@ public class LobbyController {
             ErrorAlert.show(e.getMessage());
         } catch (IOException e) {
             ErrorAlert.show(e.getMessage());
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
         }
     }
 }

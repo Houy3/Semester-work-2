@@ -8,7 +8,7 @@ import Protocol.MessageValues.User.UserLoginForm;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
-import com.example.clientgameapp.storage.StorageSingleton;
+import com.example.clientgameapp.storage.GlobalStorage;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientException;
@@ -79,7 +79,7 @@ public class Login {
             ErrorAlert.show(e.getMessage());
         } catch (IOException e) {
             ErrorAlert.show(e.getMessage());
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
         }
     }
 

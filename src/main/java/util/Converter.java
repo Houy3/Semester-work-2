@@ -6,8 +6,8 @@ import java.awt.*;
 
 public class Converter {
 
-    public static Color converColor(javafx.scene.paint.Color color) {
-        return  new Color(
+    public static Color convertColor(javafx.scene.paint.Color color) {
+        return new Color(
                 convertColorNumber(color.getRed()),
                 convertColorNumber(color.getGreen()),
                 convertColorNumber(color.getBlue())
@@ -24,6 +24,10 @@ public class Converter {
         } catch (NumberFormatException ex) {
             throw new ClientInputException("Field must be numerical");
         }
+    }
+
+    public static String convertToHex(javafx.scene.paint.Color color) {
+        return String.format("#%02x%02x%02x",convertColorNumber(color.getRed()), convertColorNumber(color.getGreen()),convertColorNumber(color.getBlue()));
     }
 
     private static int convertColorNumber(Double num) {

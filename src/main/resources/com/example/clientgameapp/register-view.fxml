@@ -34,9 +34,9 @@
 
             <Label styleClass="label-main" text="Register"/>
 
-            <TextField styleClass="mainTextField" fx:id="textFieldEmail" promptText="Email" />
-            <TextField styleClass="mainTextField" fx:id="textFieldNickName" promptText="Nickname"/>
-            <PasswordField styleClass="mainTextField" fx:id="textFieldPassword" promptText="Password"/>
+            <TextField styleClass="text-field-main" fx:id="textFieldEmail" promptText="Email" />
+            <TextField styleClass="text-field-main" fx:id="textFieldNickName" promptText="Nickname"/>
+            <PasswordField styleClass="text-field-main" fx:id="textFieldPassword" promptText="Password"/>
 
             <Button styleClass="btn-main" mnemonicParsing="false" text="Register" onAction="#registerUser"/>
         </FlowPane>

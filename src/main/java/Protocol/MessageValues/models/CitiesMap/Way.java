@@ -1,6 +1,8 @@
 package Protocol.MessageValues.models.CitiesMap;
 
-public class Way {
+import java.io.Serializable;
+
+public class Way implements Serializable {
 
     private final City start;
     private final City end;
@@ -27,7 +29,7 @@ public class Way {
 
     @Override
     public String toString() {
-        return "Way{" +
+        return "Route{" +
                 "start=" + start +
                 ", end=" + end +
                 '}';

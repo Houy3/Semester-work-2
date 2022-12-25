@@ -7,7 +7,7 @@ import Protocol.MessageValues.Response.ResponseError;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
-import com.example.clientgameapp.storage.StorageSingleton;
+import com.example.clientgameapp.storage.GlobalStorage;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ServerException;
@@ -57,7 +57,7 @@ public class ProfileController {
             ErrorAlert.show(e.getMessage());
         }  catch (IOException e) {
             ErrorAlert.show(e.getMessage());
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
         }
     }
 }

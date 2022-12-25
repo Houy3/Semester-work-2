@@ -1,6 +1,6 @@
 package com.example.clientgameapp;
 
-import com.example.clientgameapp.storage.StorageSingleton;
+import com.example.clientgameapp.storage.GlobalStorage;
 import exceptions.ClientConnectionException;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -40,7 +40,7 @@ public class DestinationsManager {
         this.stage = stage;
     }
 
-    public void navigateChoiceScene()  {
+    public void navigateChoiceScene() {
 
         showScene(GameApp.class.getResource("choice-view.fxml"));
     }
@@ -72,8 +72,8 @@ public class DestinationsManager {
 
     }
 
-    public void navigateRoomListScene()  {
-        StorageSingleton.getInstance().nullifyAll();
+    public void navigateRoomListScene() {
+        GlobalStorage.getInstance().nullifyAll();
         showScene(GameApp.class.getResource("room-lobby-view.fxml"));
 
     }
@@ -83,17 +83,17 @@ public class DestinationsManager {
 
     }
 
-    public void navigateLobbyScene()  {
+    public void navigateLobbyScene() {
         showScene(GameApp.class.getResource("lobby-view.fxml"));
-        StorageSingleton.getInstance().setScheduler(Executors.newScheduledThreadPool(1));
-        if(StorageSingleton.getInstance().getLobbyController() != null) {
-            StorageSingleton.getInstance().getLobbyController().initialize();
+        GlobalStorage.getInstance().setScheduler(Executors.newScheduledThreadPool(1));
+        if (GlobalStorage.getInstance().getLobbyController() != null) {
+            GlobalStorage.getInstance().getLobbyController().initialize();
         }
     }
 
     public void navigateGameScene() {
-
         showScene(GameApp.class.getResource("game-view.fxml"));
+        GlobalStorage.getInstance().setScheduler(Executors.newScheduledThreadPool(1));
     }
 
 }

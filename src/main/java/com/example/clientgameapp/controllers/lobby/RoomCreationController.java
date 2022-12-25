@@ -5,15 +5,13 @@ import Protocol.Message;
 import Protocol.MessageManager;
 import Protocol.MessageValues.Game.GameInitializationForm;
 import Protocol.MessageValues.Response.ResponseError;
-import Protocol.MessageValues.Response.ResponseSuccess;
-import Protocol.MessageValues.Room.Room;
 import Protocol.MessageValues.Room.RoomAccess;
 import Protocol.MessageValues.Room.RoomInitializationForm;
 import Protocol.exceptions.BadResponseException;
 import Protocol.exceptions.MismatchedClassException;
 import com.example.clientgameapp.DestinationsManager;
+import com.example.clientgameapp.storage.GlobalStorage;
 import util.Converter;
-import com.example.clientgameapp.storage.StorageSingleton;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientException;
@@ -84,8 +82,8 @@ public class RoomCreationController {
                 ResponseError error = (ResponseError) roomInitializedMessage.value();
                 throw new GameException(error.getErrorMessage());
             } else {
-                StorageSingleton.getInstance().getScheduler().shutdownNow();
-                StorageSingleton.getInstance().setColor(color);
+                GlobalStorage.getInstance().getScheduler().shutdownNow();
+                GlobalStorage.getInstance().setColor(color);
                 destinationsManager.navigateLobbyScene();
             }
         } catch (ClientException | GameException | RuntimeException |
@@ -94,7 +92,7 @@ public class RoomCreationController {
             ErrorAlert.show(e.getMessage());
         } catch (IOException e) {
             ErrorAlert.show(e.getMessage());
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
         }
     }
 
@@ -109,6 +107,6 @@ public class RoomCreationController {
 
     public void getColor(ActionEvent actionEvent) {
         javafx.scene.paint.Color originalColor = gameColorPicker.getValue();
-        color = Converter.converColor(originalColor);
+        color = Converter.convertColor(originalColor);
     }
 }

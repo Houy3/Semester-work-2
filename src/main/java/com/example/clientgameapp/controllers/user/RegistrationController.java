@@ -4,7 +4,7 @@ package com.example.clientgameapp.controllers.user;
 import Protocol.MessageValues.Response.ResponseError;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.GameApp;
-import com.example.clientgameapp.storage.StorageSingleton;
+import com.example.clientgameapp.storage.GlobalStorage;
 import exceptions.ClientException;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
@@ -40,7 +40,7 @@ public class RegistrationController {
 
     public void initialize() {
         try {
-            gameApp = StorageSingleton.getInstance().getMainApp();
+            gameApp = GlobalStorage.getInstance().getMainApp();
             connection = ClientConnectionSingleton.getInstance();
             mManager = new HighLevelMessageManager();
             socket = connection.getSocket();
@@ -74,7 +74,7 @@ public class RegistrationController {
                  ClientInputException e) {
             ErrorAlert.show(e.getMessage());
         } catch (IOException ex) {
-            StorageSingleton.getInstance().getMainApp().closeGame();
+            GlobalStorage.getInstance().getMainApp().closeGame();
             ErrorAlert.show(ex.getMessage());
         }
     }

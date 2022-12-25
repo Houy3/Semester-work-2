@@ -6,8 +6,8 @@ import com.example.clientgameapp.controllers.lobby.LobbyController;
 import java.awt.*;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class StorageSingleton {
-    private static StorageSingleton instance;
+public class GlobalStorage {
+    private static GlobalStorage instance;
     private String roomId;
 
     private GameApp gameApp;
@@ -17,18 +17,18 @@ public class StorageSingleton {
 
     private ScheduledExecutorService scheduler;
 
-    private StorageSingleton() {
+    private GlobalStorage() {
     }
 
     static {
         try {
-            instance = new StorageSingleton();
+            instance = new GlobalStorage();
         } catch (Exception e) {
             throw new RuntimeException("Exception occurred in creating singleton instance");
         }
     }
 
-    public static StorageSingleton getInstance() {
+    public static GlobalStorage getInstance() {
         return instance;
     }
 
