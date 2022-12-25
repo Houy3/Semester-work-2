@@ -1,19 +1,14 @@
 package TestClient;
 
-import Protocol.Message;
+import Protocol.Message.Request;
+import Protocol.Message.RequestValues.GameInitializationForm;
+import Protocol.Message.RequestValues.RoomConnectionForm;
+import Protocol.Message.RequestValues.RoomInitializationForm;
+import Protocol.Message.RequestValues.UserLoginForm;
+import Protocol.Message.ResponseValues.Room;
+import Protocol.Message.models.RoomAccess;
 import Protocol.MessageManager;
-import Protocol.MessageValues.Game.GameInitializationForm;
-import Protocol.MessageValues.Response.ResponseError;
-import Protocol.MessageValues.Response.ResponseSuccess;
-import Protocol.MessageValues.Room.Room;
-import Protocol.MessageValues.Room.RoomAccess;
-import Protocol.MessageValues.Room.RoomConnectionForm;
-import Protocol.MessageValues.Room.RoomInitializationForm;
-import Protocol.MessageValues.User.UserLoginForm;
-import Protocol.MessageValues.User.UserUpdateForm;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
-import Protocol.exceptions.ProtocolVersionException;
+import Protocol.ProtocolVersionException;
 
 import java.awt.*;
 import java.io.IOException;
@@ -31,93 +26,97 @@ public class Test {
 
 
 
-    public static void main(String[] args) throws BadResponseException, MismatchedClassException, IOException, ProtocolVersionException {
+    public static void main(String[] args) throws IOException, ProtocolVersionException {
 
-        user1();
-        user2();
-
-        MessageManager.sendMessage(
-                new Message(MessageManager.MessageType.GAME_START, null),
-                socket1
-        );
-
-        System.out.println("read");
-
-        Message message = MessageManager.readMessage(socket1.getInputStream());
-        System.out.println(message.type());
-        System.out.println(message.value());
-
-        System.out.println("end");
-
-    }
-
-    public static void user1() throws BadResponseException {
-        try {
-            socket1 = new Socket("localhost", PORT);
-
-            UserLoginForm user = new UserLoginForm("email@mail.ru", "password");
-
-            Message message = MessageManager.sendMessage(
-                    new Message(MessageManager.MessageType.USER_LOGIN, user),
-                    socket1
-            );
-            System.out.println(message.value());
-
-            message = MessageManager.sendMessage(
-                    new Message(MessageManager.MessageType.ROOM_INITIALIZE,
-                            new RoomInitializationForm(
-                                    4,
-                                    RoomAccess.PUBLIC,
-                                    Color.RED,
-                                    new GameInitializationForm(10, 40, 35))),
-                    socket1
-            );
-            code = ((Room)((ResponseSuccess)message.value()).getResponseValue()).getCode();
-            System.out.println(message.value());
-
-            message = MessageManager.sendMessage(
-                    new Message(MessageManager.MessageType.ROOM_I_AM_READY_TO_START,null),
-                    socket1
-            );
-            System.out.println(message.value());
-
-        } catch (IOException | MismatchedClassException e) {
-            System.out.println(e.getMessage());
-        }
+//        user1();
+//        user2();
+//
+//        MessageManager.sendRequest(
+//                new Request(MessageManager.MessageType.GAME_START, null),
+//                socket1
+//        );
+//        MessageManager.sendRequest(
+//                new Request(MessageManager.MessageType.GAME_START, null),
+//                socket2
+//        );
+//
+//        System.out.println("read");
+//
+//        Request request = MessageManager.readRequest(socket1.getInputStream());
+//        System.out.println(request.type());
+//        System.out.println(request.value());
+//
+//        System.out.println("end");
 
     }
 
-    public static void user2() throws BadResponseException {
-        try {
-            socket2 = new Socket("localhost", PORT);
-
-            UserLoginForm user = new UserLoginForm("email2@mail.ru", "password");
-
-            Message message = MessageManager.sendMessage(
-                    new Message(MessageManager.MessageType.USER_LOGIN, user),
-                    socket2
-            );
-            System.out.println(message.value());
-
-
-            message = MessageManager.sendMessage(
-                    new Message(MessageManager.MessageType.ROOM_CONNECT,
-                            new RoomConnectionForm(code, Color.BLUE)),
-                    socket2
-            );
-            System.out.println(message.value());
-
-
-            message = MessageManager.sendMessage(
-                    new Message(MessageManager.MessageType.ROOM_I_AM_READY_TO_START,null),
-                    socket2
-            );
-            System.out.println(message.value());
-
-
-        } catch (IOException | MismatchedClassException e) {
-            System.out.println(e.getMessage());
-        }
-
-    }
+//    public static void user1() throws BadResponseException {
+//        try {
+//            socket1 = new Socket("localhost", PORT);
+//
+//            UserLoginForm user = new UserLoginForm("email@mail.ru", "password");
+//
+//            Request request = MessageManager.sendRequest(
+//                    new Request(MessageManager.MessageType.USER_LOGIN, user),
+//                    socket1
+//            );
+//            System.out.println(request.value());
+//
+//            request = MessageManager.sendRequest(
+//                    new Request(MessageManager.MessageType.ROOM_INITIALIZE,
+//                            new RoomInitializationForm(
+//                                    4,
+//                                    RoomAccess.PUBLIC,
+//                                    Color.RED,
+//                                    new GameInitializationForm(10, 40, 35))),
+//                    socket1
+//            );
+//            code = ((Room)((ResponseSuccess) request.value()).getResponseValue()).code();
+//            System.out.println(request.value());
+//
+//            request = MessageManager.sendRequest(
+//                    new Request(MessageManager.MessageType.ROOM_I_AM_READY_TO_START,null),
+//                    socket1
+//            );
+//            System.out.println(request.value());
+//
+//        } catch (IOException | MismatchedClassException e) {
+//            System.out.println(e.getMessage());
+//        }
+//
+//    }
+//
+//    public static void user2() throws BadResponseException {
+//        try {
+//            socket2 = new Socket("localhost", PORT);
+//
+//            UserLoginForm user = new UserLoginForm("email2@mail.ru", "password");
+//
+//            Request request = MessageManager.sendRequest(
+//                    new Request(MessageManager.MessageType.USER_LOGIN, user),
+//                    socket2
+//            );
+//            System.out.println(request.value());
+//
+//
+//            request = MessageManager.sendRequest(
+//                    new Request(MessageManager.MessageType.ROOM_CONNECT,
+//                            new RoomConnectionForm(code, Color.BLUE)),
+//                    socket2
+//            );
+//            System.out.println(request.value());
+//
+//
+//            request = MessageManager.sendRequest(
+//                    new Request(MessageManager.MessageType.ROOM_I_AM_READY_TO_START,null),
+//                    socket2
+//            );
+//            System.out.println(request.value());
+//
+//
+//        } catch (IOException | MismatchedClassException e) {
+//            System.out.println(e.getMessage());
+//        }
+//
+//    }
 }

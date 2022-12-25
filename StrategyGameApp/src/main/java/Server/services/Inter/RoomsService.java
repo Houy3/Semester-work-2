@@ -1,9 +1,8 @@
 package Server.services.Inter;
 
-import Protocol.MessageValues.Room.RoomConnectionForm;
-import Protocol.MessageValues.Room.RoomInitializationForm;
+import Protocol.Message.RequestValues.RoomConnectionForm;
+import Protocol.Message.RequestValues.RoomInitializationForm;
 import Server.models.RoomDB;
-import Server.models.UserDB;
 import Server.models.validators.ValidatorException;
 
 import java.util.List;
@@ -11,11 +10,11 @@ import java.util.List;
 public interface RoomsService {
 
 
-    RoomDB initialize(RoomInitializationForm form, UserDB user) throws ValidatorException;
+    RoomDB create(RoomInitializationForm form) throws ValidatorException;
 
-    RoomDB connect(RoomConnectionForm form, UserDB user) throws ValidatorException;
+    RoomDB getRoom(RoomConnectionForm form) throws ValidatorException;
 
-    void disconnect(UserDB user);
+    void remove(RoomDB room);
 
     List<RoomDB> getOpenRooms();
 

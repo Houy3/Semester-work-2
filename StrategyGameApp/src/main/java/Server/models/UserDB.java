@@ -1,10 +1,9 @@
 package Server.models;
 
 
-import Protocol.MessageValues.User.User;
-import Protocol.MessageValues.User.UserLoginForm;
-import Protocol.MessageValues.User.UserRegistrationForm;
-import Protocol.MessageValues.User.UserUpdateForm;
+import Protocol.Message.ResponseValues.User;
+import Protocol.Message.RequestValues.UserLoginForm;
+import Protocol.Message.RequestValues.UserRegistrationForm;
 import Server.DB.SQLGenerator.SQLAnnotations.*;
 
 import java.util.Objects;
@@ -32,48 +31,23 @@ public class UserDB {
     public UserDB() {
     }
 
-    public UserDB(String email, String password, String nickname) {
-        this.email = email;
-        this.passwordHash = password;
-        this.nickname = nickname;
-    }
-
-    public UserDB(Long id, String email, String password, String nickname) {
-        this.id = id;
-        this.email = email;
-        this.passwordHash = password;
-        this.nickname = nickname;
-    }
-
     public UserDB(UserRegistrationForm form) {
-        this.email = form.getEmail();
-        this.password = form.getPassword();
-        this.nickname = form.getNickname();
+        this.email = form.email();
+        this.password = form.password();
+        this.nickname = form.nickname();
     }
 
     public UserDB(UserLoginForm form) {
-        this.email = form.getEmail();
-        this.password = form.getPassword();
+        this.email = form.email();
+        this.password = form.password();
     }
 
     public User toUser() {
         return new User(getNickname());
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getEmail() {
         return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPassword() {
@@ -110,7 +84,6 @@ public class UserDB {
                 ", nickname='" + nickname + '\'' +
                 '}';
     }
-
 
     @Override
     public boolean equals(Object o) {

@@ -1,8 +1,9 @@
 package Server.services.Impl;
 
 
-import Protocol.MessageValues.User.UserProfileData;
-import Protocol.MessageValues.User.UserUpdateForm;
+import Protocol.Message.RequestValues.UserLoginForm;
+import Protocol.Message.RequestValues.UserRegistrationForm;
+import Protocol.Message.RequestValues.UserUpdateForm;
 import Server.DB.exceptions.DBException;
 import Server.DB.exceptions.NotFoundException;
 import Server.DB.exceptions.NotUniqueException;
@@ -21,6 +22,8 @@ import Server.services.exceptions.UserAlreadyLoginException;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class UsersServiceImpl extends ServiceWithDBImpl implements UsersService {
 
@@ -32,7 +35,6 @@ public class UsersServiceImpl extends ServiceWithDBImpl implements UsersService 
     private final EmailValidator emailValidator;
     private final PasswordValidator passwordValidator;
     private final NicknameValidator nicknameValidator;
-
     private final PasswordEncryptor passwordEncryptor;
 
 
@@ -50,43 +52,69 @@ public class UsersServiceImpl extends ServiceWithDBImpl implements UsersService 
         this.activeUsers = new HashSet<>();
     }
 
-    @Override
-    public void register(UserDB user) throws DBException, ServiceException, NotUniqueException, NullException, ValidatorException {
-        emailValidator.check(user.getEmail());
-        passwordValidator.check(user.getPassword());
-        nicknameValidator.check(user.getNickname());
-        user.setPasswordHash(passwordEncryptor.encrypt(user.getPassword()));
-        user.setPassword(null);
 
+    private final Lock lock = new ReentrantLock();
+
+    @Override
+    public void register(UserRegistrationForm form) throws DBException, ServiceException, NotUniqueException, NullException, ValidatorException {
+        unNullCheck(form);
+
+        emailValidator.check(form.email());
+        passwordValidator.check(form.password());
+        nicknameValidator.check(form.nickname());
+
+        UserDB user = encryptPassword(new UserDB(form));
         super.add(user);
     }
 
     @Override
-    public void login(UserDB user) throws ServiceException, DBException, NullException, NotFoundException, UserAlreadyLoginException {
-        user.setPasswordHash(passwordEncryptor.encrypt(user.getPassword()));
+    public UserDB login(UserLoginForm form) throws ServiceException, DBException, NullException, NotFoundException, UserAlreadyLoginException, ValidatorException {
+        unNullCheck(form);
+
+        UserDB user = encryptPassword(new UserDB(form));
         this.usersRepository.selectUserByEmailAndPasswordHash(user);
+
+        lock.lock();
         if (activeUsers.contains(user)) {
             throw new UserAlreadyLoginException();
         }
         activeUsers.add(user);
+        lock.unlock();
+        return user;
     }
 
     @Override
-    public void logout(UserDB userDB) {
-        activeUsers.remove(userDB);
+    public void logout(UserDB user) throws ValidatorException {
+        unNullCheck(user);
+
+        lock.lock();
+        activeUsers.remove(user);
+        lock.unlock();
     }
 
 
     @Override
     public void update(UserUpdateForm form, UserDB user) throws DBException, ServiceException, NotUniqueException, NotFoundException, NullException, ValidatorException {
-        nicknameValidator.check(form.getNickname());
+        unNullCheck(form);
+        unNullCheck(user);
 
-        user.setNickname(form.getNickname());
+        nicknameValidator.check(form.nickname());
+
+        user.setNickname(form.nickname());
         super.change(user, userIdFieldName);
     }
 
-    @Override
-    public UserProfileData getProfileData(UserDB user) {
-        return new UserProfileData(19);
+
+
+    private UserDB encryptPassword(UserDB user) {
+        user.setPasswordHash(passwordEncryptor.encrypt(user.getPassword()));
+        user.setPassword(null);
+        return user;
+    }
+
+    private void unNullCheck(Object object) throws ValidatorException {
+        if (object == null) {
+            throw new ValidatorException("Not null expected");
+        }
     }
 }

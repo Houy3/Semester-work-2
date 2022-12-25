@@ -1,6 +1,6 @@
 package Server.models.validators;
 
-import Protocol.MessageValues.Room.RoomInitializationForm;
+import Protocol.Message.RequestValues.RoomInitializationForm;
 
 public record RoomInitValidator(int minCountOfPlayers, int maxCountOfPlayers, GameInitValidator gameInitValidator) implements Validator<RoomInitializationForm> {
 
@@ -10,18 +10,18 @@ public record RoomInitValidator(int minCountOfPlayers, int maxCountOfPlayers, Ga
             throw new ValidatorException("Room initialization form is empty. ");
         }
 
-        if (object.getAccess() == null) {
+        if (object.access() == null) {
             throw new ValidatorException("Set access on room. ");
         }
 
-        if (object.getCreatorColor() == null) {
+        if (object.playerColor() == null) {
             throw new ValidatorException("Choose your color in game. ");
         }
 
-        if (object.getMaxCountOfPlayers() < minCountOfPlayers || object.getMaxCountOfPlayers() > maxCountOfPlayers) {
-            throw new ValidatorException("Minimum " + minCountOfPlayers + " players. Maximum " + maxCountOfPlayers + " players ");
+        if (object.maxCountOfPlayers() < minCountOfPlayers || object.maxCountOfPlayers() > maxCountOfPlayers) {
+            throw new ValidatorException("Minimum " + minCountOfPlayers + " players. Maximum " + maxCountOfPlayers + " players. ");
         }
 
-        gameInitValidator.check(object.getGameInitializationForm());
+        gameInitValidator.check(object.gameInitializationForm());
     }
 }

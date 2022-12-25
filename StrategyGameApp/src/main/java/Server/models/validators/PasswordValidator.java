@@ -13,11 +13,11 @@ public record PasswordValidator(String regex, int minLength, int maxLength) impl
         }
 
         if (object.length() < minLength) {
-            throw new ValidatorException("The password must contain at least " + minLength + " characters.");
+            throw new ValidatorException("The password must contain at least " + minLength + " characters. ");
         }
 
         if (object.length() > maxLength) {
-            throw new ValidatorException("The password must contain no more than " + maxLength + " characters.");
+            throw new ValidatorException("The password must contain no more than " + maxLength + " characters. ");
         }
 
         Pattern pattern2 = Pattern.compile(regex);

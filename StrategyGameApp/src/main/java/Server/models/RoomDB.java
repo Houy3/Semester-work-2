@@ -1,23 +1,17 @@
 package Server.models;
 
-import Protocol.Message;
-import Protocol.MessageManager;
-import Protocol.MessageValues.Game.GameInitializationForm;
-import Protocol.MessageValues.Room.Room;
-import Protocol.MessageValues.Room.RoomAccess;
-import Protocol.MessageValues.Room.RoomInitializationForm;
-import Protocol.MessageValues.User.User;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
-
+import Protocol.Message.Request;
+import Protocol.Message.RequestValues.GameInitializationForm;
+import Protocol.Message.RequestValues.RoomInitializationForm;
+import Protocol.Message.ResponseValues.Room;
+import Protocol.Message.ResponseValues.User;
+import Protocol.Message.models.RoomAccess;
+import Server.models.validators.ValidatorException;
 
 import java.awt.*;
-import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -25,54 +19,47 @@ import java.util.stream.Collectors;
 public class RoomDB {
 
     private String code;
-    private Integer maxCountOfPlayers;
-    private RoomAccess access;
+    private final Integer maxCountOfPlayers;
+    private final RoomAccess access;
 
     private final List<UserDB> users;
-    private final Map<UserDB, Color> usersColor;
+    private final Map<UserDB, Socket> usersSockets;
     private final Map<UserDB, Boolean> usersIsReady;
 
 
-    private final Map<UserDB, Socket> sockets;
-    private Boolean inGame;
-
-    private GameInitializationForm gameInitializationForm;
+    private final Map<UserDB, Color> usersColor;
+    private final GameInitializationForm gameInitializationForm;
 
     public RoomDB(RoomInitializationForm form) {
-        this.maxCountOfPlayers = form.getMaxCountOfPlayers();
-        this.access = form.getAccess();
-        this.gameInitializationForm = form.getGameInitializationForm();
+        this.maxCountOfPlayers = form.maxCountOfPlayers();
+        this.access = form.access();
+        this.gameInitializationForm = form.gameInitializationForm();
 
         this.users = new ArrayList<>();
         this.usersColor = new HashMap<>();
         this.usersIsReady = new HashMap<>();
-        this.sockets = new HashMap<>();
-        this.inGame = false;
+        this.usersSockets = new HashMap<>();
     }
 
     public Room toRoom() {
-        Room room = new Room();
-
-        room.setCode(code);
-        room.setMaxCountOfPlayers(maxCountOfPlayers);
-        room.setAccess(access);
-        room.setGameInitializationForm(gameInitializationForm);
-
-        room.setUsers(users.stream().map(UserDB::toUser).collect(Collectors.toList()));
-
         Map<User, Color> colorMap = new HashMap<>();
         for (UserDB userDB : users) {
             colorMap.put(userDB.toUser(), usersColor.get(userDB));
         }
-        room.setUsersColor(colorMap);
-
         Map<User, Boolean> readyMap = new HashMap<>();
         for (UserDB userDB : users) {
             readyMap.put(userDB.toUser(), usersIsReady.get(userDB));
         }
-        room.setUsersIsReady(readyMap);
 
-        return room;
+        return new Room(
+                code,
+                maxCountOfPlayers,
+                access,
+                users.stream().map(UserDB::toUser).collect(Collectors.toList()),
+                colorMap,
+                readyMap,
+                gameInitializationForm
+                );
     }
 
     public String getCode() {
@@ -83,87 +70,131 @@ public class RoomDB {
         this.code = code;
     }
 
-    public Integer getMaxCountOfPlayers() {
-        return maxCountOfPlayers;
+    public boolean isPublic() {
+        return access.equals(RoomAccess.PUBLIC);
     }
 
-    public void setMaxCountOfPlayers(Integer maxCountOfPlayers) {
-        this.maxCountOfPlayers = maxCountOfPlayers;
-    }
-
-    public RoomAccess getAccess() {
-        return access;
-    }
-
-    public void setAccess(RoomAccess access) {
-        this.access = access;
-    }
-
-    public List<UserDB> getUsers() {
-        return users;
-    }
-
-    public Map<UserDB, Color> getUsersColor() {
-        return usersColor;
-    }
-
-    public Map<UserDB, Boolean> getUsersIsReady() {
-        return usersIsReady;
-    }
-
-    public GameInitializationForm getGameInitializationForm() {
-        return gameInitializationForm;
-    }
-
-    public void setGameInitializationForm(GameInitializationForm gameInitializationForm) {
-        this.gameInitializationForm = gameInitializationForm;
-    }
-    public Map<UserDB, Socket> getSockets() {
-        return sockets;
-    }
-
-    public Boolean getInGame() {
-        return inGame;
-    }
-
-    public void setInGame(Boolean inGame) {
-        this.inGame = inGame;
-    }
-
-    public boolean everybodyIsReady() {
-        boolean flag = true;
-        for (boolean f : usersIsReady.values()) {
-            flag = flag && f;
-        }
-        return flag;
+    public boolean isGameInProcess() {
+        return gameDB != null;
     }
 
     private final Lock lock = new ReentrantLock();
-    public void addSocket(UserDB user, Socket socket) {
+
+    public boolean isFull() {
         lock.lock();
-        sockets.put(user, socket);
+        boolean isFull =  users.size() >= maxCountOfPlayers;
         lock.unlock();
+        return isFull;
     }
 
-    public void removeSocket(UserDB user) {
+    public boolean isEmpty() {
         lock.lock();
-        sockets.remove(user);
+        boolean isEmpty = users.isEmpty();
         lock.unlock();
+        return isEmpty;
     }
 
-    public synchronized void sendMessageToAllUsersInRoom(Message message) {
-        for (Socket socket : sockets.values()) {
-            new Thread(() -> {
-                try {
-                    MessageManager.sendMessage(message, socket);
-                } catch (IOException | BadResponseException | MismatchedClassException ignored) {
-                    try {
-                        socket.close();
-                    } catch (IOException ignored1) {}
-                }
-            }).start();
+    public boolean isReady(UserDB user) {
+        lock.lock();
+        boolean isReady = usersIsReady.get(user);
+        lock.unlock();
+        return isReady;
+    }
+
+    public boolean isEverybodyReady() {
+        lock.lock();
+        boolean isEverybodyReady = true;
+        for (UserDB user : users) {
+            isEverybodyReady = isEverybodyReady && isReady(user);
         }
+        lock.unlock();
+        return isEverybodyReady;
     }
+
+    public void addUserToRoom(UserDB user, Color color, Socket socket) throws ValidatorException {
+        lock.lock();
+        if (isFull()) {
+            lock.unlock();
+            throw new ValidatorException("Room is full. ");
+        }
+        if (isGameInProcess()) {
+            lock.unlock();
+            throw new ValidatorException("Game in process. ");
+        }
+        users.add(user);
+        usersIsReady.put(user, false);
+        usersSockets.put(user, socket);
+        usersColor.put(user, color);
+        lock.unlock();
+    }
+
+    public void removeUserFromRoom(UserDB user) {
+        lock.lock();
+        if (isGameInProcess()) {
+            gameDB.disconnectUser(user);
+        }
+        users.remove(user);
+        usersIsReady.remove(user);
+        usersSockets.remove(user);
+        usersColor.remove(user);
+        lock.unlock();
+    }
+
+    public void setUserIsReady(UserDB user) {
+        lock.lock();
+        usersIsReady.replace(user, true);
+        lock.unlock();
+    }
+
+    public void setUserIsNotReady(UserDB user) {
+        lock.lock();
+        usersIsReady.replace(user, true);
+        lock.unlock();
+    }
+
+    public void setUserColor(UserDB user, Color color) throws ValidatorException {
+        lock.lock();
+        if (usersColor.containsValue(color)) {
+            lock.unlock();
+            throw new ValidatorException("Color is taken");
+        }
+        usersColor.replace(user, color);
+        lock.unlock();
+    }
+
+    public void sendMessageToAllUsersInRoom(Request request) {
+        lock.lock();
+        for (Socket socket : usersSockets.values()) {
+//            HighLevelMessageManager.se(request, socket);
+            //TODO
+        }
+        lock.unlock();
+    }
+
+
+    private GameDB gameDB;
+
+    public void startGame() throws ValidatorException {
+        lock.lock();
+        if (isGameInProcess()) {
+            return;
+        }
+
+        if (!isEverybodyReady()) {
+            throw new ValidatorException("Not everybody ready");
+        }
+        if (users.size() < 2) {
+            throw new ValidatorException("Not enough players");
+        }
+
+        gameDB = new GameDB(gameInitializationForm, users);
+        lock.unlock();
+    }
+
+    public GameDB getGameDB() {
+        return gameDB;
+    }
+
 
     @Override
     public String toString() {
@@ -172,12 +203,27 @@ public class RoomDB {
                 ", maxCountOfPlayers=" + maxCountOfPlayers +
                 ", access=" + access +
                 ", users=" + users +
-                ", usersColor=" + usersColor +
+                ", usersSockets=" + usersSockets +
                 ", usersIsReady=" + usersIsReady +
-                ", sockets=" + sockets +
-                ", inGame=" + inGame +
+                ", usersColor=" + usersColor +
                 ", gameInitializationForm=" + gameInitializationForm +
+                ", gameDB=" + gameDB +
                 ", lock=" + lock +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RoomDB roomDB = (RoomDB) o;
+
+        return Objects.equals(code, roomDB.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return code != null ? code.hashCode() : 0;
     }
 }
