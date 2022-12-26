@@ -1,8 +1,8 @@
 package Server.models;
 
 import Protocol.Message.ResponseValues.Game;
-import Protocol.Message.RequestValues.GameActionArmyMovement;
-import Protocol.Message.RequestValues.GameActionCityCapture;
+import Protocol.Message.RequestValues.GameArmyStartMove;
+import Protocol.Message.RequestValues.GameArmyEndMove;
 import Protocol.Message.RequestValues.GameInitializationForm;
 import Protocol.Message.ResponseValues.User;
 import Protocol.Message.models.CitiesMap;
@@ -31,11 +31,10 @@ public class GameDB {
     //Скорость роста армии игрока в городе ед./с.
     private final int armyGrowthRate;
 
-    private static final int waitingTimeS = 15;
+    private static final int waitingTimeS = 1;
 
     public GameDB(GameInitializationForm form, List<UserDB> users) {
         MapCitiesGenerator.generateCitiesMap(this, form.countOfCities(), users);
-        this.startTime = new Date((new Date()).getTime() + waitingTimeS*1000);
         this.armySpeed = form.armySpeed();
         this.armyGrowthRate = form.armyGrowthRate();
     }
@@ -59,15 +58,11 @@ public class GameDB {
 
     private boolean isGameInProcess = false;
     public void start() {
-        try {
-            Thread.sleep(startTime.getTime() - (new Date()).getTime() );
-        } catch (InterruptedException ignored) {}
-
         isGameInProcess = true;
-        ArmyAutoIncrement armyAutoIncrement = new ArmyAutoIncrement(this);
-        armyAutoIncrement.start();
-    }
 
+        this.startTime = new Date((new Date()).getTime() + waitingTimeS*1000);
+        new ArmyAutoIncrement().start();
+    }
 
     public CitiesMap getCitiesMap() {
         return citiesMap;
@@ -88,43 +83,55 @@ public class GameDB {
 
     private final Lock lock = new ReentrantLock();
 
-    public void disconnectUser(UserDB user) {
+    private UserDB winner = null;
+    public void disconnectUser(UserDB user, UserConnectionThread userConnectionThread) {
         lock.lock();
         for (City city : usersCities.keySet()) {
             if (usersCities.get(city).equals(user)) {
                 usersCities.remove(city);
+                userConnectionThread.moveArmyEnd(new GameArmyEndMove(
+                        city,
+                        null,
+                        citiesArmies.get(city)
+                ));
             }
         }
-
         lock.unlock();
     }
 
-    public void moveArmy(GameActionArmyMovement gameActionArmyMovement, UserDB user, UserConnectionThread userConnectionThread) throws ValidatorException {
+    public UserDB getWinner() {
+        return winner;
+    }
+
+    public void moveArmy(GameArmyStartMove gameArmyStartMove, UserDB user, UserConnectionThread userConnectionThread) throws ValidatorException {
         lock.lock();
-        City startCity = gameActionArmyMovement.way().getStart();
+        City startCity = gameArmyStartMove.way().getStart();
         if (!usersCities.get(startCity).equals(user)) {
+            lock.unlock();
             throw new ValidatorException("It's not your city. ");
         }
-        if (citiesArmies.get(startCity) < gameActionArmyMovement.armyCount()) {
+        if (citiesArmies.get(startCity) < gameArmyStartMove.armyCount()) {
+            lock.unlock();
             throw new ValidatorException("Not enough army. ");
         }
 
-        citiesArmies.replace(startCity, citiesArmies.get(startCity) - gameActionArmyMovement.armyCount());
+        citiesArmies.replace(startCity, citiesArmies.get(startCity) - gameArmyStartMove.armyCount());
         lock.unlock();
-        new ArmyMove(this, gameActionArmyMovement, user, userConnectionThread, lock).start();
+        new ArmyMove(gameArmyStartMove, user, userConnectionThread, lock).start();
     }
 
 
-
-
-    public void incrementArmies() {
+    public boolean isEnd() {
         lock.lock();
-        for (City city : citiesArmies.keySet()) {
-            if (usersCities.get(city) != null) {
-                citiesArmies.replace(city, citiesArmies.get(city) + armyGrowthRate);
-            }
+        int countOfActiveUsers = new HashSet<>(usersCities.values()).size();
+        if (countOfActiveUsers == 1) {
+            winner = usersCities.values().stream().toList().get(0);
+            lock.unlock();
+            return true;
+        } else {
+            lock.unlock();
+            return false;
         }
-        lock.unlock();
     }
 
     @Override
@@ -142,15 +149,12 @@ public class GameDB {
 
     private class ArmyMove extends Thread {
 
-        private final GameDB game;
-        private final GameActionArmyMovement gameActionArmyMovement;
-
+        private final GameArmyStartMove gameArmyStartMove;
         private final UserDB user;
         private final UserConnectionThread userConnectionThread;
 
-        public ArmyMove(GameDB game, GameActionArmyMovement gameActionArmyMovement, UserDB user, UserConnectionThread userConnectionThread, Lock lock) {
-            this.game = game;
-            this.gameActionArmyMovement = gameActionArmyMovement;
+        public ArmyMove(GameArmyStartMove gameArmyStartMove, UserDB user, UserConnectionThread userConnectionThread, Lock lock) {
+            this.gameArmyStartMove = gameArmyStartMove;
             this.user = user;
             this.userConnectionThread = userConnectionThread;
         }
@@ -158,39 +162,51 @@ public class GameDB {
         @Override
         public void run() {
             try {
-                Thread.sleep(1000L * ((long) gameActionArmyMovement.way().getLength()) / armySpeed);
+                Thread.sleep(1000L * ((long) gameArmyStartMove.way().getLength()) / armySpeed);
             } catch (InterruptedException ignored) {}
-            City endCity = gameActionArmyMovement.way().getEnd();
+
+            City endCity = gameArmyStartMove.way().getEnd();
             lock.lock();
-            if (usersCities.get(endCity) == null || usersCities.get(endCity).equals(user)) {
-                citiesArmies.replace(endCity, citiesArmies.get(endCity) + gameActionArmyMovement.armyCount());
-                userConnectionThread.captureCityWithResponse(new GameActionCityCapture(endCity, user.toUser(), citiesArmies.get(endCity) ));
-            } else  {
-                citiesArmies.replace(endCity, citiesArmies.get(endCity) - gameActionArmyMovement.armyCount());
-                if (citiesArmies.get(endCity) < 0) {
+            if (usersCities.get(endCity) == null || !usersCities.get(endCity).equals(user)) {
+                citiesArmies.replace(endCity, citiesArmies.get(endCity) - gameArmyStartMove.armyCount());
+                if (citiesArmies.get(endCity) == 0) {
+                    //армии самоуничтожились
+                    userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, null, citiesArmies.get(endCity) ));
+                } else if (citiesArmies.get(endCity) < 0) {
+                    //произошел захват города
                     citiesArmies.replace(endCity, Math.abs(citiesArmies.get(endCity)) );
                     usersCities.replace(endCity, user);
-                    userConnectionThread.captureCityWithResponse(new GameActionCityCapture(endCity, user.toUser(), citiesArmies.get(endCity) ));
+                    userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, user.toUser(), citiesArmies.get(endCity) ));
                 } else {
-                    userConnectionThread.captureCityWithResponse(new GameActionCityCapture(endCity, usersCities.get(endCity).toUser(), citiesArmies.get(endCity) ));
+                    //захват не произошел
+                    userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, usersCities.get(endCity).toUser(), citiesArmies.get(endCity) ));
                 }
+            } else {
+                //перевод армии в свой город
+                citiesArmies.replace(endCity, citiesArmies.get(endCity) + gameArmyStartMove.armyCount());
+                userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, user.toUser(), citiesArmies.get(endCity) ));
             }
             lock.unlock();
         }
     }
 
+
     private class ArmyAutoIncrement extends Thread {
-
-        private final GameDB game;
-
-        public ArmyAutoIncrement(GameDB game) {
-            this.game = game;
-        }
 
         @Override
         public void run() {
+            try {
+                Thread.sleep(startTime.getTime() - (new Date()).getTime() );
+            } catch (InterruptedException ignored) {}
+
             while (isGameInProcess) {
-                game.incrementArmies();
+                lock.lock();
+                for (City city : citiesArmies.keySet()) {
+                    if (usersCities.get(city) != null) {
+                        citiesArmies.replace(city, citiesArmies.get(city) + armyGrowthRate);
+                    }
+                }
+                lock.unlock();
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -199,4 +215,5 @@ public class GameDB {
             }
         }
     }
+
 }

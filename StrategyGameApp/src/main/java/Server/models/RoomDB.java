@@ -133,9 +133,6 @@ public class RoomDB {
 
     public void removeUserFromRoom(UserDB user) {
         lock.lock();
-        if (isGameInProcess()) {
-            gameDB.disconnectUser(user);
-        }
         users.remove(user);
         usersIsReady.remove(user);
         usersSockets.remove(user);
@@ -151,7 +148,7 @@ public class RoomDB {
 
     public void setUserIsNotReady(UserDB user) {
         lock.lock();
-        usersIsReady.replace(user, true);
+        usersIsReady.replace(user, false);
         lock.unlock();
     }
 
@@ -165,16 +162,12 @@ public class RoomDB {
         lock.unlock();
     }
 
-    public void sendMessageToAllUsersInRoom(Request request) {
-        lock.lock();
-        for (UserDB user : usersSockets.keySet()) {
-            try {
-                HighLevelMessageManager.sendRequestWithOutResponse(request, usersSockets.get(user));
-            } catch (IOException | ProtocolVersionException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        lock.unlock();
+    public Lock getRoomLock() {
+        return lock;
+    }
+
+    public List<Socket> getSockets() {
+        return new ArrayList<>(usersSockets.values());
     }
 
 
@@ -194,10 +187,14 @@ public class RoomDB {
         }
 
         gameDB = new GameDB(gameInitializationForm, users);
+        gameDB.start();
         lock.unlock();
     }
 
     public GameDB getGameDB() {
+        if (gameDB == null) {
+            throw new RuntimeException("Game not in process");
+        }
         return gameDB;
     }
 

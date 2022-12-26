@@ -3,8 +3,8 @@ package Protocol;
 import Protocol.Message.Request;
 import Protocol.Message.Response;
 import Protocol.Message.ResponseValues.Game;
-import Protocol.Message.RequestValues.GameActionArmyMovement;
-import Protocol.Message.RequestValues.GameActionCityCapture;
+import Protocol.Message.RequestValues.GameArmyStartMove;
+import Protocol.Message.RequestValues.GameArmyEndMove;
 import Protocol.Message.RequestValues.GameResults;
 import Protocol.Message.RequestValues.RoomConnectionForm;
 import Protocol.Message.RequestValues.RoomInitializationForm;
@@ -95,12 +95,12 @@ public final class HighLevelMessageManager extends MessageManager {
     }
 
     /**пустой ответ*/
-    public static Response moveArmy(GameActionArmyMovement value, Socket socket) throws IOException, ProtocolVersionException {
-        return sendRequest(new Request(GAME_ACTION_ARMY_MOVEMENT, value), socket);
+    public static Response moveArmyStart(GameArmyStartMove value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(GAME_ACTION_ARMY_START_MOVE, value), socket);
     }
     /**пустой ответ*/
-    public static Response captureCity(GameActionCityCapture value, Socket socket) throws IOException, ProtocolVersionException {
-        return sendRequest(new Request(GAME_ACTION_CITY_CAPTURE, value), socket);
+    public static Response moveArmyEnd(GameArmyEndMove value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(GAME_ACTION_ARMY_END_MOVE, value), socket);
     }
     /**Возвращает Game*/
     public static Response getGame(Socket socket) throws IOException, ProtocolVersionException {
