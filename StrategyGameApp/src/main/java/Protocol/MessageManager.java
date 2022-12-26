@@ -14,18 +14,17 @@ import java.util.Map;
 
 public class MessageManager {
 
-    public final static byte VERSION = 3;
+    public final static byte VERSION = 4;
 
 
     /**Необходимо отправить ответ после вызова этой функции*/
     public static Request readRequest(Socket socket) throws IOException, ProtocolVersionException {
         InputStream in = socket.getInputStream();
-
-        versionCheck(in);
+        versionCheck(in.read());
 
         try {
             return new Request(
-                    requestTypes.get(in),
+                    requestTypes.get((byte)in.read()),
                     (RequestValue) new ObjectInputStream(in).readObject()
             );
         } catch (ClassNotFoundException e) {
@@ -41,8 +40,7 @@ public class MessageManager {
     }
 
 
-
-    protected static Response sendRequest(Request request, Socket socket) throws IOException, ProtocolVersionException {
+    public static void sendRequestWithOutResponse(Request request, Socket socket) throws IOException, ProtocolVersionException {
         if (request.type() == null) {
             throw new NullPointerException("Type can't be null");
         }
@@ -52,13 +50,17 @@ public class MessageManager {
         out.write(request.type().getValue());
         new ObjectOutputStream(out).writeObject(request.value());
         out.flush();
+    }
+
+    public static Response sendRequest(Request request, Socket socket) throws IOException, ProtocolVersionException {
+        sendRequestWithOutResponse(request, socket);
 
         //чтение ответа
         InputStream in = socket.getInputStream();
-        versionCheck(in);
+        versionCheck(in.read());
         try {
             return new Response(
-                    responseTypes.get(in.read()),
+                    responseTypes.get((byte)in.read()),
                     (ResponseValue) new ObjectInputStream(in).readObject()
             );
         } catch (ClassNotFoundException e) {
@@ -75,8 +77,8 @@ public class MessageManager {
 
 
     protected static void sendResponse(Response response, Socket socket) throws IOException {
-        if (response.type() == null || response.value() == null) {
-            throw new NullPointerException("Type and value can't be null");
+        if (response.type() == null) {
+            throw new NullPointerException("Type can't be null");
         }
 
         OutputStream out = socket.getOutputStream();
@@ -88,8 +90,7 @@ public class MessageManager {
 
 
 
-    private static void versionCheck(InputStream in) throws IOException, ProtocolVersionException {
-        int version = in.read();
+    private static void versionCheck(int version) throws IOException, ProtocolVersionException {
         if (version == -1) {
             throw new IOException("Connection lost");
         }

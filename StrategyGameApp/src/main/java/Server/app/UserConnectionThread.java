@@ -177,8 +177,7 @@ public class UserConnectionThread implements Runnable {
 
     private void logoutUserWithResponse() throws IOException {
         try {
-            usersService.logout(userDB);
-            userDB = null;
+            logout();
             HighLevelMessageManager.sendResponseSuccess(null, socket);
         } catch (ValidatorException e) {
             errorMessageLog(e);
@@ -219,6 +218,7 @@ public class UserConnectionThread implements Runnable {
             roomDB.addUserToRoom(userDB, form.playerColor(), socket);
             HighLevelMessageManager.sendResponseSuccess(roomDB.toRoom(), socket);
         } catch (ValidatorException e) {
+            roomDB = null;
             HighLevelMessageManager.sendResponseError(e.getMessage(), socket);
         }
     }
@@ -263,9 +263,7 @@ public class UserConnectionThread implements Runnable {
     }
 
     private void disconnectUserFromRoomWithResponse() throws IOException {
-        roomDB.removeUserFromRoom(userDB);
-        roomsService.remove(roomDB);
-        roomDB = null;
+        disconnectFromRoom();
         HighLevelMessageManager.sendResponseSuccess(null, socket);
     }
     private void setReadyToStartWithResponse() throws IOException {
@@ -287,7 +285,7 @@ public class UserConnectionThread implements Runnable {
     private void gameLobby() throws UserDisconnectException, ProtocolVersionException {
         try {
             while (roomDB.isReady(userDB)) {
-                Request request = MessageManager.readRequest(socket);
+                Request request = HighLevelMessageManager.readRequest(socket);
 
                 if (!roomDB.isGameInProcess()) {
                     switch (request.type()) {
@@ -387,7 +385,25 @@ public class UserConnectionThread implements Runnable {
     }
 
 
+    private void logout() throws ValidatorException {
+        usersService.logout(userDB);
+        userDB = null;
+    }
+
+    private void disconnectFromRoom() {
+        roomDB.removeUserFromRoom(userDB);
+        roomsService.remove(roomDB);
+        roomDB = null;
+    }
+
+
     private void exitUser() {
+        if (isConnectedToRoom()) {
+            disconnectFromRoom();
+        }
+        try {
+            logout();
+        } catch (ValidatorException ignored) {}
         closeConnection();
         isExit = true;
     }

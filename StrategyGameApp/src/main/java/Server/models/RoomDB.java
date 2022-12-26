@@ -1,14 +1,17 @@
 package Server.models;
 
+import Protocol.HighLevelMessageManager;
 import Protocol.Message.Request;
 import Protocol.Message.RequestValues.GameInitializationForm;
 import Protocol.Message.RequestValues.RoomInitializationForm;
 import Protocol.Message.ResponseValues.Room;
 import Protocol.Message.ResponseValues.User;
 import Protocol.Message.models.RoomAccess;
+import Protocol.ProtocolVersionException;
 import Server.models.validators.ValidatorException;
 
 import java.awt.*;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import java.util.*;
@@ -164,9 +167,12 @@ public class RoomDB {
 
     public void sendMessageToAllUsersInRoom(Request request) {
         lock.lock();
-        for (Socket socket : usersSockets.values()) {
-//            HighLevelMessageManager.se(request, socket);
-            //TODO
+        for (UserDB user : usersSockets.keySet()) {
+            try {
+                HighLevelMessageManager.sendRequestWithOutResponse(request, usersSockets.get(user));
+            } catch (IOException | ProtocolVersionException e) {
+                throw new RuntimeException(e);
+            }
         }
         lock.unlock();
     }

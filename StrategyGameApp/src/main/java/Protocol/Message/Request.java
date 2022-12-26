@@ -6,7 +6,7 @@ public record Request(Type type, RequestValue value) {
 
     @Override
     public String toString() {
-        return "Message{" +
+        return "Request{" +
                 "type=" + type +
                 ", value=" + value +
                 '}';
