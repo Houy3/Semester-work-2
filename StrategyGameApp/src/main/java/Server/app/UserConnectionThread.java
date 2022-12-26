@@ -375,7 +375,9 @@ public class UserConnectionThread implements Runnable {
     }
 
     private void getGameWithResponse() throws IOException {
+        roomDB.getRoomLock().lock();
         HighLevelMessageManager.sendResponseSuccess(roomDB.getGameDB().toGame(), socket);
+        roomDB.getRoomLock().unlock();
     }
 
 
