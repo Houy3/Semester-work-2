@@ -1,7 +1,8 @@
 package Server.services.Inter;
 
-import Protocol.MessageValues.User.UserProfileData;
-import Protocol.MessageValues.User.UserUpdateForm;
+import Protocol.Message.RequestValues.UserLoginForm;
+import Protocol.Message.RequestValues.UserRegistrationForm;
+import Protocol.Message.RequestValues.UserUpdateForm;
 import Server.DB.exceptions.DBException;
 import Server.DB.exceptions.NotFoundException;
 import Server.DB.exceptions.NotUniqueException;
@@ -14,14 +15,12 @@ import Server.services.exceptions.UserAlreadyLoginException;
 
 public interface UsersService extends ServiceWithDB {
 
-    void register(UserDB user) throws DBException, ServiceException, NotUniqueException, NullException, ValidatorException;
+    void register(UserRegistrationForm user) throws DBException, ServiceException, NotUniqueException, NullException, ValidatorException;
 
-    void login(UserDB userDB) throws ServiceException, DBException, NullException, NotFoundException, UserAlreadyLoginException;
+    UserDB login(UserLoginForm userDB) throws ServiceException, DBException, NullException, NotFoundException, UserAlreadyLoginException, ValidatorException;
 
-    void logout(UserDB userDB);
+    void logout(UserDB userDB) throws ValidatorException;
 
     void update(UserUpdateForm form, UserDB user) throws DBException, ServiceException, NotUniqueException, NotFoundException, NullException, ValidatorException;
-
-    UserProfileData getProfileData(UserDB user);
 
 }

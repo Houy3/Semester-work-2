@@ -1,117 +1,127 @@
 package Protocol;
 
-import Protocol.MessageValues.Game.Game;
-import Protocol.MessageValues.Game.GameActions.ArmyMovement;
-import Protocol.MessageValues.Game.GameActions.CityCapture;
-import Protocol.MessageValues.Game.GameResults;
-import Protocol.MessageValues.Room.RoomConnectionForm;
-import Protocol.MessageValues.Room.RoomInitializationForm;
-import Protocol.MessageValues.Room.RoomUserColor;
-import Protocol.MessageValues.User.UserLoginForm;
-import Protocol.MessageValues.User.UserRegistrationForm;
-import Protocol.MessageValues.User.UserUpdateForm;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
+import Protocol.Message.Request;
+import Protocol.Message.Response;
+import Protocol.Message.ResponseValues.Game;
+import Protocol.Message.RequestValues.GameActionArmyMovement;
+import Protocol.Message.RequestValues.GameActionCityCapture;
+import Protocol.Message.RequestValues.GameResults;
+import Protocol.Message.RequestValues.RoomConnectionForm;
+import Protocol.Message.RequestValues.RoomInitializationForm;
+import Protocol.Message.RequestValues.RoomUserColor;
+import Protocol.Message.RequestValues.UserLoginForm;
+import Protocol.Message.RequestValues.UserRegistrationForm;
+import Protocol.Message.RequestValues.UserUpdateForm;
+import Protocol.Message.ResponseValues.ResponseError;
+import Protocol.Message.ResponseValues.ResponseValue;
 
 import java.awt.*;
 import java.io.IOException;
 import java.net.Socket;
 
-import static Protocol.MessageManager.MessageType.*;
+import static Protocol.Message.Request.Type.*;
+import static Protocol.Message.Response.Type.*;
 
-public class HighLevelMessageManager extends MessageManager {
+public final class HighLevelMessageManager extends MessageManager {
 
     /**пустой ответ*/
-    public static Message registerUser(UserRegistrationForm value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(USER_REGISTER, value), socket);
+    public static Response registerUser(UserRegistrationForm value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(USER_REGISTER, value), socket);
     }
     /**Возвращает User*/
-    public static Message loginUser(UserLoginForm value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(USER_LOGIN, value), socket);
+    public static Response loginUser(UserLoginForm value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(USER_LOGIN, value), socket);
     }
     /**пустой ответ*/
-    public static Message logoutUser(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(USER_LOGOUT, null), socket);
+    public static Response logoutUser(Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(USER_LOGOUT, null), socket);
     }
     /**пустой ответ*/
-    public static Message updateUser(UserUpdateForm value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(USER_UPDATE, value), socket);
-    }
-    /**Возвращает UserProfileData*/
-    public static Message getUserProfileData(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(USER_PROFILE_DATA_GET, null), socket);
+    public static Response updateUser(UserUpdateForm value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(USER_UPDATE, value), socket);
     }
 
-    /**Возвращает Room*/
-    public static Message initializeRoom(RoomInitializationForm value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(ROOM_INITIALIZE, value), socket);
-    }
-    /**Возвращает Room*/
-    public static Message connectRoom(RoomConnectionForm value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(ROOM_CONNECT, value), socket);
-    }
-    /**пустой ответ*/
-    public static Message disconnectRoom(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(ROOM_DISCONNECT, null), socket);
-    }
-    /**пустой ответ*/
-    public static Message readyToStart(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(ROOM_I_AM_READY_TO_START, null), socket);
-    }
-    /**пустой ответ*/
-    public static Message notReadyToStart(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(ROOM_I_AM_NOT_READY_TO_START, null), socket);
-    }
-    /**пустой ответ*/
-    public static Message setColor(Socket socket, Color color) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(ROOM_SET_COLOR, new RoomUserColor(color)), socket);
-    }
 
     /**Возвращает Room*/
-    public static Message getRoomParameters(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(ROOM_GET, null), socket);
+    public static Response initializeRoom(RoomInitializationForm value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(ROOM_INITIALIZE, value), socket);
+    }
+    /**Возвращает Room*/
+    public static Response connectToRoom(RoomConnectionForm value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(ROOM_CONNECT, value), socket);
     }
     /**пустой ответ*/
-    public static Message startGame(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(GAME_START, null), socket);
+    public static Response disconnectFromRoom(Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(ROOM_DISCONNECT, null), socket);
+    }
+    /**пустой ответ*/
+    public static Response setUserReadyToStart(Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(ROOM_I_AM_READY_TO_START, null), socket);
+    }
+    /**пустой ответ*/
+    public static Response setUserNotReadyToStart(Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(ROOM_I_AM_NOT_READY_TO_START, null), socket);
+    }
+    /**пустой ответ*/
+    public static Response setPlayerNewColor(Socket socket, Color color) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(ROOM_SET_COLOR, new RoomUserColor(color)), socket);
+    }
+    /**Возвращает Room*/
+    public static Response getRoom(Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(ROOM_GET, null), socket);
+    }
+    /**Возвращает OpenRoomList*/
+    public static Response getOpenRooms(Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(GET_OPEN_ROOMS, null), socket);
+    }
+
+
+
+    /**пустой ответ*/
+    public static Response startGame(Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(GAME_START, null), socket);
+    }
+    /**пустой ответ*/
+    public static Response disconnectFromGame(Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(GAME_DISCONNECT, null), socket);
+    }
+    /**пустой ответ*/
+    public static Response gameStarted(Game value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(GAME_STARTED, value), socket);
+    }
+    /**пустой ответ*/
+    public static Response gameEnded(GameResults value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(GAME_ENDED, value), socket);
+    }
+
+    /**пустой ответ*/
+    public static Response moveArmy(GameActionArmyMovement value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(GAME_ACTION_ARMY_MOVEMENT, value), socket);
+    }
+    /**пустой ответ*/
+    public static Response captureCity(GameActionCityCapture value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(GAME_ACTION_CITY_CAPTURE, value), socket);
     }
     /**Возвращает Game*/
-    public static Message reconnectGame(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(GAME_RECONNECT, null), socket);
-    }
-    /**пустой ответ*/
-    public static Message disconnectGame(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(GAME_DISCONNECT, null), socket);
-    }
-    /**пустой ответ. Принимает клиент*/
-    public static Message gameStarted(Game value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(GAME_STARTED, value), socket);
-    }
-    /**пустой ответ. Принимает клиент*/
-    public static Message gameEnded(GameResults value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(GAME_ENDED, value), socket);
+    public static Response getGame(Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(GAME_DATA_GET, null), socket);
     }
 
-    /**пустой ответ. Принимает клиент*/
-    public static Message moveArmy(ArmyMovement value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(GAME_ACTION_ARMY_MOVEMENT, value), socket);
-    }
-    /**пустой ответ. Принимает клиент*/
-    public static Message captureCity(CityCapture value, Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(GAME_ACTION_CITY_CAPTURE, value), socket);
-    }
-    /**Возвращает Game*/
-    public static Message getActualGameData(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(GAME_DATA_GET, null), socket);
-    }
-
-    /**Возвращает List<Room>*/
-    public static Message getOpenRooms(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(GET_OPEN_ROOMS, null), socket);
-    }
 
     /**пустой ответ*/
-    public static Message exit(Socket socket) throws MismatchedClassException, BadResponseException, IOException {
-        return sendMessage(new Message(EXIT, null), socket);
+    public static Response exit(Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(EXIT, null), socket);
+    }
+
+
+    public static void sendResponseError(String errorMessage, Socket socket) throws IOException {
+        sendResponseError(new ResponseError(errorMessage), socket);
+    }
+    public static void sendResponseError(ResponseError responseError, Socket socket) throws IOException {
+        MessageManager.sendResponse(new Response(RESPONSE_ERROR, responseError), socket);
+    }
+
+    public static void sendResponseSuccess(ResponseValue responseSuccess, Socket socket) throws IOException {
+        MessageManager.sendResponse(new Response(RESPONSE_SUCCESS, responseSuccess), socket);
     }
 }

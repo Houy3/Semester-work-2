@@ -1,13 +1,11 @@
 package Server.services;
 
-import Server.models.validators.*;
 import Server.DB.repositories.Impl.UsersRepositoryImpl;
 import Server.DB.repositories.RepositoryImpl;
 import Server.app.ServerApp;
-import Server.services.Impl.GameServiceImpl;
+import Server.models.validators.*;
 import Server.services.Impl.RoomsServiceImpl;
 import Server.services.Impl.UsersServiceImpl;
-import Server.services.Inter.GameService;
 import Server.services.Inter.RoomsService;
 import Server.services.Inter.UsersService;
 
@@ -21,8 +19,6 @@ public class ServicesToolKit {
     private final ServiceWithDB service;
     private final UsersService usersService;
     private final RoomsService roomsService;
-    private final GameService gameService;
-
 
     public ServicesToolKit(DataSource dataSource) {
 
@@ -69,7 +65,6 @@ public class ServicesToolKit {
         );
 
         roomsService = new RoomsServiceImpl(roomInitValidator);
-        gameService = new GameServiceImpl();
     }
 
     public ServiceWithDB getMainService() {
@@ -82,10 +77,6 @@ public class ServicesToolKit {
 
     public RoomsService getRoomService() {
         return roomsService;
-    }
-
-    public GameService getGameService() {
-        return gameService;
     }
 
 }
