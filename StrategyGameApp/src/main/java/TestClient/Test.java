@@ -28,7 +28,7 @@ public class Test {
 
 
 
-    public static void main(String[] args) throws IOException, ProtocolVersionException {
+    public static void main(String[] args) throws IOException, ProtocolVersionException, InterruptedException {
 
         user1();
         user2();
@@ -36,6 +36,7 @@ public class Test {
         Response response = HighLevelMessageManager.startGame(
                 socket1
         );
+        System.out.println(response.type());
         System.out.println(response.value());
 
         System.out.println("read1");
@@ -43,7 +44,6 @@ public class Test {
         Request request = MessageManager.readRequest(socket1);
         System.out.println(request.type());
         System.out.println(request.value());
-        HighLevelMessageManager.sendResponseSuccess(null, socket1);
 
         System.out.println("end");
 
@@ -52,10 +52,22 @@ public class Test {
         request = MessageManager.readRequest(socket2);
         System.out.println(request.type());
         System.out.println(request.value());
-//        HighLevelMessageManager.sendResponseSuccess(null, socket2);
 
 
+        Thread.sleep(3000);
 
+        socket2.close();
+
+        request = HighLevelMessageManager.readRequest(socket1);
+        System.out.println(request.type());
+        System.out.println(request.value());
+
+
+        request = HighLevelMessageManager.readRequest(socket1);
+        System.out.println(request.type());
+        System.out.println(request.value());
+
+        Thread.sleep(100000);
 
     }
 
@@ -68,24 +80,28 @@ public class Test {
                 user,
                 socket1
         );
+        System.out.println(response.type());
         System.out.println(response.value());
 
         RoomInitializationForm form = new RoomInitializationForm(
                 4,
                 RoomAccess.PUBLIC,
                 Color.RED,
-                new GameInitializationForm(10, 40, 35));
+                new GameInitializationForm(10, 40, 3));
 
         response = HighLevelMessageManager.initializeRoom(form,
                 socket1
         );
         code = ((Room)response.value()).code();
+        System.out.println(response.type());
         System.out.println(response.value());
 
         response = HighLevelMessageManager.setUserReadyToStart(
                 socket1
         );
+        System.out.println(response.type());
         System.out.println(response.value());
+
 
     }
 
@@ -99,6 +115,7 @@ public class Test {
                 user,
                 socket2
         );
+        System.out.println(response.type());
         System.out.println(response.value());
 
         RoomConnectionForm form = new RoomConnectionForm(
@@ -109,6 +126,7 @@ public class Test {
                 form,
                 socket2
         );
+        System.out.println(response.type());
         System.out.println(response.value());
 
 
@@ -116,6 +134,7 @@ public class Test {
         response = HighLevelMessageManager.setUserReadyToStart(
                 socket2
         );
+        System.out.println(response.type());
         System.out.println(response.value());
 
     }

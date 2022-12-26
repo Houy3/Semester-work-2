@@ -4,9 +4,7 @@ import Protocol.HighLevelMessageManager;
 import Protocol.Message.Request;
 import Protocol.Message.RequestValues.*;
 import Protocol.Message.ResponseValues.OpenRoomsList;
-import Protocol.MessageManager;
-import Protocol.Message.RequestValues.GameActionArmyMovement;
-import Protocol.Message.RequestValues.GameActionCityCapture;
+import Protocol.Message.RequestValues.GameArmyStartMove;
 import Protocol.Message.ResponseValues.ResponseError;
 import Protocol.ProtocolVersionException;
 import Server.DB.exceptions.DBException;
@@ -26,6 +24,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Date;
 import java.util.stream.Collectors;
+
+import static Protocol.Message.Request.Type.*;
 
 
 public class UserConnectionThread implements Runnable {
@@ -52,20 +52,20 @@ public class UserConnectionThread implements Runnable {
     public void run() {
         try {
             while (!isExit) {
-                System.out.println("этап входа");
+                System.out.println("этап входа " + socket);
                 loginOrRegister();
 
                 while (isLogin() && !isExit) {
-                    System.out.println("этап лобби");
+                    System.out.println("этап главного " + socket);
                     mainLobby();
 
                     if (!isLogin()) { break; }
                     while (isConnectedToRoom() && !isExit) {
-                        System.out.println("этап комнаты");
+                        System.out.println("этап лобби комнаты " + socket);
                         roomLobby();
 
                         if (!isConnectedToRoom() || isExit) { break; }
-                        System.out.println("этап игры");
+                        System.out.println("этап игры " + socket);
                         gameLobby();
                     }
                 }
@@ -97,7 +97,7 @@ public class UserConnectionThread implements Runnable {
                 }
             }
         } catch (IOException e) {
-            throw new UserDisconnectException("socket closed");
+            throw new UserDisconnectException("socket " + socket + " closed.");
         }
     }
 
@@ -171,7 +171,7 @@ public class UserConnectionThread implements Runnable {
 
             }
         } catch (IOException e) {
-            throw new UserDisconnectException("socket closed");
+            throw new UserDisconnectException("socket " + socket + " closed.");
         }
     }
 
@@ -258,7 +258,7 @@ public class UserConnectionThread implements Runnable {
 
             }
         } catch (IOException e) {
-            throw new UserDisconnectException("socket closed");
+            throw new UserDisconnectException("socket " + socket + " closed.");
         }
     }
 
@@ -309,9 +309,9 @@ public class UserConnectionThread implements Runnable {
                         case GAME_DISCONNECT -> {
                             disconnectUserFromGameWithResponse();
                         }
-                        case GAME_ACTION_ARMY_MOVEMENT ->  {
-                            GameActionArmyMovement gameActionArmyMovement = (GameActionArmyMovement) request.value();
-                            moveArmyWithResponse(gameActionArmyMovement);
+                        case GAME_ACTION_ARMY_START_MOVE ->  {
+                            GameArmyStartMove gameArmyStartMove = (GameArmyStartMove) request.value();
+                            moveArmyStartWithResponse(gameArmyStartMove);
                         }
                         case GAME_DATA_GET -> {
                             getGameWithResponse();
@@ -326,7 +326,7 @@ public class UserConnectionThread implements Runnable {
             }
 
         } catch (IOException e) {
-            throw new UserDisconnectException("socket closed");
+            throw new UserDisconnectException("socket " + socket + " closed.");
         }
     }
 
@@ -339,34 +339,39 @@ public class UserConnectionThread implements Runnable {
         try {
             roomDB.startGame();
             HighLevelMessageManager.sendResponseSuccess(null, socket);
-            roomDB.sendMessageToAllUsersInRoom(new Request(Request.Type.GAME_STARTED, roomDB.getGameDB().toGame()));
+            sendMessageToAllUsersInRoom(new Request(Request.Type.GAME_STARTED, roomDB.getGameDB().toGame()));
         } catch (ValidatorException e) {
             HighLevelMessageManager.sendResponseError(e.getMessage(), socket);
         }
 
     }
 
-
     private void disconnectUserFromGameWithResponse() throws IOException {
-        roomDB.removeUserFromRoom(userDB);
-        roomDB = null;
         HighLevelMessageManager.sendResponseSuccess(null, socket);
+        disconnectFromRoom();
     }
 
-    private void moveArmyWithResponse(GameActionArmyMovement gameActionArmyMovement) throws IOException {
-//        try {
-//            gameDB.moveArmy(gameActionArmyMovement, userDB, this);
-//            MessageManager.sendSuccessResponse(new ResponseSuccess(null), socket.getOutputStream());
-//            roomDB.sendMessageToAllUsersInRoom(new Request(GAME_ACTION_ARMY_MOVEMENT, gameActionArmyMovement));
-//        } catch (ValidatorException e) {
-//            MessageManager.sendErrorResponse(new ResponseError(e.getMessage()), socket.getOutputStream());
-//        }
-
+    private void moveArmyStartWithResponse(GameArmyStartMove gameArmyStartMove) throws IOException {
+        try {
+            roomDB.getGameDB().moveArmy(gameArmyStartMove, userDB, this);
+            HighLevelMessageManager.sendResponseSuccess(null, socket);
+            sendMessageToAllUsersInRoom(new Request(GAME_ACTION_ARMY_START_MOVE, gameArmyStartMove));
+        } catch (ValidatorException e) {
+            HighLevelMessageManager.sendResponseError(e.getMessage(), socket);
+        }
     }
+    public void moveArmyEnd(GameArmyEndMove gameArmyEndMove) {
+        if (gameArmyEndMove == null) {
+            throw new RuntimeException("game army end move");
+        }
+        sendMessageToAllUsersInRoom(new Request(GAME_ACTION_ARMY_END_MOVE, gameArmyEndMove));
 
-    public void captureCityWithResponse(GameActionCityCapture gameActionCityCapture) {
-//        roomDB.sendMessageToAllUsersInRoom(new Request(GAME_ACTION_CITY_CAPTURE, gameActionCityCapture));
-//        isGameEnded = gameDB.isEnded();
+        if (roomDB.getGameDB().isEnd()) {
+            sendMessageToAllUsersInRoom(
+                    new Request(GAME_ENDED,
+                    new GameResults(roomDB.getGameDB().getWinner().toUser()))
+            );
+        }
     }
 
     private void getGameWithResponse() throws IOException {
@@ -374,6 +379,16 @@ public class UserConnectionThread implements Runnable {
     }
 
 
+
+    private void sendMessageToAllUsersInRoom(Request request) {
+        roomDB.getRoomLock().lock();
+        for (Socket socket : roomDB.getSockets()) {
+            try {
+                HighLevelMessageManager.sendRequestWithOutResponse(request, socket);
+            } catch (IOException | ProtocolVersionException ignored) {}
+        }
+        roomDB.getRoomLock().unlock();
+    }
 
 
     private boolean isLogin() {
@@ -391,6 +406,9 @@ public class UserConnectionThread implements Runnable {
     }
 
     private void disconnectFromRoom() {
+        if (roomDB.isGameInProcess()) {
+            roomDB.getGameDB().disconnectUser(userDB, this);
+        }
         roomDB.removeUserFromRoom(userDB);
         roomsService.remove(roomDB);
         roomDB = null;

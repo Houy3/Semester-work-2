@@ -46,10 +46,10 @@ public record Request(Type type, RequestValue value) {
         //сервер отсылает клиенту
         GAME_STARTED((byte)43), //ничего не возвращает
         GAME_ENDED((byte)44), //ничего не возвращает
-        GAME_ACTION_CITY_CAPTURE((byte)45), //ничего не возвращает
+        GAME_ACTION_ARMY_END_MOVE((byte)45), //ничего не возвращает
 
         //и сервер клиенту, и клиент серверу
-        GAME_ACTION_ARMY_MOVEMENT((byte)46), //ничего не возвращает
+        GAME_ACTION_ARMY_START_MOVE((byte)46), //ничего не возвращает
 
     //можно отправить всегда
         EXIT((byte)52); //ничего не возвращает
