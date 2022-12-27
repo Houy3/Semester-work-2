@@ -51,6 +51,9 @@ public record Request(Type type, RequestValue value) {
         //и сервер клиенту, и клиент серверу
         GAME_ACTION_ARMY_START_MOVE((byte)46), //ничего не возвращает
 
+    //можно отправить только в самом начале
+        START((byte)51),
+
     //можно отправить всегда
         EXIT((byte)52); //ничего не возвращает
 
