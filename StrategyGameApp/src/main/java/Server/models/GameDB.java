@@ -146,7 +146,7 @@ public class GameDB {
             throw new ValidatorException("No way found. ");
         }
         City startCity = gameArmyStartMove.way().getStart();
-        if (!usersCities.get(startCity).equals(user)) {
+        if (usersCities.get(startCity) == null || !usersCities.get(startCity).equals(user)) {
             lock.unlock();
             throw new ValidatorException("It's not your city. ");
         }

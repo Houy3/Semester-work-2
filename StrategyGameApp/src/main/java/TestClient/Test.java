@@ -64,8 +64,8 @@ public class Test {
         response = HighLevelMessageManager.moveArmyStart(
                 new GameArmyStartMove(
                      new Way(
-                          new City(1, 1,1),
-                          new City(6,1,1)
+                          new City(6, 1,1),
+                          new City(1,1,1)
                      ),
                      1
                 ),
