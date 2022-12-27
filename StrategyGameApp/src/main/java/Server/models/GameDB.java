@@ -232,6 +232,7 @@ public class GameDB {
                     way,
                     gameArmyStartMove.armyCount()
             );
+            userConnectionThread.moveArmyStart(gameArmyStartMove);
             try {
                 Thread.sleep(1000 * ((long) gameArmyStartMove.way().getLength()) / armySpeed);
             } catch (InterruptedException ignored) {}

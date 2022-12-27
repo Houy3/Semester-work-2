@@ -361,6 +361,14 @@ public class UserConnectionThread implements Runnable {
             HighLevelMessageManager.sendResponseError(e.getMessage(), socketAccepting);
         }
     }
+
+    public void moveArmyStart(GameArmyStartMove gameArmyStartMove) {
+        if (gameArmyStartMove == null) {
+            throw new RuntimeException("game army start move");
+        }
+        sendMessageToAllUsersInRoom(new Request(GAME_ACTION_ARMY_START_MOVE, gameArmyStartMove));
+    }
+
     public void moveArmyEnd(GameArmyEndMove gameArmyEndMove) {
         if (gameArmyEndMove == null) {
             throw new RuntimeException("game army end move");
