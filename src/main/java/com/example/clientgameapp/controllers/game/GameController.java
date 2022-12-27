@@ -165,7 +165,7 @@ public class GameController implements Initializable {
                             ErrorAlert.show(e.getMessage());
                             GlobalStorage.getInstance().getMainApp().closeGame();
                         } catch (ProtocolVersionException | ServerException | InterruptedException e) {
-                            ErrorAlert.show(e.getMessage());
+                            System.out.println(e.getMessage());
                         }
                     }
                 }
@@ -205,7 +205,7 @@ public class GameController implements Initializable {
                                 User owner = game.usersCities().get(endCity);
                                 java.awt.Color newColor = game.usersColor().get(owner);
                                 Platform.runLater(() -> {
-                                    drawBall(buttonStart, buttonEnd, Converter.convertColor(java.awt.Color.GREEN), (int) (move.way().getLength()/game.armySpeed()));
+                                    drawBall(buttonStart, buttonEnd, Converter.convertColor(java.awt.Color.GREEN), 4);
                                 });
                             } else if (request.type() == Request.Type.GAME_ENDED) {
                                 GameResults gameResults = (GameResults) request.value();
@@ -229,9 +229,9 @@ public class GameController implements Initializable {
 
                         } catch (IOException e) {
                             ErrorAlert.show(e.getMessage());
-                        } catch (ProtocolVersionException e) {
-                            ErrorAlert.show(e.getMessage());
                             GlobalStorage.getInstance().getMainApp().closeGame();
+                        } catch (ProtocolVersionException e) {
+                            System.out.println(e.getMessage());
                         }
                     }
                 }
