@@ -1,17 +1,9 @@
 package Protocol;
 
 import Protocol.Message.Request;
+import Protocol.Message.RequestValues.*;
 import Protocol.Message.Response;
 import Protocol.Message.ResponseValues.Game;
-import Protocol.Message.RequestValues.GameArmyStartMove;
-import Protocol.Message.RequestValues.GameArmyEndMove;
-import Protocol.Message.RequestValues.GameResults;
-import Protocol.Message.RequestValues.RoomConnectionForm;
-import Protocol.Message.RequestValues.RoomInitializationForm;
-import Protocol.Message.RequestValues.RoomUserColor;
-import Protocol.Message.RequestValues.UserLoginForm;
-import Protocol.Message.RequestValues.UserRegistrationForm;
-import Protocol.Message.RequestValues.UserUpdateForm;
 import Protocol.Message.ResponseValues.ResponseError;
 import Protocol.Message.ResponseValues.ResponseValue;
 
@@ -23,6 +15,12 @@ import static Protocol.Message.Request.Type.*;
 import static Protocol.Message.Response.Type.*;
 
 public final class HighLevelMessageManager extends MessageManager {
+
+    /** Если посылать Start с null-кодом, то вернется Start с заполненным кодом (первый сокет).
+     * Если посылать Start с заполненным кодом, то вернется пустой ответ (второй сокет)*/
+    public static Response start(Start value, Socket socket) throws IOException, ProtocolVersionException {
+        return sendRequest(new Request(START, value), socket);
+    }
 
     /**пустой ответ*/
     public static Response registerUser(UserRegistrationForm value, Socket socket) throws IOException, ProtocolVersionException {

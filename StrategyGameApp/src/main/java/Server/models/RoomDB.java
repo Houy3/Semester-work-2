@@ -78,7 +78,7 @@ public class RoomDB {
     }
 
     public boolean isGameInProcess() {
-        return gameDB != null;
+        return gameDB != null && gameDB.isGameInProcess();
     }
 
     private final Lock lock = new ReentrantLock();
@@ -176,13 +176,16 @@ public class RoomDB {
     public void startGame() throws ValidatorException {
         lock.lock();
         if (isGameInProcess()) {
+            lock.unlock();
             return;
         }
 
         if (!isEverybodyReady()) {
+            lock.unlock();
             throw new ValidatorException("Not everybody ready");
         }
         if (users.size() < 2) {
+            lock.unlock();
             throw new ValidatorException("Not enough players");
         }
 
@@ -196,6 +199,10 @@ public class RoomDB {
             throw new RuntimeException("Game not in process");
         }
         return gameDB;
+    }
+
+    public void endGameDB() {
+        gameDB = null;
     }
 
 

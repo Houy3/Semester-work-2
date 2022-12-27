@@ -2,6 +2,7 @@ package Server.app;
 
 import Protocol.HighLevelMessageManager;
 import Protocol.Message.Request;
+import Protocol.Message.RequestValues.RequestValue;
 import Protocol.Message.RequestValues.Start;
 import Protocol.ProtocolVersionException;
 import Server.DB.DataSources.SimpleDataSource;
@@ -53,31 +54,36 @@ public class DistributionCenter implements Runnable {
             while (true) {
                 Socket socket = server.accept();
 
-                try {
-                    Request request = HighLevelMessageManager.readRequest(socket);
+                new Thread(() -> {
+                    try {
+                        Request request = HighLevelMessageManager.readRequest(socket);
 
-                    if (request.type() != Request.Type.START) {
-                        HighLevelMessageManager.sendResponseError("You need to start. ", socket);
-                        return;
-                    }
+                        if (request.type() != Request.Type.START) {
+                            HighLevelMessageManager.sendResponseError("You need to start. ", socket);
+                            return;
+                        }
 
-                    String code = ((Start)request.value()).code();
+                        Start start = (Start) request.value();
 
-                    if (code == null) {
-                        code = generateCode();
-                        HighLevelMessageManager.sendResponseSuccess(new Start(code), socket);
-                        return;
-                    }
+                        if (start == null) {
+                            String code = generateCode();
+                            codeToSocket.put(code, socket);
+                            HighLevelMessageManager.sendResponseSuccess(new Start(code), socket);
+                            return;
+                        }
 
-                    if (!codeToSocket.containsKey(code)) {
-                        HighLevelMessageManager.sendResponseError("Wrong code.", socket);
-                        return;
-                    }
+                        if (!codeToSocket.containsKey(start.code())) {
+                            HighLevelMessageManager.sendResponseError("Wrong code.", socket);
+                            return;
+                        }
 
-                    new Thread(new UserConnectionThread(socket, codeToSocket.get(code), servicesToolKit)).start();
+                        HighLevelMessageManager.sendResponseSuccess(null, socket);
+                        new Thread(new UserConnectionThread(codeToSocket.get(start.code()), socket, servicesToolKit)).start();
+                        codeToSocket.remove(start.code());
 
-                } catch (IOException | ProtocolVersionException ignored) {}
+                    } catch (IOException | ProtocolVersionException ignored) {}
 
+                }).start();
             }
         } catch (IOException e) {
             ErrorLogger.log(e.getMessage());

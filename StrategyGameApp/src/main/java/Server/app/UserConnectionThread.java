@@ -387,9 +387,11 @@ public class UserConnectionThread implements Runnable {
     private void sendMessageToAllUsersInRoom(Request request) {
         roomDB.getRoomLock().lock();
         for (Socket socket : roomDB.getSockets()) {
-            try {
-                HighLevelMessageManager.sendRequest(request, socket);
-            } catch (IOException | ProtocolVersionException ignored) {}
+            new Thread(() -> {
+                try {
+                    HighLevelMessageManager.sendRequest(request, socket);
+                } catch (IOException | ProtocolVersionException ignored) {}
+            }).start();
         }
         roomDB.getRoomLock().unlock();
     }
@@ -433,6 +435,8 @@ public class UserConnectionThread implements Runnable {
     private void closeConnection() {
         try {
             socketAccepting.close();
+        } catch (IOException ignored) {}
+        try {
             socketSending.close();
         } catch (IOException ignored) {}
     }

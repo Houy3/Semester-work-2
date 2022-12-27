@@ -40,7 +40,7 @@ public class MessageManager {
     }
 
 
-    private static void sendRequestWithOutResponse(Request request, Socket socket) throws IOException, ProtocolVersionException {
+    private static void sendRequestWithOutResponse(Request request, Socket socket) throws IOException {
         if (request.type() == null) {
             throw new NullPointerException("Type can't be null");
         }

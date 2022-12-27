@@ -32,6 +32,8 @@ public class GameDB {
     private final int armyGrowthRate;
 
     private static final int waitingTimeS = 1;
+    private static final int cityMaxSize = 99;
+
 
     public GameDB(GameInitializationForm form, List<UserDB> users) {
         MapCitiesGenerator.generateCitiesMap(this, form.countOfCities(), users);
@@ -64,6 +66,10 @@ public class GameDB {
         new ArmyAutoIncrement().start();
     }
 
+    public boolean isGameInProcess() {
+        return isGameInProcess;
+    }
+
     public CitiesMap getCitiesMap() {
         return citiesMap;
     }
@@ -86,9 +92,13 @@ public class GameDB {
     private UserDB winner = null;
     public void disconnectUser(UserDB user, UserConnectionThread userConnectionThread) {
         lock.lock();
-        for (City city : usersCities.keySet()) {
+
+        Set<City> cities = usersCities.keySet();
+        Iterator<City> i = cities.iterator();
+        while (i.hasNext()) {
+            City city = i.next();
             if (usersCities.get(city).equals(user)) {
-                usersCities.remove(city);
+                i.remove();
                 userConnectionThread.moveArmyEnd(new GameArmyEndMove(
                         city,
                         null,
@@ -96,6 +106,17 @@ public class GameDB {
                 ));
             }
         }
+
+//        for (City city : usersCities.keySet()) {
+//            if (usersCities.get(city).equals(user)) {
+//                usersCities.remove(city);
+//                userConnectionThread.moveArmyEnd(new GameArmyEndMove(
+//                        city,
+//                        null,
+//                        citiesArmies.get(city)
+//                ));
+//            }
+//        }
         lock.unlock();
     }
 
@@ -106,6 +127,10 @@ public class GameDB {
     public void moveArmy(GameArmyStartMove gameArmyStartMove, UserDB user, UserConnectionThread userConnectionThread) throws ValidatorException {
         lock.lock();
         City startCity = gameArmyStartMove.way().getStart();
+        if (new Date().getTime() < startTime.getTime()) {
+            lock.unlock();
+            throw new ValidatorException("Wait until start. ");
+        }
         if (!usersCities.get(startCity).equals(user)) {
             lock.unlock();
             throw new ValidatorException("It's not your city. ");
@@ -126,6 +151,7 @@ public class GameDB {
         int countOfActiveUsers = new HashSet<>(usersCities.values()).size();
         if (countOfActiveUsers == 1) {
             winner = usersCities.values().stream().toList().get(0);
+            isGameInProcess = false;
             lock.unlock();
             return true;
         } else {
@@ -162,7 +188,7 @@ public class GameDB {
         @Override
         public void run() {
             try {
-                Thread.sleep(1000L * ((long) gameArmyStartMove.way().getLength()) / armySpeed);
+                Thread.sleep(1000 * ((long) gameArmyStartMove.way().getLength()) / armySpeed);
             } catch (InterruptedException ignored) {}
 
             City endCity = gameArmyStartMove.way().getEnd();
@@ -203,7 +229,7 @@ public class GameDB {
                 lock.lock();
                 for (City city : citiesArmies.keySet()) {
                     if (usersCities.get(city) != null) {
-                        citiesArmies.replace(city, citiesArmies.get(city) + armyGrowthRate);
+                        citiesArmies.replace(city, Math.min(citiesArmies.get(city) + armyGrowthRate, cityMaxSize));
                     }
                 }
                 lock.unlock();

@@ -2,10 +2,7 @@ package TestClient;
 
 import Protocol.HighLevelMessageManager;
 import Protocol.Message.Request;
-import Protocol.Message.RequestValues.GameInitializationForm;
-import Protocol.Message.RequestValues.RoomConnectionForm;
-import Protocol.Message.RequestValues.RoomInitializationForm;
-import Protocol.Message.RequestValues.UserLoginForm;
+import Protocol.Message.RequestValues.*;
 import Protocol.Message.Response;
 import Protocol.Message.ResponseValues.Room;
 import Protocol.Message.models.RoomAccess;
@@ -22,8 +19,12 @@ public class Test {
 
     private static int PORT = 8888;
 
-    private static Socket socket1;
-    private static Socket socket2;
+    private static Socket socket11;
+    private static Socket socket12;
+
+    private static Socket socket21;
+    private static Socket socket22;
+
 
 
 
@@ -34,36 +35,39 @@ public class Test {
         user2();
 
         Response response = HighLevelMessageManager.startGame(
-                socket1
+                socket11
         );
         System.out.println(response.type());
         System.out.println(response.value());
 
         System.out.println("read1");
 
-        Request request = MessageManager.readRequest(socket1);
+        Request request = HighLevelMessageManager.readRequest(socket12);
         System.out.println(request.type());
         System.out.println(request.value());
+        HighLevelMessageManager.sendResponseSuccess(null,socket12);
 
         System.out.println("end");
 
         System.out.println("read2");
 
-        request = MessageManager.readRequest(socket2);
+        request = HighLevelMessageManager.readRequest(socket22);
         System.out.println(request.type());
         System.out.println(request.value());
+        HighLevelMessageManager.sendResponseSuccess(null, socket22);
 
 
         Thread.sleep(3000);
 
-        socket2.close();
+        socket21.close();
 
-        request = HighLevelMessageManager.readRequest(socket1);
+        request = HighLevelMessageManager.readRequest(socket12);
         System.out.println(request.type());
         System.out.println(request.value());
 
 
-        request = HighLevelMessageManager.readRequest(socket1);
+
+        request = HighLevelMessageManager.readRequest(socket12);
         System.out.println(request.type());
         System.out.println(request.value());
 
@@ -72,13 +76,24 @@ public class Test {
     }
 
     public static void user1() throws ProtocolVersionException, IOException {
-        socket1 = new Socket("localhost", PORT);
+        socket11 = new Socket("localhost", PORT);
+        socket12 = new Socket("localhost", PORT);
+
+        Response response = HighLevelMessageManager.start(null, socket11);
+        String startCode = ((Start)response.value()).code();
+        System.out.println(response.type());
+        System.out.println(response.value());
+
+        response = HighLevelMessageManager.start(new Start(startCode), socket12);
+        System.out.println(response.type());
+        System.out.println(response.value());
+
 
         UserLoginForm user = new UserLoginForm("email@mail.ru", "password");
 
-        Response response = HighLevelMessageManager.loginUser(
+        response = HighLevelMessageManager.loginUser(
                 user,
-                socket1
+                socket11
         );
         System.out.println(response.type());
         System.out.println(response.value());
@@ -90,14 +105,14 @@ public class Test {
                 new GameInitializationForm(10, 40, 3));
 
         response = HighLevelMessageManager.initializeRoom(form,
-                socket1
+                socket11
         );
         code = ((Room)response.value()).code();
         System.out.println(response.type());
         System.out.println(response.value());
 
         response = HighLevelMessageManager.setUserReadyToStart(
-                socket1
+                socket11
         );
         System.out.println(response.type());
         System.out.println(response.value());
@@ -107,13 +122,23 @@ public class Test {
 
     public static void user2() throws ProtocolVersionException, IOException {
 
-        socket2 = new Socket("localhost", PORT);
+        socket21 = new Socket("localhost", PORT);
+        socket22 = new Socket("localhost", PORT);
+
+        Response response = HighLevelMessageManager.start(null, socket21);
+        String startCode = ((Start)response.value()).code();
+        System.out.println(response.type());
+        System.out.println(response.value());
+
+        response = HighLevelMessageManager.start(new Start(startCode), socket22);
+        System.out.println(response.type());
+        System.out.println(response.value());
 
         UserLoginForm user = new UserLoginForm("email2@mail.ru", "password");
 
-        Response response = HighLevelMessageManager.loginUser(
+        response = HighLevelMessageManager.loginUser(
                 user,
-                socket2
+                socket21
         );
         System.out.println(response.type());
         System.out.println(response.value());
@@ -124,7 +149,7 @@ public class Test {
 
         response = HighLevelMessageManager.connectToRoom(
                 form,
-                socket2
+                socket21
         );
         System.out.println(response.type());
         System.out.println(response.value());
@@ -132,7 +157,7 @@ public class Test {
 
 
         response = HighLevelMessageManager.setUserReadyToStart(
-                socket2
+                socket21
         );
         System.out.println(response.type());
         System.out.println(response.value());
