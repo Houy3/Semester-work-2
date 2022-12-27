@@ -65,10 +65,12 @@ public class MapCitiesGenerator {
         for (City city : citiesMap.cities()) {
             if (city.number() == 1) {
                 usersCities.put(city, users.get(0));
-            }
-            if (city.number() == 4) {
+            } else if (city.number() == 4) {
                 usersCities.put(city, users.get(1));
+            } else {
+                usersCities.put(city, null);
             }
+
         }
 
         return usersCities;

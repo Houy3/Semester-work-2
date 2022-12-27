@@ -21,9 +21,10 @@ public record Game(CitiesMap citiesMap,
     public String toString() {
         return "Game{" +
                 "citiesMap=" + citiesMap +
+                ", startTime=" + startTime +
                 ", citiesArmies=" + citiesArmies +
                 ", usersCities=" + usersCities +
-                ", startTime=" + startTime +
+                ", usersColor=" + usersColor +
                 ", armySpeed=" + armySpeed +
                 ", armyGrowthRate=" + armyGrowthRate +
                 '}';

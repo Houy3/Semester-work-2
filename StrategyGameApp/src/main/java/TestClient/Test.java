@@ -59,7 +59,7 @@ public class Test {
         HighLevelMessageManager.sendResponseSuccess(null, socket22);
 
 
-        Thread.sleep(3000);
+        Thread.sleep(10000);
 
         response = HighLevelMessageManager.moveArmyStart(
                 new GameArmyStartMove(
@@ -67,7 +67,7 @@ public class Test {
                           new City(1, 1,1),
                           new City(2,1,1)
                      ),
-                     1
+                     15
                 ),
                 socket11
         );
@@ -93,6 +93,12 @@ public class Test {
         request = HighLevelMessageManager.readRequest(socket22);
         System.out.println(request.type());
         System.out.println(request.value());
+
+        System.out.println("---");
+
+        response = HighLevelMessageManager.getGame(socket11);
+        System.out.println(response.type());
+        System.out.println(response.value());
 
 //        Thread.sleep(100000);
 

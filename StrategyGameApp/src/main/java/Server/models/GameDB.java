@@ -48,7 +48,8 @@ public class GameDB {
     public Game toGame() {
         Map<City, User> usersCities = new HashMap<>();
         for (City city : this.usersCities.keySet()) {
-            usersCities.put(city, this.usersCities.get(city).toUser());
+            UserDB user = this.usersCities.get(city);
+            usersCities.put(city, user == null ? null :  user.toUser());
         }
 
         Map<User, Color> usersColor = new HashMap<>();
@@ -235,6 +236,7 @@ public class GameDB {
                     //произошел захват города
                     citiesArmies.replace(endCity, Math.abs(citiesArmies.get(endCity)) );
                     usersCities.replace(endCity, user);
+                    System.out.println(usersCities);
                     lock.unlock();
                     userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, user.toUser(), citiesArmies.get(endCity) ));
                 } else {
