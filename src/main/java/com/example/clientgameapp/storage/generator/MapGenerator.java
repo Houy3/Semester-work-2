@@ -6,6 +6,7 @@ import com.example.clientgameapp.models.Route;
 import javafx.scene.control.Button;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class MapGenerator {
     private final List<Button> availableCities;
     private ArrayList<City> cities;
     private ArrayList<Button> utilCityList;
+
     private ArrayList<Route> routes;
 
     private CitiesGameMap map;
@@ -72,11 +74,11 @@ public class MapGenerator {
         return new City(id, getRelativeXPosition(button), getRelativeYPosition(button));
     }
 
-    private int getRelativeXPosition(Button button) {
+    public static int getRelativeXPosition(Button button) {
         return (int) ((button.getLayoutX() / DEFAULT_MAP_WIDTH) * 100);
     }
 
-    private int getRelativeYPosition(Button button) {
+    public static int getRelativeYPosition(Button button) {
         return (int) ((button.getLayoutY() / DEFAULT_MAP_HEIGHT) * 100);
     }
 

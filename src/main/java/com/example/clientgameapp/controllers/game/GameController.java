@@ -1,18 +1,25 @@
 package com.example.clientgameapp.controllers.game;
 
 import Protocol.HighLevelMessageManager;
+import Protocol.Message.Request;
+import Protocol.Message.RequestValues.GameArmyStartMove;
 import Protocol.Message.Response;
 import Protocol.Message.ResponseValues.Game;
+import Protocol.Message.ResponseValues.ResponseError;
+import Protocol.Message.ResponseValues.User;
+import Protocol.Message.models.CitiesMap;
+import Protocol.Message.models.City;
+import Protocol.Message.models.Way;
 import Protocol.ProtocolVersionException;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.controllers.error.ErrorAlert;
 import com.example.clientgameapp.models.CitiesGameMap;
 import com.example.clientgameapp.models.Route;
 import com.example.clientgameapp.storage.GameStorage;
-import com.example.clientgameapp.storage.GlobalStorage;
 import com.example.clientgameapp.storage.generator.MapGenerator;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
+import exceptions.ServerException;
 import javafx.animation.PathTransition;
 import javafx.animation.Transition;
 import javafx.application.Platform;
@@ -28,12 +35,16 @@ import javafx.scene.shape.*;
 import javafx.util.Duration;
 import util.Converter;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import static com.example.clientgameapp.storage.generator.MapGenerator.getRelativeXPosition;
+import static com.example.clientgameapp.storage.generator.MapGenerator.getRelativeYPosition;
 
 public class GameController implements Initializable {
     public Button cityBtnFirst;
@@ -65,7 +76,11 @@ public class GameController implements Initializable {
     private HighLevelMessageManager mManager;
 
     private GameStorage gameStorage;
-    private Socket socket;
+    private Socket senderSocket;
+
+    private Socket receiverSocket;
+
+    private Game game;
     private int incrementRate = 2;
 
 
@@ -76,10 +91,15 @@ public class GameController implements Initializable {
         try {
             connection = ClientConnectionSingleton.getInstance();
             mManager = new HighLevelMessageManager();
-            socket = connection.getSocketSender();
+            senderSocket = connection.getSocketSender();
+            receiverSocket = connection.getSocketReceiver();
             destinationsManager = DestinationsManager.getInstance();
             gameStorage = GameStorage.getInstance();
             pane.requestFocus();
+            if (!isInitialized) {
+                initGame();
+                isInitialized = true;
+            }
         } catch (ClientConnectionException e) {
             ErrorAlert.show(e.getMessage());
         }
@@ -89,28 +109,59 @@ public class GameController implements Initializable {
         initMap();
         citiesGameMap = gameStorage.getMaps().get(0);
         color = Color.RED;
-        // startGameProcess();
+        startGameProcess();
+        getCurrentGame();
         drawWays();
         setAllNumbersValue(0);
         startIncrementingAll();
     }
 
+    private void getCurrentGame() {
+        new Thread(
+                () -> {
+                    try {
+                        Response response = HighLevelMessageManager.getGame(senderSocket);
+                        if (response.type() == Response.Type.RESPONSE_ERROR) {
+                            throw new ServerException(((ResponseError) response.value()).errorMessage());
+                        } else {
+                            game = (Game) response.value();
+                            incrementRate = game.armyGrowthRate();
+                            duration = game.armySpeed();
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    } catch (ProtocolVersionException e) {
+                        throw new RuntimeException(e);
+                    } catch (ServerException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        ).start();
+    }
+
     private void startGameProcess() {
-        try {
-            Response startGame = HighLevelMessageManager.startGame(socket);
-            if (startGame.type() == Response.Type.RESPONSE_SUCCESS) {
-              //  Response success = (Response) startGame.value();
-                Game game = (Game) startGame.value();
-            } else {
-                ErrorAlert.show("Couldn't start the game");
-                GlobalStorage.getInstance().getMainApp().closeGame();
-            }
-        } catch (IOException e) {
-            //     ErrorAlert.show(e.getMessage());
-            //   GlobalStorage.getInstance().getMainApp().closeGame();
-        }  catch (ProtocolVersionException e) {
-            ErrorAlert.show(e.getMessage());
-        }
+        new Thread(
+                () -> {
+                    while (!receiverSocket.isClosed()) {
+                        try {
+                            Request request = HighLevelMessageManager.readRequest(receiverSocket);
+                            if (request.type() == Request.Type.GAME_ACTION_ARMY_START_MOVE) {
+                                GameArmyStartMove move = (GameArmyStartMove) request.value();
+                                Way way = move.way();
+                                Button buttonStart = getButton(way.getStart().x(), way.getStart().y());
+                                Button buttonEnd = getButton(way.getEnd().x(), way.getEnd().y());
+                                City startCity = way.getStart();
+                                City endCity = way.getEnd();
+                                User owner = game.usersCities().get(endCity);
+                                java.awt.Color newColor = game.usersColor().get(owner);
+                                drawBall(buttonStart, buttonEnd, Converter.convertColor(newColor), duration);
+                            }
+                        } catch (IOException | ProtocolVersionException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+        ).start();
     }
 
     private void initMap() {
@@ -157,41 +208,47 @@ public class GameController implements Initializable {
     }
 
     private void makeMove(Button fromButton, Button toButton) {
-        /*
-        try {
-            City fromCity = getAppropriateCity(fromButton);
-            City toCity = getAppropriateCity(toButton);
-            Route way = new Route(fromCity, toCity);
-            int armyCount = Integer.parseInt(fromButton.getText());
-            ArmyMovement movement = new ArmyMovement(way, armyCount);
-            Message message = HighLevelMessageManager.moveArmy(
-                    movement, socket
-            );
-            if (message.type() == MessageManager.MessageType.RESPONSE_SUCCESS) {
-             //   makeMove(fromButton, toButton);
-                drawBall(fromButton, toButton, color, duration);
-            }
-        } catch (MismatchedClassException | BadResponseException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            ErrorAlert.show(e.getMessage());
-            GlobalStorage.getInstance().getMainApp().closeGame();
-        }
-
-         */
-
-        drawBall(fromButton, toButton, color, duration);
-
-    }
-
-    private void listenForMovements() {
         new Thread(
                 () -> {
-
-
-
+                    try {
+                        City cityFrom = getCity(fromButton);
+                        City cityTo = getCity(toButton);
+                        if (cityTo != null && cityFrom != null) {
+                            Way way = new Way(cityFrom, cityTo);
+                            int armyCount = Integer.parseInt(fromButton.getText());
+                            GameArmyStartMove move = new GameArmyStartMove(
+                                    way, armyCount
+                            );
+                            HighLevelMessageManager.moveArmyStart(move, senderSocket);
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    } catch (ProtocolVersionException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
         ).start();
+    }
+
+
+    private City getCity(Button button) {
+        for (City city : citiesGameMap.cities()) {
+            if (city.x() - getRelativeXPosition(button) < 0.0005 && city.y() - getRelativeYPosition(button) < 0.0005) {
+                return city;
+            }
+        }
+        return null;
+    }
+
+    private Button getButton(int x, int y) {
+        for (Node node : pane.getChildren()) {
+            if (getRelativeXPosition((Button) node) - x < 0.0004
+                    && getRelativeYPosition((Button) node) - y < 0.0005
+            ) {
+                return (Button) node;
+            }
+        }
+        return null;
     }
 
 
@@ -253,10 +310,6 @@ public class GameController implements Initializable {
     }
 
     private void handleButtonClick(Button clickedButton, Color color, int duration) {
-        if (!isInitialized) {
-            initGame();
-            isInitialized = true;
-        }
         if (isFirst) {
             fromButton = clickedButton;
             drawSelectionBorder(fromButton);
@@ -311,7 +364,7 @@ public class GameController implements Initializable {
         gc = canvas.getGraphicsContext2D();
         gc.setStroke(Color.BLACK);
         gc.setFill(Color.RED);
-        widthMargin = cityBtnFirst.getWidth()/2;
+        widthMargin = cityBtnFirst.getWidth() / 2;
         for (Route route : citiesGameMap.routes()) {
             drawStrokeLine(route.fromCity(), route.toCity());
         }
@@ -328,7 +381,6 @@ public class GameController implements Initializable {
         button.setStyle("-fx-background-color: rgb(" + newColor.getRed() + ","
                 + newColor.getGreen() + "," + newColor.getBlue() + ");");
     }
-
 
 
     private void setButtonText(Button button, int number) {

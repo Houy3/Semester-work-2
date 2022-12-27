@@ -1,6 +1,8 @@
 package com.example.clientgameapp.storage;
 
+import Protocol.Message.models.City;
 import com.example.clientgameapp.models.CitiesGameMap;
+import javafx.scene.control.Button;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,6 +28,8 @@ public class GameStorage {
     public static GameStorage getInstance() {
         return instance;
     }
+
+
 
     public void addMap(CitiesGameMap map) {
         mapList.add(map);

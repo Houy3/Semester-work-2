@@ -12,6 +12,7 @@ import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.models.UserModel;
 import com.example.clientgameapp.controllers.listViewItems.ClientCell;
 import com.example.clientgameapp.storage.GlobalStorage;
+import javafx.scene.control.Alert;
 import util.Converter;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
@@ -185,7 +186,7 @@ public class LobbyController {
                                     throw new ClientException("Not all users are ready");
                                 }
                             }
-                            destinationsManager.navigateGameScene();
+                            scheduler.shutdownNow();
                         }
                     } catch (ProtocolVersionException | ServerException | ClientException ex) {
                         ErrorAlert.show(ex.getMessage());
@@ -205,7 +206,10 @@ public class LobbyController {
                     ResponseError error = (ResponseError) updatedData.value();
                     throw new ServerException(error.errorMessage());
                 } else {
-                    initializeList(updatedData);
+
+                    Platform.runLater(() -> {
+                        initializeList(updatedData);
+                    });
                 }
 
             } catch (ServerException | ProtocolVersionException e) {
@@ -219,37 +223,21 @@ public class LobbyController {
 
 
     private void updateList() {
-        Runnable updateRunnable = () -> {
-            try {
-                Response updateData = HighLevelMessageManager.getRoom(socketSender);
-                if (updateData.type() == Response.Type.RESPONSE_ERROR) {
-                    ResponseError error = (ResponseError) updateData.value();
-                    throw new ServerException(error.errorMessage());
-                } else {
-                    Platform.runLater(() -> {
-                        initializeList(updateData);
-                    });
-                }
-            } catch (ProtocolVersionException e) {
-                ErrorAlert.show(e.getMessage());
-            } catch (IOException | ServerException e) {
-                ErrorAlert.show(e.getMessage());
-                GlobalStorage.getInstance().getMainApp().closeGame();
-            }
-        };
-        scheduler.scheduleAtFixedRate(updateRunnable, 0, 4, TimeUnit.SECONDS);
+
     }
 
 
     private void listenForMessages() {
         new Thread(() -> {
             try {
-                Thread.sleep(5000L);
-                Request request = HighLevelMessageManager.readRequest(socketReceiver);
-                if (request.type() == Request.Type.GAME_START) {
-                    HighLevelMessageManager.sendResponseSuccess(null, socketReceiver);
-                    destinationsManager.navigateGameScene();
-                    isWaiting = false;
+                while (isWaiting) {
+                    Thread.sleep(5000L);
+                    Request request = HighLevelMessageManager.readRequest(socketReceiver);
+                    if (request.type() == Request.Type.GAME_STARTED) {
+                        HighLevelMessageManager.sendResponseSuccess(null, socketReceiver);
+                        destinationsManager.navigateGameScene();
+                        isWaiting = false;
+                    }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

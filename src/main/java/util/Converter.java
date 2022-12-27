@@ -12,7 +12,14 @@ public class Converter {
                 convertColorNumber(color.getGreen()),
                 convertColorNumber(color.getBlue())
         );
+    }
 
+    public static javafx.scene.paint.Color convertColor(Color color) {
+        return new javafx.scene.paint.Color(
+                color.getRed()/255.0,
+                color.getGreen()/255.0,
+                color.getBlue()/255.0, 10
+        );
     }
 
     public static int convertToInt(String text) throws ClientInputException {
@@ -27,7 +34,7 @@ public class Converter {
     }
 
     public static String convertToHex(javafx.scene.paint.Color color) {
-        return String.format("#%02x%02x%02x",convertColorNumber(color.getRed()), convertColorNumber(color.getGreen()),convertColorNumber(color.getBlue()));
+        return String.format("#%02x%02x%02x", convertColorNumber(color.getRed()), convertColorNumber(color.getGreen()), convertColorNumber(color.getBlue()));
     }
 
     private static int convertColorNumber(Double num) {
