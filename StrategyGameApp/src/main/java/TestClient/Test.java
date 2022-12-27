@@ -65,7 +65,7 @@ public class Test {
                 new GameArmyStartMove(
                      new Way(
                           new City(1, 1,1),
-                          new City(6,1,1)
+                          new City(2,1,1)
                      ),
                      1
                 ),
@@ -125,7 +125,7 @@ public class Test {
                 4,
                 RoomAccess.PUBLIC,
                 Color.RED,
-                new GameInitializationForm(10, 40, 3));
+                new GameInitializationForm(10, 20, 3));
 
         response = HighLevelMessageManager.initializeRoom(form,
                 socket11

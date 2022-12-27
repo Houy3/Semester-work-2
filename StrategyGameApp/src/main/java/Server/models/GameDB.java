@@ -7,6 +7,7 @@ import Protocol.Message.RequestValues.GameInitializationForm;
 import Protocol.Message.ResponseValues.User;
 import Protocol.Message.models.CitiesMap;
 import Protocol.Message.models.City;
+import Protocol.Message.models.Way;
 import Server.app.UserConnectionThread;
 import Server.models.validators.ValidatorException;
 import Server.services.Impl.MapCitiesGenerator;
@@ -155,6 +156,7 @@ public class GameDB {
             throw new ValidatorException("Not enough army. ");
         }
 
+
         citiesArmies.replace(startCity, citiesArmies.get(startCity) - gameArmyStartMove.armyCount());
         lock.unlock();
         new ArmyMove(gameArmyStartMove, user, userConnectionThread, lock).start();
@@ -190,7 +192,7 @@ public class GameDB {
 
     private class ArmyMove extends Thread {
 
-        private final GameArmyStartMove gameArmyStartMove;
+        private GameArmyStartMove gameArmyStartMove;
         private final UserDB user;
         private final UserConnectionThread userConnectionThread;
 
@@ -202,11 +204,26 @@ public class GameDB {
 
         @Override
         public void run() {
+            Way way = gameArmyStartMove.way();
+
+            for (Way iWay : citiesMap.ways()) {
+                if (iWay.equals(way)) {
+                    way = iWay;
+                    break;
+                }
+            }
+            gameArmyStartMove = new GameArmyStartMove(
+                    way,
+                    gameArmyStartMove.armyCount()
+            );
+
             try {
                 Thread.sleep(1000 * ((long) gameArmyStartMove.way().getLength()) / armySpeed);
             } catch (InterruptedException ignored) {}
 
-            City endCity = gameArmyStartMove.way().getEnd();
+
+            City endCity = way.getEnd();
+
             lock.lock();
             if (usersCities.get(endCity) == null || !usersCities.get(endCity).equals(user)) {
                 citiesArmies.replace(endCity, citiesArmies.get(endCity) - gameArmyStartMove.armyCount());
