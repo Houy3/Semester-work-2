@@ -67,7 +67,7 @@ public class Test {
                           new City(1, 1,1),
                           new City(6,1,1)
                      ),
-                     5
+                     1
                 ),
                 socket11
         );
@@ -81,7 +81,14 @@ public class Test {
         System.out.println(request.type());
         System.out.println(request.value());
 
+        request = HighLevelMessageManager.readRequest(socket22);
+        System.out.println(request.type());
+        System.out.println(request.value());
 
+
+        request = HighLevelMessageManager.readRequest(socket12);
+        System.out.println(request.type());
+        System.out.println(request.value());
 
         request = HighLevelMessageManager.readRequest(socket22);
         System.out.println(request.type());
