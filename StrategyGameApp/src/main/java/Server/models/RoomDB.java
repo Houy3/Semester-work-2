@@ -189,7 +189,7 @@ public class RoomDB {
             throw new ValidatorException("Not enough players");
         }
 
-        gameDB = new GameDB(gameInitializationForm, users);
+        gameDB = new GameDB(gameInitializationForm, users, usersColor);
         gameDB.start();
         lock.unlock();
     }

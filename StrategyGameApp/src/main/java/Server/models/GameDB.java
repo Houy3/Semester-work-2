@@ -11,7 +11,9 @@ import Server.app.UserConnectionThread;
 import Server.models.validators.ValidatorException;
 import Server.services.Impl.MapCitiesGenerator;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -21,7 +23,7 @@ public class GameDB {
 
     private Date startTime;
 
-
+    private Map<UserDB, Color> usersColor;
     private Map<City, Integer> citiesArmies;
     private Map<City, UserDB> usersCities;
 
@@ -31,12 +33,13 @@ public class GameDB {
     //Скорость роста армии игрока в городе ед./с.
     private final int armyGrowthRate;
 
-    private static final int waitingTimeS = 1;
+    private static final int waitingTimeS = 10;
     private static final int cityMaxSize = 99;
 
 
-    public GameDB(GameInitializationForm form, List<UserDB> users) {
+    public GameDB(GameInitializationForm form, List<UserDB> users, Map<UserDB, Color> usersColor) {
         MapCitiesGenerator.generateCitiesMap(this, form.countOfCities(), users);
+        this.usersColor = usersColor;
         this.armySpeed = form.armySpeed();
         this.armyGrowthRate = form.armyGrowthRate();
     }
@@ -47,11 +50,18 @@ public class GameDB {
             usersCities.put(city, this.usersCities.get(city).toUser());
         }
 
+        Map<User, Color> usersColor = new HashMap<>();
+        for (UserDB user : this.usersColor.keySet()) {
+            usersColor.put(user.toUser(), this.usersColor.get(user));
+        }
+
+
         return new Game(
                 citiesMap,
                 startTime,
                 citiesArmies,
                 usersCities,
+                usersColor,
                 armySpeed,
                 armyGrowthRate
         );
