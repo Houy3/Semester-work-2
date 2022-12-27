@@ -156,7 +156,7 @@ public class RoomDB {
         lock.lock();
         if (usersColor.containsValue(color)) {
             lock.unlock();
-            throw new ValidatorException("Color is taken");
+            throw new ValidatorException("Color is taken. ");
         }
         usersColor.replace(user, color);
         lock.unlock();

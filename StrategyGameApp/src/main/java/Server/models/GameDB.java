@@ -33,7 +33,7 @@ public class GameDB {
     //Скорость роста армии игрока в городе ед./с.
     private final int armyGrowthRate;
 
-    private static final int waitingTimeS = 10;
+    private static final int waitingTimeS = 1;
     private static final int cityMaxSize = 99;
 
 
@@ -136,11 +136,16 @@ public class GameDB {
 
     public void moveArmy(GameArmyStartMove gameArmyStartMove, UserDB user, UserConnectionThread userConnectionThread) throws ValidatorException {
         lock.lock();
-        City startCity = gameArmyStartMove.way().getStart();
         if (new Date().getTime() < startTime.getTime()) {
             lock.unlock();
             throw new ValidatorException("Wait until start. ");
         }
+
+        if (!citiesMap.ways().contains(gameArmyStartMove.way())) {
+            lock.unlock();
+            throw new ValidatorException("No way found. ");
+        }
+        City startCity = gameArmyStartMove.way().getStart();
         if (!usersCities.get(startCity).equals(user)) {
             lock.unlock();
             throw new ValidatorException("It's not your city. ");
@@ -215,7 +220,8 @@ public class GameDB {
                     userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, user.toUser(), citiesArmies.get(endCity) ));
                 } else {
                     //захват не произошел
-                    userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, usersCities.get(endCity).toUser(), citiesArmies.get(endCity) ));
+                    UserDB newUser = usersCities.get(endCity);
+                    userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, newUser == null ? null : newUser.toUser(), citiesArmies.get(endCity) ));
                 }
             } else {
                 //перевод армии в свой город

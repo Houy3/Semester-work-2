@@ -5,7 +5,9 @@ import Protocol.Message.Request;
 import Protocol.Message.RequestValues.*;
 import Protocol.Message.Response;
 import Protocol.Message.ResponseValues.Room;
+import Protocol.Message.models.City;
 import Protocol.Message.models.RoomAccess;
+import Protocol.Message.models.Way;
 import Protocol.MessageManager;
 import Protocol.ProtocolVersionException;
 
@@ -59,7 +61,21 @@ public class Test {
 
         Thread.sleep(3000);
 
-        socket21.close();
+        response = HighLevelMessageManager.moveArmyStart(
+                new GameArmyStartMove(
+                     new Way(
+                          new City(1, 1,1),
+                          new City(6,1,1)
+                     ),
+                     5
+                ),
+                socket11
+        );
+        System.out.println(response.type());
+        System.out.println(response.value());
+
+
+//        socket21.close();
 
         request = HighLevelMessageManager.readRequest(socket12);
         System.out.println(request.type());
@@ -67,11 +83,11 @@ public class Test {
 
 
 
-        request = HighLevelMessageManager.readRequest(socket12);
+        request = HighLevelMessageManager.readRequest(socket22);
         System.out.println(request.type());
         System.out.println(request.value());
 
-        Thread.sleep(100000);
+//        Thread.sleep(100000);
 
     }
 
