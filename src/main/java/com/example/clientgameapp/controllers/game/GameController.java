@@ -129,7 +129,7 @@ public class GameController implements Initializable {
         citiesGameMap = gameStorage.getMaps().get(0);
         color = Color.RED;
         getCurrentGame();
-        setAllNumbersValue(10);
+        //    setAllNumbersValue(10);
         startIncrementingAll();
         initCitiesMap();
         startGameProcess();
@@ -138,8 +138,8 @@ public class GameController implements Initializable {
     private void getCurrentGame() {
         new Thread(
                 () -> {
-                    while (isFinished) {
-                        try {
+                    try {
+                        while (isFinished) {
                             Response response = HighLevelMessageManager.getGame(senderSocket);
                             System.out.println(response);
                             if (response.type() == Response.Type.RESPONSE_ERROR) {
@@ -161,13 +161,14 @@ public class GameController implements Initializable {
 
                             }
                             Thread.sleep(5000L);
-                        } catch (IOException e) {
-                            ErrorAlert.show(e.getMessage());
-                            GlobalStorage.getInstance().getMainApp().closeGame();
-                        } catch (ProtocolVersionException | ServerException | InterruptedException e) {
-                            System.out.println(e.getMessage());
                         }
+                    } catch (IOException e) {
+                        ErrorAlert.show(e.getMessage());
+                        GlobalStorage.getInstance().getMainApp().closeGame();
+                    } catch (ProtocolVersionException | ServerException | InterruptedException e) {
+                        ErrorAlert.show(e.getMessage());
                     }
+
                 }
         ).start();
     }
