@@ -109,7 +109,8 @@ public class GameDB {
         Iterator<City> i = cities.iterator();
         while (i.hasNext()) {
             City city = i.next();
-            if (usersCities.get(city).equals(user)) {
+            UserDB userDB = usersCities.get(city);
+            if (userDB != null && userDB.equals(user)) {
                 i.remove();
                 userConnectionThread.moveArmyEnd(new GameArmyEndMove(
                         city,
@@ -157,7 +158,6 @@ public class GameDB {
             throw new ValidatorException("Not enough army. ");
         }
 
-
         citiesArmies.replace(startCity, citiesArmies.get(startCity) - gameArmyStartMove.armyCount());
         lock.unlock();
         new ArmyMove(gameArmyStartMove, user, userConnectionThread, lock).start();
@@ -167,6 +167,8 @@ public class GameDB {
     public boolean isEnd() {
         lock.lock();
         int countOfActiveUsers = new HashSet<>(usersCities.values()).size();
+        System.out.println(usersCities);
+        System.out.println(countOfActiveUsers);
         if (countOfActiveUsers == 1) {
             winner = usersCities.values().stream().toList().get(0);
             isGameInProcess = false;
@@ -209,7 +211,11 @@ public class GameDB {
 
             for (Way iWay : citiesMap.ways()) {
                 if (iWay.equals(way)) {
-                    way = iWay;
+                    if (way.getStart().equals(iWay.getStart())) {
+                        way = iWay;
+                    } else {
+                        way = new Way(iWay.getEnd(), iWay.getStart());
+                    }
                     break;
                 }
             }
@@ -217,7 +223,6 @@ public class GameDB {
                     way,
                     gameArmyStartMove.armyCount()
             );
-
             try {
                 Thread.sleep(1000 * ((long) gameArmyStartMove.way().getLength()) / armySpeed);
             } catch (InterruptedException ignored) {}
@@ -230,28 +235,23 @@ public class GameDB {
                 citiesArmies.replace(endCity, citiesArmies.get(endCity) - gameArmyStartMove.armyCount());
                 if (citiesArmies.get(endCity) == 0) {
                     //армии самоуничтожились
-                    lock.unlock();
                     userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, null, citiesArmies.get(endCity) ));
                 } else if (citiesArmies.get(endCity) < 0) {
                     //произошел захват города
                     citiesArmies.replace(endCity, Math.abs(citiesArmies.get(endCity)) );
                     usersCities.replace(endCity, user);
-                    System.out.println(usersCities);
-                    lock.unlock();
                     userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, user.toUser(), citiesArmies.get(endCity) ));
                 } else {
                     //захват не произошел
                     UserDB newUser = usersCities.get(endCity);
-                    lock.unlock();
                     userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, newUser == null ? null : newUser.toUser(), citiesArmies.get(endCity) ));
                 }
             } else {
                 //перевод армии в свой город
                 citiesArmies.replace(endCity, citiesArmies.get(endCity) + gameArmyStartMove.armyCount());
-                lock.unlock();
                 userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, user.toUser(), citiesArmies.get(endCity) ));
             }
-
+            lock.unlock();
         }
     }
 

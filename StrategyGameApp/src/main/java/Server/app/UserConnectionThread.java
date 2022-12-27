@@ -373,6 +373,7 @@ public class UserConnectionThread implements Runnable {
                     new Request(GAME_ENDED,
                     new GameResults(roomDB.getGameDB().getWinner().toUser()))
             );
+            System.out.println("win");
         }
     }
 
