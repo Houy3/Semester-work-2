@@ -46,7 +46,6 @@ public class DestinationsManager {
     }
 
     private void showScene(URL destiny) {
-
         Platform.runLater(() -> {
             try {
                 Parent root = FXMLLoader.load(destiny);

@@ -1,6 +1,6 @@
 package com.example.clientgameapp.models;
 
-import Protocol.MessageValues.User.User;
+import Protocol.Message.ResponseValues.User;
 
 import java.awt.*;
 import java.util.Objects;

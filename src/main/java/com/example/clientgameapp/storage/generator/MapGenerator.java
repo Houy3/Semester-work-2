@@ -1,6 +1,6 @@
 package com.example.clientgameapp.storage.generator;
 
-import Protocol.MessageValues.models.CitiesMap.City;
+import Protocol.Message.models.City;
 import com.example.clientgameapp.models.CitiesGameMap;
 import com.example.clientgameapp.models.Route;
 import javafx.scene.control.Button;

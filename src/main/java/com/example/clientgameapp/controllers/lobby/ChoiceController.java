@@ -23,7 +23,7 @@ public class ChoiceController {
         try {
             connection = ClientConnectionSingleton.getInstance();
             mManager = new HighLevelMessageManager();
-            socket = connection.getSocket();
+            socket = connection.getSocketSender();
             destinationsManager = DestinationsManager.getInstance();
         } catch (ClientConnectionException ex) {
             ErrorAlert.show(ex.getMessage());

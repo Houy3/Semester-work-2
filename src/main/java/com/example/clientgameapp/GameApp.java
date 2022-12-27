@@ -1,12 +1,12 @@
 package com.example.clientgameapp;
 
 import Protocol.HighLevelMessageManager;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
+import Protocol.ProtocolVersionException;
 import com.example.clientgameapp.storage.GlobalStorage;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -17,15 +17,17 @@ import java.util.concurrent.Executors;
 public class GameApp extends Application {
     private Stage stage;
 
+    private ClientConnectionSingleton connection;
     private DestinationsManager destinationsManager;
     private GlobalStorage globalStorage;
 
     @Override
     public void start(Stage stage) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(GameApp.class.getResource("game-view.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(GameApp.class.getResource("login-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 600, 400);
             globalStorage = GlobalStorage.getInstance();
+            connection = ClientConnectionSingleton.getInstance();
             globalStorage.setScheduler(Executors.newScheduledThreadPool(1));
             destinationsManager = DestinationsManager.getInstance();
             destinationsManager.init(stage);
@@ -45,16 +47,23 @@ public class GameApp extends Application {
     }
 
     public void closeGame() {
-        globalStorage.nullifyAll();
-        globalStorage.getScheduler().shutdownNow();
-        stage.close();
-        try {
-            HighLevelMessageManager.logoutUser(ClientConnectionSingleton.getInstance().getSocket());
-            HighLevelMessageManager.exit(ClientConnectionSingleton.getInstance().getSocket());
-            ClientConnectionSingleton.getInstance().getSocket().close();
-        } catch (IOException | ClientConnectionException | MismatchedClassException | BadResponseException e) {
-            System.out.println(e.getMessage());
-        }
+        Platform.runLater(() -> {
+            globalStorage.nullifyAll();
+            globalStorage.getScheduler().shutdownNow();
+
+            stage.close();
+            try {
+                connection.getSocketReceiver().close();
+                connection.getSocketSender().close();
+                HighLevelMessageManager.logoutUser(ClientConnectionSingleton.getInstance().getSocketSender());
+                HighLevelMessageManager.exit(ClientConnectionSingleton.getInstance().getSocketSender());
+                ClientConnectionSingleton.getInstance().getSocketSender().close();
+            } catch (IOException | ClientConnectionException |
+                     ProtocolVersionException e) {
+                System.out.println(e.getMessage());
+            }
+        });
+
     }
 
     public static void main(String[] args) {

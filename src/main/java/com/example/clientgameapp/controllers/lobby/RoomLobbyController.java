@@ -1,12 +1,10 @@
 package com.example.clientgameapp.controllers.lobby;
 
 import Protocol.HighLevelMessageManager;
-import Protocol.Message;
-import Protocol.MessageValues.Response.ResponseSuccess;
-import Protocol.MessageValues.Room.OpenRoomsList;
-import Protocol.MessageValues.Room.Room;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
+import Protocol.Message.Response;
+import Protocol.Message.ResponseValues.OpenRoomsList;
+import Protocol.Message.ResponseValues.Room;
+import Protocol.ProtocolVersionException;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.storage.GlobalStorage;
 import util.Converter;
@@ -30,7 +28,6 @@ public class RoomLobbyController {
     public ListView<Room> roomsList;
 
     private ClientConnectionSingleton connection;
-    private HighLevelMessageManager mManager;
 
     @FXML
     private ColorPicker gameColorPicker;
@@ -40,29 +37,30 @@ public class RoomLobbyController {
     private DestinationsManager destinationsManager;
 
     public void initialize() {
-        try {
-            connection = ClientConnectionSingleton.getInstance();
-            mManager = new HighLevelMessageManager();
-            socket = connection.getSocket();
-            destinationsManager = DestinationsManager.getInstance();
-            Message message = HighLevelMessageManager.getOpenRooms(socket);
-            ResponseSuccess responseSuccess = (ResponseSuccess) message.value();
-            OpenRoomsList list = (OpenRoomsList) responseSuccess.getResponseValue();
-            List<Room> rooms = list.getOpenRooms();
+        new Thread(
+                () -> {
+                    try {
+                        connection = ClientConnectionSingleton.getInstance();
+                        socket = connection.getSocketSender();
+                        destinationsManager = DestinationsManager.getInstance();
+                        Response message = HighLevelMessageManager.getOpenRooms(socket);
+                        OpenRoomsList list = (OpenRoomsList) message.value();
+                        List<Room> rooms = list.openRooms();
 
-            ObservableList<Room> roomList = FXCollections.observableArrayList();
-            roomList.addAll(rooms);
-            roomsList.setItems(roomList);
-            roomsList.setCellFactory(studentListView -> new RoomCell());
+                        ObservableList<Room> roomList = FXCollections.observableArrayList();
+                        roomList.addAll(rooms);
+                        roomsList.setItems(roomList);
+                        roomsList.setCellFactory(studentListView -> new RoomCell());
 
-
-        } catch (ClientConnectionException | MismatchedClassException | BadResponseException ex) {
-            System.out.println(ex.getMessage());
-            ErrorAlert.show(ex.getMessage());
-        } catch (IOException e) {
-            ErrorAlert.show(e.getMessage());
-            GlobalStorage.getInstance().getMainApp().closeGame();
-        }
+                    } catch (ClientConnectionException | ProtocolVersionException ex) {
+                        System.out.println(ex.getMessage());
+                        ErrorAlert.show(ex.getMessage());
+                    } catch (IOException e) {
+                        ErrorAlert.show(e.getMessage());
+                        GlobalStorage.getInstance().getMainApp().closeGame();
+                    }
+                }
+        ).start();
     }
 
     public void navigateRoomCreation(ActionEvent actionEvent) {
@@ -83,7 +81,7 @@ public class RoomLobbyController {
                 if (selectedRoom != null) {
                     Room currentRoom = roomsList.getSelectionModel().getSelectedItems().get(0);
                     GlobalStorage globalStorage = GlobalStorage.getInstance();
-                    globalStorage.setRoomId(currentRoom.getCode());
+                    globalStorage.setRoomId(currentRoom.code());
                     globalStorage.setColor(color);
                     destinationsManager.navigateLobbyScene();
                     System.out.println(roomsList.getSelectionModel().getSelectedItems());

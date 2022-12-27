@@ -1,6 +1,6 @@
 package com.example.clientgameapp.controllers.listViewItems;
 
-import Protocol.MessageValues.Room.Room;
+import Protocol.Message.ResponseValues.Room;
 import com.example.clientgameapp.GameApp;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -40,7 +40,7 @@ public class RoomCell extends ListCell<Room> {
     protected void updateItem(Room item, boolean empty) {
         super.updateItem(item, empty);
 
-        if (empty || item == null || item.getGameInitializationForm() == null) {
+        if (empty || item == null || item.gameInitializationForm() == null) {
             setText(null);
             setGraphic(null);
         } else {
@@ -55,10 +55,10 @@ public class RoomCell extends ListCell<Room> {
                 }
 
             }
-            labelAvailableSpacesCount.setText("Space count: " + String.valueOf(item.getMaxCountOfPlayers() - item.getUsers().size()));
-            labelArmySpeed.setText("Army speed: " + String.valueOf(item.getGameInitializationForm().getArmySpeed()));
-            labelCitiesCount.setText("Cities count: " + String.valueOf(item.getGameInitializationForm().getCountOfCities()));
-            labelGrowthRate.setText("Growth rate: " + String.valueOf(item.getGameInitializationForm().getArmyGrowthRate()));
+            labelAvailableSpacesCount.setText("Space count: " + String.valueOf(item.maxCountOfPlayers() - item.users().size()));
+            labelArmySpeed.setText("Army speed: " + String.valueOf(item.gameInitializationForm().armySpeed()));
+            labelCitiesCount.setText("Cities count: " + String.valueOf(item.gameInitializationForm().countOfCities()));
+            labelGrowthRate.setText("Growth rate: " + String.valueOf(item.gameInitializationForm().armyGrowthRate()));
             setText(null);
             setGraphic(borderPane);
         }

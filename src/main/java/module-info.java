@@ -10,13 +10,12 @@ module com.example.clientgameapp {
     opens com.example.clientgameapp to javafx.fxml;
     exports com.example.clientgameapp;
     exports com.example.clientgameapp.controllers.user;
-    exports Protocol.MessageValues.Room;
+    exports Protocol.Message.models;
     exports com.example.clientgameapp.storage.generator;
     exports com.example.clientgameapp.models;
     exports com.example.clientgameapp.storage;
-    exports Protocol.MessageValues.User;
-    exports Protocol.MessageValues.Response;
-    exports Protocol.MessageValues.Game;
+    exports Protocol.Message.ResponseValues;
+    exports Protocol.Message.RequestValues;
     exports util;
     exports com.example.clientgameapp.controllers.error;
     opens com.example.clientgameapp.controllers.user to javafx.fxml;

@@ -1,6 +1,6 @@
 package com.example.clientgameapp.models;
 
-import Protocol.MessageValues.models.CitiesMap.City;
+import Protocol.Message.models.City;
 
 import java.util.List;
 import java.util.Objects;

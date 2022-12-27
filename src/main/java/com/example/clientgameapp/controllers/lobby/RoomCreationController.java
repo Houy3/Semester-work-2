@@ -1,14 +1,12 @@
 package com.example.clientgameapp.controllers.lobby;
 
 import Protocol.HighLevelMessageManager;
-import Protocol.Message;
-import Protocol.MessageManager;
-import Protocol.MessageValues.Game.GameInitializationForm;
-import Protocol.MessageValues.Response.ResponseError;
-import Protocol.MessageValues.Room.RoomAccess;
-import Protocol.MessageValues.Room.RoomInitializationForm;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
+import Protocol.Message.RequestValues.GameInitializationForm;
+import Protocol.Message.RequestValues.RoomInitializationForm;
+import Protocol.Message.Response;
+import Protocol.Message.ResponseValues.ResponseError;
+import Protocol.Message.models.RoomAccess;
+import Protocol.ProtocolVersionException;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.storage.GlobalStorage;
 import util.Converter;
@@ -32,7 +30,6 @@ public class RoomCreationController {
     public ColorPicker gameColorPicker;
     public Spinner spinnerArmySpeed;
     public Spinner spinnerArmyGrowthRate;
-    public Spinner spinnerCitiesAmount;
 
     private ClientConnectionSingleton connection;
     private HighLevelMessageManager mManager;
@@ -46,7 +43,7 @@ public class RoomCreationController {
         try {
             connection = ClientConnectionSingleton.getInstance();
             mManager = new HighLevelMessageManager();
-            socket = connection.getSocket();
+            socket = connection.getSocketSender();
             destinationsManager = DestinationsManager.getInstance();
         } catch (ClientConnectionException ex) {
             ErrorAlert.show(ex.getMessage());
@@ -54,46 +51,45 @@ public class RoomCreationController {
     }
 
     public void createRoom(ActionEvent actionEvent) {
+        new Thread(
+                () -> {
+                    try {
+                        int growthRate = (int) spinnerArmyGrowthRate.getValue();
+                        int armySpeed = (int) spinnerArmySpeed.getValue();
+                        boolean isPrivate = togglePrivate.isSelected();
+                        RoomAccess access;
+                        if (color == null) {
+                            throw new ClientException("You need to choose a color");
+                        }
+                        GameInitializationForm gameInitializationForm = new GameInitializationForm(
+                                6, armySpeed, growthRate
+                        );
+                        if (isPrivate) {
+                            access = RoomAccess.PRIVATE;
+                        } else {
+                            access = RoomAccess.PUBLIC;
+                        }
+                        RoomInitializationForm newRoom = new RoomInitializationForm(
+                                2, access, color, gameInitializationForm
+                        );
+                        Response roomInitializedMessage = HighLevelMessageManager.initializeRoom(newRoom, socket);
 
-        try {
-            System.out.println(socket.isClosed());
-            int citiesAmount = (int) spinnerCitiesAmount.getValue();
-            int growthRate = (int) spinnerArmyGrowthRate.getValue();
-            int armySpeed = (int) spinnerArmySpeed.getValue();
-            boolean isPrivate = togglePrivate.isSelected();
-            RoomAccess access;
-            if (color == null) {
-                throw new ClientException("You need to choose a color");
-            }
-            GameInitializationForm gameInitializationForm = new GameInitializationForm(
-                    citiesAmount, growthRate, armySpeed
-            );
-            if (isPrivate) {
-                access = RoomAccess.PRIVATE;
-            } else {
-                access = RoomAccess.PUBLIC;
-            }
-            RoomInitializationForm newRoom = new RoomInitializationForm(
-                    2, access, color, gameInitializationForm
-            );
-            Message roomInitializedMessage = HighLevelMessageManager.initializeRoom(newRoom, socket);
+                        if (roomInitializedMessage.type() == Response.Type.RESPONSE_ERROR) {
+                            ResponseError error = (ResponseError) roomInitializedMessage.value();
+                            throw new GameException(error.errorMessage());
+                        } else {
+                            GlobalStorage.getInstance().setColor(color);
+                            destinationsManager.navigateLobbyScene();
+                        }
+                    } catch (ClientException | GameException |ProtocolVersionException| RuntimeException e) {
+                        ErrorAlert.show(e.getMessage());
+                    } catch (IOException e) {
+                        ErrorAlert.show(e.getMessage());
+                        GlobalStorage.getInstance().getMainApp().closeGame();
+                    }
+                }
+        ).start();
 
-            if (roomInitializedMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
-                ResponseError error = (ResponseError) roomInitializedMessage.value();
-                throw new GameException(error.getErrorMessage());
-            } else {
-                GlobalStorage.getInstance().getScheduler().shutdownNow();
-                GlobalStorage.getInstance().setColor(color);
-                destinationsManager.navigateLobbyScene();
-            }
-        } catch (ClientException | GameException | RuntimeException |
-                 BadResponseException |
-                 MismatchedClassException e) {
-            ErrorAlert.show(e.getMessage());
-        } catch (IOException e) {
-            ErrorAlert.show(e.getMessage());
-            GlobalStorage.getInstance().getMainApp().closeGame();
-        }
     }
 
     public void navigateProfile(ActionEvent actionEvent) {

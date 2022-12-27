@@ -1,13 +1,9 @@
 package com.example.clientgameapp.controllers.game;
 
 import Protocol.HighLevelMessageManager;
-import Protocol.Message;
-import Protocol.MessageManager;
-import Protocol.MessageValues.Game.Game;
-import Protocol.MessageValues.Response.ResponseSuccess;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
-import Protocol.exceptions.ProtocolVersionException;
+import Protocol.Message.Response;
+import Protocol.Message.ResponseValues.Game;
+import Protocol.ProtocolVersionException;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.controllers.error.ErrorAlert;
 import com.example.clientgameapp.models.CitiesGameMap;
@@ -80,7 +76,7 @@ public class GameController implements Initializable {
         try {
             connection = ClientConnectionSingleton.getInstance();
             mManager = new HighLevelMessageManager();
-            socket = connection.getSocket();
+            socket = connection.getSocketSender();
             destinationsManager = DestinationsManager.getInstance();
             gameStorage = GameStorage.getInstance();
             pane.requestFocus();
@@ -101,10 +97,10 @@ public class GameController implements Initializable {
 
     private void startGameProcess() {
         try {
-            Message startGame = HighLevelMessageManager.startGame(socket);
-            if (startGame.type() == MessageManager.MessageType.RESPONSE_SUCCESS) {
-                ResponseSuccess success = (ResponseSuccess) startGame.value();
-                Game game = (Game) success.getResponseValue();
+            Response startGame = HighLevelMessageManager.startGame(socket);
+            if (startGame.type() == Response.Type.RESPONSE_SUCCESS) {
+              //  Response success = (Response) startGame.value();
+                Game game = (Game) startGame.value();
             } else {
                 ErrorAlert.show("Couldn't start the game");
                 GlobalStorage.getInstance().getMainApp().closeGame();
@@ -112,7 +108,7 @@ public class GameController implements Initializable {
         } catch (IOException e) {
             //     ErrorAlert.show(e.getMessage());
             //   GlobalStorage.getInstance().getMainApp().closeGame();
-        } catch (MismatchedClassException | BadResponseException e) {
+        }  catch (ProtocolVersionException e) {
             ErrorAlert.show(e.getMessage());
         }
     }
@@ -192,13 +188,7 @@ public class GameController implements Initializable {
         new Thread(
                 () -> {
 
-                    try {
-                        HighLevelMessageManager.readMessage(socket.getInputStream());
-                    } catch (MismatchedClassException | ProtocolVersionException e) {
-                        throw new RuntimeException(e);
-                    } catch (IOException ex) {
 
-                    }
 
                 }
         ).start();

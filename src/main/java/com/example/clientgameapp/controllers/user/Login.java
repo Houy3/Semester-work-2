@@ -1,12 +1,11 @@
 package com.example.clientgameapp.controllers.user;
 
 import Protocol.HighLevelMessageManager;
-import Protocol.Message;
-import Protocol.MessageManager;
-import Protocol.MessageValues.Response.ResponseError;
-import Protocol.MessageValues.User.UserLoginForm;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
+import Protocol.Message.RequestValues.UserLoginForm;
+import Protocol.Message.Response;
+import Protocol.Message.ResponseValues.ResponseError;
+import Protocol.ProtocolVersionException;
+
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.storage.GlobalStorage;
 import connection.ClientConnectionSingleton;
@@ -37,7 +36,6 @@ public class Login {
 
 
     private ClientConnectionSingleton connection;
-    private HighLevelMessageManager mManager;
     private Socket socket;
 
     private DestinationsManager destinationsManager;
@@ -46,8 +44,7 @@ public class Login {
     public void initialize() {
         try {
             connection = ClientConnectionSingleton.getInstance();
-            mManager = new HighLevelMessageManager();
-            socket = connection.getSocket();
+            socket = connection.getSocketSender();
             destinationsManager = DestinationsManager.getInstance();
         } catch (ClientConnectionException ex) {
             ErrorAlert.show(ex.getMessage());
@@ -56,31 +53,34 @@ public class Login {
 
 
     public void loginUser(ActionEvent actionEvent) {
-        try {
-            String email = textFieldEmail.getText();
-            String password = textFieldPassword.getText();
-            if (Validator.isValid(email) && Validator.isValid(password)) {
-
-                System.out.println(email + "  " + password);
-                UserLoginForm loginForm = new UserLoginForm(
-                        email, password
-                );
-                Message userLogin = mManager.loginUser(
-                        loginForm, socket
-                );
-                if (userLogin.type() == MessageManager.MessageType.RESPONSE_ERROR) {
-                    ResponseError error = (ResponseError) userLogin.value();
-                    throw new ClientException(error.getErrorMessage());
-                } else {
-                    navigateChoiceScene(actionEvent);
+        new Thread(
+                () -> {
+                    try {
+                        String email = textFieldEmail.getText();
+                        String password = textFieldPassword.getText();
+                        if (Validator.isValid(email) && Validator.isValid(password)) {
+                            System.out.println(email + "  " + password);
+                            UserLoginForm loginForm = new UserLoginForm(
+                                    email, password
+                            );
+                            Response userLogin = HighLevelMessageManager.loginUser(
+                                    loginForm, socket
+                            );
+                            if (userLogin.type() == Response.Type.RESPONSE_ERROR) {
+                                ResponseError error = (ResponseError) userLogin.value();
+                                throw new ClientException(error.errorMessage());
+                            } else {
+                                navigateChoiceScene(actionEvent);
+                            }
+                        }
+                    } catch (ClientInputException | ClientException | ProtocolVersionException e) {
+                        ErrorAlert.show(e.getMessage());
+                    } catch (IOException e) {
+                        ErrorAlert.show(e.getMessage());
+                        GlobalStorage.getInstance().getMainApp().closeGame();
+                    }
                 }
-            }
-        } catch (ClientInputException | ClientException | MismatchedClassException | BadResponseException e) {
-            ErrorAlert.show(e.getMessage());
-        } catch (IOException e) {
-            ErrorAlert.show(e.getMessage());
-            GlobalStorage.getInstance().getMainApp().closeGame();
-        }
+        ).start();
     }
 
     public void navigateRegistration(ActionEvent actionEvent) throws IOException {

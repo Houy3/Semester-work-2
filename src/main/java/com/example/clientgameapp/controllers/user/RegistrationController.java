@@ -1,7 +1,10 @@
 package com.example.clientgameapp.controllers.user;
 
 
-import Protocol.MessageValues.Response.ResponseError;
+import Protocol.Message.RequestValues.UserRegistrationForm;
+import Protocol.Message.Response;
+import Protocol.Message.ResponseValues.ResponseError;
+import Protocol.ProtocolVersionException;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.GameApp;
 import com.example.clientgameapp.storage.GlobalStorage;
@@ -10,11 +13,6 @@ import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import Protocol.HighLevelMessageManager;
-import Protocol.Message;
-import Protocol.MessageManager;
-import Protocol.MessageValues.User.UserRegistrationForm;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
 import exceptions.ClientInputException;
@@ -33,7 +31,6 @@ public class RegistrationController {
     private Scene scene;
 
     private ClientConnectionSingleton connection;
-    private HighLevelMessageManager mManager;
     private Socket socket;
 
     private DestinationsManager destinationsManager;
@@ -42,8 +39,7 @@ public class RegistrationController {
         try {
             gameApp = GlobalStorage.getInstance().getMainApp();
             connection = ClientConnectionSingleton.getInstance();
-            mManager = new HighLevelMessageManager();
-            socket = connection.getSocket();
+            socket = connection.getSocketSender();
             destinationsManager = DestinationsManager.getInstance();
         } catch (ClientConnectionException ex) {
             ErrorAlert.show(ex.getMessage());
@@ -53,30 +49,33 @@ public class RegistrationController {
 
 
     public void registerUser(ActionEvent actionEvent) {
-        try {
-            String nickName = textFieldNickName.getText();
-            String password = textFieldPassword.getText();
-            String email = textFieldEmail.getText();
-            System.out.println(nickName + password + email);
-            if (Validator.isValid(nickName) && Validator.isValid(password) && Validator.isValid(email)) {
-                UserRegistrationForm form = new UserRegistrationForm(
-                        email, password, nickName
-                );
-                Message registerMessage = mManager.registerUser(form, socket);
-                if (registerMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
-                    ResponseError error = (ResponseError) registerMessage.value();
-                    throw new ClientException(error.getErrorMessage());
-                } else {
-                    openLoginScene(actionEvent);
+        new Thread(
+                () -> {
+                    try {
+                        String nickName = textFieldNickName.getText();
+                        String password = textFieldPassword.getText();
+                        String email = textFieldEmail.getText();
+                        System.out.println(nickName + password + email);
+                        if (Validator.isValid(nickName) && Validator.isValid(password) && Validator.isValid(email)) {
+                            UserRegistrationForm form = new UserRegistrationForm(
+                                    email, password, nickName
+                            );
+                            Response registerMessage = HighLevelMessageManager.registerUser(form, socket);
+                            if (registerMessage.type() == Response.Type.RESPONSE_ERROR) {
+                                ResponseError error = (ResponseError) registerMessage.value();
+                                throw new ClientException(error.errorMessage());
+                            } else {
+                                openLoginScene(actionEvent);
+                            }
+                        }
+                    } catch ( ProtocolVersionException  | ClientException | ClientInputException e) {
+                        ErrorAlert.show(e.getMessage());
+                    } catch (IOException ex) {
+                        GlobalStorage.getInstance().getMainApp().closeGame();
+                        ErrorAlert.show(ex.getMessage());
+                    }
                 }
-            }
-        } catch (MismatchedClassException | BadResponseException  | ClientException |
-                 ClientInputException e) {
-            ErrorAlert.show(e.getMessage());
-        } catch (IOException ex) {
-            GlobalStorage.getInstance().getMainApp().closeGame();
-            ErrorAlert.show(ex.getMessage());
-        }
+        ).start();
     }
 
 

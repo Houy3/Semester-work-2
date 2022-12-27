@@ -1,21 +1,20 @@
 package connection;
 
 
-import Protocol.Message;
-import Protocol.MessageManager;
-import Protocol.exceptions.MismatchedClassException;
-import Protocol.exceptions.ProtocolVersionException;
+import Protocol.HighLevelMessageManager;
+import Protocol.Message.RequestValues.Start;
+import Protocol.Message.Response;
+import Protocol.ProtocolVersionException;
 import exceptions.ClientConnectionException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 
 public class ClientConnectionSingleton {
     private static ClientConnectionSingleton instance;
-    private static Socket socket;
+    private static Socket socketSender;
+    private static Socket socketReceiver;
     private static final int PORT = 8888;
-    private static InputStream inputStream;
     private static boolean isInitialized = false;
 
     private ClientConnectionSingleton() {
@@ -31,7 +30,7 @@ public class ClientConnectionSingleton {
     }
 
     public static ClientConnectionSingleton getInstance() throws ClientConnectionException {
-        if(!isInitialized) {
+        if (!isInitialized) {
             init();
             isInitialized = true;
         }
@@ -40,31 +39,34 @@ public class ClientConnectionSingleton {
 
     private static void init() throws ClientConnectionException {
         try {
-            if (socket == null) {
-                socket = new Socket("localhost", PORT);
-                inputStream = socket.getInputStream();
+            if (socketReceiver == null && socketSender == null) {
+                socketSender = new Socket("localhost", PORT);
+                socketReceiver = new Socket("localhost", PORT);
+                Response response = HighLevelMessageManager.start(null, socketSender);
+                String startCode = ((Start) response.value()).code();
+                response = HighLevelMessageManager.start(new Start(startCode), socketReceiver);
+                if (response.type() == Response.Type.RESPONSE_ERROR) {
+                    throw new ClientConnectionException("Unable to connect");
+                }
             }
-        } catch (IOException ex) {
+        } catch (ProtocolVersionException | IOException ex) {
             throw new ClientConnectionException("Couldn't connect. Server is closed!");
         }
     }
 
-    /**
-     * необходимо отправить ответ
-     **/
-    public Message listenForMessages() throws IOException, MismatchedClassException, ProtocolVersionException {
-        return MessageManager.readMessage(socket.getInputStream());
-    }
 
     public boolean isConnected() {
-        return !socket.isClosed();
+        return !socketSender.isClosed() && !socketReceiver.isClosed();
     }
 
-    public InputStream getInputStream() {
-        return inputStream;
+
+    public Socket getSocketSender() {
+        return socketSender;
+
     }
 
-    public Socket getSocket() {
-        return socket;
+    public Socket getSocketReceiver() {
+        return socketReceiver;
     }
+
 }

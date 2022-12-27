@@ -40,19 +40,21 @@
                     showTickLabels="true" showTickMarks="true"/> !-->
 
             <ToggleSwitch fx:id="togglePrivate" text="Private" styleClass="toggle"/>
+            <!--
             <HBox alignment="BASELINE_LEFT" styleClass="hBox">
                 <Label text="Cities amount" styleClass="secondary-label"/>
-                <Spinner fx:id="spinnerCitiesAmount" styleClass="spinner">
+                <Spinner fx:id="spinnerCitiesAmount" styleClass="spinner" editable="false">
                     <valueFactory>
                         <SpinnerValueFactory.IntegerSpinnerValueFactory min="6" max="10"/>
                     </valueFactory>
                 </Spinner>
             </HBox>
+            !-->
             <HBox alignment="BASELINE_LEFT" styleClass="hBox">
                 <Label text="Army speed" styleClass="secondary-label"/>
                 <Spinner fx:id="spinnerArmySpeed" styleClass="spinner">
                     <valueFactory>
-                        <SpinnerValueFactory.IntegerSpinnerValueFactory min="5" max="20"/>
+                        <SpinnerValueFactory.IntegerSpinnerValueFactory min="20" max="50"/>
                     </valueFactory>
                 </Spinner>
             </HBox>
@@ -60,7 +62,7 @@
                 <Label text="Army growth rate" styleClass="secondary-label"/>
                 <Spinner fx:id="spinnerArmyGrowthRate" styleClass="spinner">
                     <valueFactory>
-                        <SpinnerValueFactory.IntegerSpinnerValueFactory min="5" max="20"/>
+                        <SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="10"/>
                     </valueFactory>
                 </Spinner>
             </HBox>

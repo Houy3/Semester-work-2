@@ -1,11 +1,9 @@
 package com.example.clientgameapp.controllers.user;
 
 import Protocol.HighLevelMessageManager;
-import Protocol.Message;
-import Protocol.MessageManager;
-import Protocol.MessageValues.Response.ResponseError;
-import Protocol.exceptions.BadResponseException;
-import Protocol.exceptions.MismatchedClassException;
+import Protocol.Message.Response;
+import Protocol.Message.ResponseValues.ResponseError;
+import Protocol.ProtocolVersionException;
 import com.example.clientgameapp.DestinationsManager;
 import com.example.clientgameapp.storage.GlobalStorage;
 import connection.ClientConnectionSingleton;
@@ -20,7 +18,6 @@ import java.net.Socket;
 public class ProfileController {
 
     private ClientConnectionSingleton connection;
-    private HighLevelMessageManager mManager;
     private Socket socket;
 
     private DestinationsManager destinationsManager;
@@ -28,8 +25,7 @@ public class ProfileController {
     public void initialize() {
         try {
             connection = ClientConnectionSingleton.getInstance();
-            mManager = new HighLevelMessageManager();
-            socket = connection.getSocket();
+            socket = connection.getSocketSender();
             destinationsManager = DestinationsManager.getInstance();
         } catch (ClientConnectionException ex) {
             ErrorAlert.show(ex.getMessage());
@@ -45,19 +41,23 @@ public class ProfileController {
     }
 
     public void logout(ActionEvent actionEvent) {
-        try {
-            Message logoutMessage = HighLevelMessageManager.logoutUser(socket);
-            if(logoutMessage.type() == MessageManager.MessageType.RESPONSE_ERROR) {
-                ResponseError error = (ResponseError) logoutMessage.value();
-                throw new ServerException(error.getErrorMessage());
-            } else {
-                destinationsManager.navigateLoginScene();
-            }
-        } catch (ServerException | MismatchedClassException | BadResponseException e) {
-            ErrorAlert.show(e.getMessage());
-        }  catch (IOException e) {
-            ErrorAlert.show(e.getMessage());
-            GlobalStorage.getInstance().getMainApp().closeGame();
-        }
+        new Thread(
+                () -> {
+                    try {
+                        Response logoutMessage = HighLevelMessageManager.logoutUser(socket);
+                        if(logoutMessage.type() == Response.Type.RESPONSE_ERROR) {
+                            ResponseError error = (ResponseError) logoutMessage.value();
+                            throw new ServerException(error.errorMessage());
+                        } else {
+                            destinationsManager.navigateLoginScene();
+                        }
+                    } catch (ServerException | ProtocolVersionException  e) {
+                        ErrorAlert.show(e.getMessage());
+                    }  catch (IOException e) {
+                        ErrorAlert.show(e.getMessage());
+                        GlobalStorage.getInstance().getMainApp().closeGame();
+                    }
+                }
+        ).start();
     }
 }

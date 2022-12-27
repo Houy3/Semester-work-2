@@ -1,6 +1,5 @@
 package com.example.clientgameapp.controllers.listViewItems;
 
-import Protocol.MessageValues.User.User;
 import com.example.clientgameapp.GameApp;
 import com.example.clientgameapp.models.UserModel;
 import javafx.fxml.FXML;
@@ -54,7 +53,7 @@ public class ClientCell extends ListCell<UserModel> {
             labelUserId.setText(String.valueOf(item.getIndex()));
             labelColor.setStyle("-fx-background-color: rgb(" + item.getUserColor().getRed() + ","
                     + item.getUserColor().getGreen() + "," + item.getUserColor().getBlue() + ");");
-            labelStatus.setText(item.getUserStatus() ? "(ready)" : "(not ready)");            labelUserName.setText(String.valueOf(item.getUser().getNickname()));
+            labelStatus.setText(item.getUserStatus() ? "(ready)" : "(not ready)");            labelUserName.setText(String.valueOf(item.getUser().nickname()));
             setText(null);
             setGraphic(borderPane);
         }
