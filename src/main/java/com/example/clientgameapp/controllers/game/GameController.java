@@ -185,12 +185,13 @@ public class GameController implements Initializable {
     private void startGameProcess() {
         new Thread(
                 () -> {
-                    while (true) {
-                        try {
+
+                    try {
+                        while (true) {
                             System.out.println("HERE");
                             System.out.println(receiverSocket);
                             Request request = HighLevelMessageManager.readRequest(receiverSocket);
-                            System.out.println("typpe " + request.type());
+                            System.out.println(request);
                             if (request.type() == Request.Type.GAME_ACTION_ARMY_START_MOVE) {
                                 GameArmyStartMove move = (GameArmyStartMove) request.value();
                                 Way way = move.way();
@@ -205,6 +206,7 @@ public class GameController implements Initializable {
                                 City endCity = way.getEnd();
                                 User owner = game.usersCities().get(endCity);
                                 java.awt.Color newColor = game.usersColor().get(owner);
+                                System.out.println("buttons" + buttonStart + " " + buttonEnd);
                                 Platform.runLater(() -> {
                                     drawBall(buttonStart, buttonEnd, Converter.convertColor(java.awt.Color.GREEN), 4);
                                 });
@@ -227,14 +229,14 @@ public class GameController implements Initializable {
                                 game.usersCities().replace(city, user);
                             }
                             HighLevelMessageManager.sendResponseSuccess(null, receiverSocket);
-
-                        } catch (IOException e) {
-                            ErrorAlert.show(e.getMessage());
-                            GlobalStorage.getInstance().getMainApp().closeGame();
-                        } catch (ProtocolVersionException e) {
-                            System.out.println(e.getMessage());
                         }
+                    } catch (IOException e) {
+                        ErrorAlert.show(e.getMessage());
+                        GlobalStorage.getInstance().getMainApp().closeGame();
+                    } catch (ProtocolVersionException e) {
+                        System.out.println(e.getMessage());
                     }
+
                 }
         ).start();
     }
@@ -269,7 +271,7 @@ public class GameController implements Initializable {
                         }
                         for (City city : game.citiesArmies().keySet()) {
                             if (game.usersCities().get(city) != null) {
-                                game.citiesArmies().replace(city, game.citiesArmies().get(city) + game.armyGrowthRate());
+                                game.citiesArmies().replace(city, Math.min(game.citiesArmies().get(city) + game.armyGrowthRate(), 99));
                             }
                         }
                         for (Button button : allAvailableCities) {
