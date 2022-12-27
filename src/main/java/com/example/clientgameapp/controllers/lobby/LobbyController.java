@@ -48,6 +48,7 @@ public class LobbyController {
 
     private ScheduledExecutorService scheduler;
 
+    private boolean isFirstStart = true;
     private boolean isReady = false;
 
 
@@ -128,8 +129,11 @@ public class LobbyController {
         list.addAll(userModelList);
         usersList.setItems(list);
         usersList.setCellFactory(studentListView -> new ClientCell());
-        updateList();
-        listenForMessages();
+        if (isFirstStart) {
+            updateList();
+            listenForMessages();
+            isFirstStart = false;
+        }
     }
 
     public void setReadyStatus(ActionEvent actionEvent) {
