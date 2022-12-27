@@ -200,7 +200,8 @@ public class GameController implements Initializable {
                                 Button buttonStart = getButton(way.getStart());
                                 Button buttonEnd = getButton(way.getEnd());
                                 Platform.runLater(() -> {
-                                    buttonStart.setText(String.valueOf(Integer.parseInt(buttonStart.getText()) - move.armyCount()));
+                                    game.citiesArmies().replace(way.getStart(), game.citiesArmies().get(way.getStart()) - move.armyCount());
+                                    buttonStart.setText(String.valueOf(game.citiesArmies().get(way.getStart())));
                                 });
                                 System.out.println(buttonStart + " " + buttonEnd);
                                 City startCity = way.getStart();
@@ -220,12 +221,18 @@ public class GameController implements Initializable {
                                 GameArmyEndMove gameArmyEndMove = (GameArmyEndMove) request.value();
                                 City city = gameArmyEndMove.city();
                                 User user = gameArmyEndMove.user();
+                                game.citiesArmies().replace(city, gameArmyEndMove.armyCount());
+                                game.usersCities().replace(city, user);
                                 int armyCount = gameArmyEndMove.armyCount();
                                 Button button = getButton(city);
-                                Color color = Converter.convertColor(game.usersColor().get(user));
-                                setStyle(button, color);
+                                try {
+                                    Color color = Converter.convertColor(game.usersColor().get(user));
+                                    setStyle(button, color);
+                                } catch (Exception e) {
+                                    setStyle(button, Color.GRAY);
+                                }
                                 Platform.runLater(() -> {
-                                    button.setText(String.valueOf(armyCount));
+                                    button.setText(String.valueOf(game.citiesArmies().get(city)));
                                 });
                                 game.usersCities().replace(city, user);
                             }
