@@ -137,7 +137,6 @@
     -fx-text-fill: black;
     -fx-border-width: 0px;
     -fx-border-color: green;
-    -fx-background-color: grey;
 
     -fx-effect: dropshadow(gaussian, rgba(0.0, 0.0, 0.5, 0.5), 0, 0, 0, 0);
 }

@@ -494,7 +494,7 @@ public class GameController implements Initializable {
 
     private void drawSelectionBorder(Button button) {
         Platform.runLater(() -> {
-            button.setStyle("-fx-border-width: 2px");
+          button.setStyle("-fx-border-width: 2px");
         });
     }
 
