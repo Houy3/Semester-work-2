@@ -308,7 +308,6 @@ public class UserConnectionThread implements Runnable {
 
                     }
                 } else {
-                    roomDB.getRoomLock().lock();
                     switch (request.type()) {
                         case GAME_DISCONNECT -> {
                             disconnectUserFromGameWithResponse();
@@ -326,7 +325,6 @@ public class UserConnectionThread implements Runnable {
                         default -> HighLevelMessageManager.sendResponseError("You are in game. You can only: disconnect from game (and room) or move army. ", socketAccepting);
 
                     }
-                    roomDB.getRoomLock().unlock();
                 }
             }
 

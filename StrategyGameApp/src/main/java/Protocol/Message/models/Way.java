@@ -32,6 +32,7 @@ public class Way implements Serializable {
         return "Way{" +
                 "start=" + start +
                 ", end=" + end +
+                ", length=" + length +
                 '}';
     }
 

@@ -212,23 +212,27 @@ public class GameDB {
                 citiesArmies.replace(endCity, citiesArmies.get(endCity) - gameArmyStartMove.armyCount());
                 if (citiesArmies.get(endCity) == 0) {
                     //армии самоуничтожились
+                    lock.unlock();
                     userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, null, citiesArmies.get(endCity) ));
                 } else if (citiesArmies.get(endCity) < 0) {
                     //произошел захват города
                     citiesArmies.replace(endCity, Math.abs(citiesArmies.get(endCity)) );
                     usersCities.replace(endCity, user);
+                    lock.unlock();
                     userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, user.toUser(), citiesArmies.get(endCity) ));
                 } else {
                     //захват не произошел
                     UserDB newUser = usersCities.get(endCity);
+                    lock.unlock();
                     userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, newUser == null ? null : newUser.toUser(), citiesArmies.get(endCity) ));
                 }
             } else {
                 //перевод армии в свой город
                 citiesArmies.replace(endCity, citiesArmies.get(endCity) + gameArmyStartMove.armyCount());
+                lock.unlock();
                 userConnectionThread.moveArmyEnd(new GameArmyEndMove(endCity, user.toUser(), citiesArmies.get(endCity) ));
             }
-            lock.unlock();
+
         }
     }
 
