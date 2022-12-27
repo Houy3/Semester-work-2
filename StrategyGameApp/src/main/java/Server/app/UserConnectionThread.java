@@ -356,7 +356,7 @@ public class UserConnectionThread implements Runnable {
         try {
             roomDB.getGameDB().moveArmy(gameArmyStartMove, userDB, this);
             HighLevelMessageManager.sendResponseSuccess(null, socketAccepting);
-            sendMessageToAllUsersInRoom(new Request(GAME_ACTION_ARMY_START_MOVE, gameArmyStartMove));
+            //sendMessageToAllUsersInRoom(new Request(GAME_ACTION_ARMY_START_MOVE, gameArmyStartMove));
         } catch (ValidatorException e) {
             HighLevelMessageManager.sendResponseError(e.getMessage(), socketAccepting);
         }
@@ -367,6 +367,7 @@ public class UserConnectionThread implements Runnable {
             throw new RuntimeException("game army start move");
         }
         sendMessageToAllUsersInRoom(new Request(GAME_ACTION_ARMY_START_MOVE, gameArmyStartMove));
+        System.out.println("----");
     }
 
     public void moveArmyEnd(GameArmyEndMove gameArmyEndMove) {
