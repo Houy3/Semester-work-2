@@ -253,6 +253,9 @@ public class UserConnectionThread implements Runnable {
                     case ROOM_GET -> {
                         getRoomParametersWithResponse();
                     }
+                    case ROOM_CONNECT -> {
+                        HighLevelMessageManager.sendResponseSuccess(null, socketAccepting);
+                    }
                     case EXIT -> {
                         exitUserWithResponse();
                     }
