@@ -191,6 +191,7 @@ public class GameController implements Initializable {
                             System.out.println("HERE");
                             System.out.println(receiverSocket);
                             Request request = HighLevelMessageManager.readRequest(receiverSocket);
+                            HighLevelMessageManager.sendResponseSuccess(null, receiverSocket);
                             System.out.println(request);
                             if (request.type() == Request.Type.GAME_ACTION_ARMY_START_MOVE) {
                                 GameArmyStartMove move = (GameArmyStartMove) request.value();
@@ -228,7 +229,6 @@ public class GameController implements Initializable {
                                 });
                                 game.usersCities().replace(city, user);
                             }
-                            HighLevelMessageManager.sendResponseSuccess(null, receiverSocket);
                         }
                     } catch (IOException e) {
                         ErrorAlert.show(e.getMessage());

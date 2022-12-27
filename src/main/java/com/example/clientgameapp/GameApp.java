@@ -53,10 +53,9 @@ public class GameApp extends Application {
 
             stage.close();
             try {
+                HighLevelMessageManager.exit(ClientConnectionSingleton.getInstance().getSocketSender());
                 connection.getSocketReceiver().close();
                 connection.getSocketSender().close();
-                HighLevelMessageManager.logoutUser(ClientConnectionSingleton.getInstance().getSocketSender());
-                HighLevelMessageManager.exit(ClientConnectionSingleton.getInstance().getSocketSender());
                 ClientConnectionSingleton.getInstance().getSocketSender().close();
             } catch (IOException | ClientConnectionException |
                      ProtocolVersionException e) {
