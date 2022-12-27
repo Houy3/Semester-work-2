@@ -169,10 +169,19 @@ public class GameDB {
         int countOfActiveUsers = new HashSet<>(usersCities.values()).size();
         System.out.println(usersCities);
         System.out.println(countOfActiveUsers);
-        if (countOfActiveUsers == 1) {
+        if (countOfActiveUsers == 2) {
             winner = usersCities.values().stream().toList().get(0);
+            if (winner == null) {
+                winner = usersCities.values().stream().toList().get(1);
+            }
             isGameInProcess = false;
             lock.unlock();
+            return true;
+        } if (countOfActiveUsers < 2) {
+            isGameInProcess = false;
+            lock.unlock();
+            winner = new UserDB();
+            winner.setNickname("Unknown");
             return true;
         } else {
             lock.unlock();

@@ -256,7 +256,7 @@ public class UserConnectionThread implements Runnable {
                     case EXIT -> {
                         exitUserWithResponse();
                     }
-                    default -> HighLevelMessageManager.sendResponseError("You only can: disconnect from room, become ready or set your color. ", socketAccepting);
+                    default -> HighLevelMessageManager.sendResponseError("You only can: disconnect from room, become ready or set your color. " + request, socketAccepting);
                 }
 
             }
@@ -323,7 +323,6 @@ public class UserConnectionThread implements Runnable {
                             exitUserWithResponse();
                         }
                         default -> HighLevelMessageManager.sendResponseError("You are in game. You can only: disconnect from game (and room) or move army. ", socketAccepting);
-
                     }
                 }
             }
