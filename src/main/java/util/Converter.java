@@ -18,7 +18,7 @@ public class Converter {
         return new javafx.scene.paint.Color(
                 color.getRed()/255.0,
                 color.getGreen()/255.0,
-                color.getBlue()/255.0, 10
+                color.getBlue()/255.0, 1
         );
     }
 

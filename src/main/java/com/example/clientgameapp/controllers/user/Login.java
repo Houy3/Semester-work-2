@@ -4,6 +4,7 @@ import Protocol.HighLevelMessageManager;
 import Protocol.Message.RequestValues.UserLoginForm;
 import Protocol.Message.Response;
 import Protocol.Message.ResponseValues.ResponseError;
+import Protocol.Message.ResponseValues.User;
 import Protocol.ProtocolVersionException;
 
 import com.example.clientgameapp.DestinationsManager;
@@ -70,6 +71,8 @@ public class Login {
                                 ResponseError error = (ResponseError) userLogin.value();
                                 throw new ClientException(error.errorMessage());
                             } else {
+                                User user = (User) userLogin.value();
+                                GlobalStorage.getInstance().setUser(user);
                                 navigateChoiceScene(actionEvent);
                             }
                         }

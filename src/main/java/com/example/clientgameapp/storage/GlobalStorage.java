@@ -1,5 +1,6 @@
 package com.example.clientgameapp.storage;
 
+import Protocol.Message.ResponseValues.User;
 import com.example.clientgameapp.GameApp;
 import com.example.clientgameapp.controllers.lobby.LobbyController;
 
@@ -11,11 +12,21 @@ public class GlobalStorage {
     private String roomId;
 
     private GameApp gameApp;
+
+    private User user;
     private Color color;
 
    private LobbyController lobbyController;
 
     private ScheduledExecutorService scheduler;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     private GlobalStorage() {
     }

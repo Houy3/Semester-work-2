@@ -2,7 +2,9 @@ package com.example.clientgameapp.controllers.game;
 
 import Protocol.HighLevelMessageManager;
 import Protocol.Message.Request;
+import Protocol.Message.RequestValues.GameArmyEndMove;
 import Protocol.Message.RequestValues.GameArmyStartMove;
+import Protocol.Message.RequestValues.GameResults;
 import Protocol.Message.Response;
 import Protocol.Message.ResponseValues.Game;
 import Protocol.Message.ResponseValues.ResponseError;
@@ -12,10 +14,12 @@ import Protocol.Message.models.City;
 import Protocol.Message.models.Way;
 import Protocol.ProtocolVersionException;
 import com.example.clientgameapp.DestinationsManager;
+import com.example.clientgameapp.GameApp;
 import com.example.clientgameapp.controllers.error.ErrorAlert;
 import com.example.clientgameapp.models.CitiesGameMap;
 import com.example.clientgameapp.models.Route;
 import com.example.clientgameapp.storage.GameStorage;
+import com.example.clientgameapp.storage.GlobalStorage;
 import com.example.clientgameapp.storage.generator.MapGenerator;
 import connection.ClientConnectionSingleton;
 import exceptions.ClientConnectionException;
@@ -24,6 +28,7 @@ import javafx.animation.PathTransition;
 import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -39,21 +44,34 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import static com.example.clientgameapp.storage.generator.MapGenerator.getRelativeXPosition;
 import static com.example.clientgameapp.storage.generator.MapGenerator.getRelativeYPosition;
 
 public class GameController implements Initializable {
+    @FXML
     public Button cityBtnFirst;
+
+    @FXML
     public Button cityBtnSecond;
+
+    @FXML
     public Button cityBtnThird;
+
+    @FXML
     public Button cityBtnFourth;
+
+    @FXML
     public Button cityBtnFifth;
+
+    @FXML
     public Button cityBtnSixth;
+
     public Pane pane;
+    private Map<Button, City> citiesMap;
+
     public Canvas canvas;
 
     private CitiesGameMap citiesGameMap;
@@ -95,6 +113,7 @@ public class GameController implements Initializable {
             receiverSocket = connection.getSocketReceiver();
             destinationsManager = DestinationsManager.getInstance();
             gameStorage = GameStorage.getInstance();
+            citiesMap = new HashMap<>();
             pane.requestFocus();
             if (!isInitialized) {
                 initGame();
@@ -109,55 +128,110 @@ public class GameController implements Initializable {
         initMap();
         citiesGameMap = gameStorage.getMaps().get(0);
         color = Color.RED;
-        startGameProcess();
         getCurrentGame();
-        drawWays();
-        setAllNumbersValue(0);
+        setAllNumbersValue(10);
         startIncrementingAll();
+        initCitiesMap();
+        startGameProcess();
     }
 
     private void getCurrentGame() {
         new Thread(
                 () -> {
-                    try {
-                        Response response = HighLevelMessageManager.getGame(senderSocket);
-                        if (response.type() == Response.Type.RESPONSE_ERROR) {
-                            throw new ServerException(((ResponseError) response.value()).errorMessage());
-                        } else {
-                            game = (Game) response.value();
-                            incrementRate = game.armyGrowthRate();
-                            duration = game.armySpeed();
+                    while (isFinished) {
+                        try {
+                            Response response = HighLevelMessageManager.getGame(senderSocket);
+                            System.out.println(response);
+                            if (response.type() == Response.Type.RESPONSE_ERROR) {
+                                throw new ServerException(((ResponseError) response.value()).errorMessage());
+                            } else {
+                                game = (Game) response.value();
+                                incrementRate = game.armyGrowthRate();
+                                duration = game.armySpeed();
+                            }
+                            for (City city : game.usersCities().keySet()) {
+                                Color color = null;
+                                if (game.usersCities().get(city) != null) {
+                                    color = Converter.convertColor(game.usersColor().get(game.usersCities().get(city)));
+                                } else {
+                                    color = Converter.convertColor(java.awt.Color.GRAY);
+                                }
+                                Button button = getButton(city);
+                                setStyle(button, color);
+
+                            }
+                            Thread.sleep(5000L);
+                        } catch (IOException e) {
+                            ErrorAlert.show(e.getMessage());
+                            GlobalStorage.getInstance().getMainApp().closeGame();
+                        } catch (ProtocolVersionException | ServerException | InterruptedException e) {
+                            ErrorAlert.show(e.getMessage());
                         }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    } catch (ProtocolVersionException e) {
-                        throw new RuntimeException(e);
-                    } catch (ServerException e) {
-                        throw new RuntimeException(e);
                     }
                 }
         ).start();
     }
 
+    private void initCitiesMap() {
+        citiesMap.put(cityBtnFirst, new City(1, 0, 0));
+        citiesMap.put(cityBtnSecond, new City(2, 0, 0));
+        citiesMap.put(cityBtnThird, new City(3, 0, 0));
+        citiesMap.put(cityBtnFourth, new City(4, 0, 0));
+        citiesMap.put(cityBtnFifth, new City(5, 0, 0));
+        citiesMap.put(cityBtnSixth, new City(6, 0, 0));
+    }
+
     private void startGameProcess() {
         new Thread(
                 () -> {
-                    while (!receiverSocket.isClosed()) {
+                    while (true) {
                         try {
+                            System.out.println("HERE");
+                            System.out.println(receiverSocket);
                             Request request = HighLevelMessageManager.readRequest(receiverSocket);
+                            System.out.println("typpe " + request.type());
                             if (request.type() == Request.Type.GAME_ACTION_ARMY_START_MOVE) {
                                 GameArmyStartMove move = (GameArmyStartMove) request.value();
                                 Way way = move.way();
-                                Button buttonStart = getButton(way.getStart().x(), way.getStart().y());
-                                Button buttonEnd = getButton(way.getEnd().x(), way.getEnd().y());
+                                System.out.println(way);
+                                Button buttonStart = getButton(way.getStart());
+                                Button buttonEnd = getButton(way.getEnd());
+                                Platform.runLater(() -> {
+                                    buttonStart.setText(String.valueOf(Integer.parseInt(buttonStart.getText()) - move.armyCount()));
+                                });
+                                System.out.println(buttonStart + " " + buttonEnd);
                                 City startCity = way.getStart();
                                 City endCity = way.getEnd();
                                 User owner = game.usersCities().get(endCity);
                                 java.awt.Color newColor = game.usersColor().get(owner);
-                                drawBall(buttonStart, buttonEnd, Converter.convertColor(newColor), duration);
+                                Platform.runLater(() -> {
+                                    drawBall(buttonStart, buttonEnd, Converter.convertColor(java.awt.Color.GREEN), (int) (move.way().getLength()/game.armySpeed()));
+                                });
+                            } else if (request.type() == Request.Type.GAME_ENDED) {
+                                GameResults gameResults = (GameResults) request.value();
+                                ErrorAlert.show(gameResults.winner().nickname() + " won!! ");
+                                GlobalStorage.getInstance().getMainApp().closeGame();
+                                isFinished = false;
+                            } else if (request.type() == Request.Type.GAME_ACTION_ARMY_END_MOVE) {
+                                GameArmyEndMove gameArmyEndMove = (GameArmyEndMove) request.value();
+                                City city = gameArmyEndMove.city();
+                                User user = gameArmyEndMove.user();
+                                int armyCount = gameArmyEndMove.armyCount();
+                                Button button = getButton(city);
+                                Color color = Converter.convertColor(game.usersColor().get(user));
+                                setStyle(button, color);
+                                Platform.runLater(() -> {
+                                    button.setText(String.valueOf(armyCount));
+                                });
+                                game.usersCities().replace(city, user);
                             }
-                        } catch (IOException | ProtocolVersionException e) {
-                            throw new RuntimeException(e);
+                            HighLevelMessageManager.sendResponseSuccess(null, receiverSocket);
+
+                        } catch (IOException e) {
+                            ErrorAlert.show(e.getMessage());
+                        } catch (ProtocolVersionException e) {
+                            ErrorAlert.show(e.getMessage());
+                            GlobalStorage.getInstance().getMainApp().closeGame();
                         }
                     }
                 }
@@ -184,24 +258,26 @@ public class GameController implements Initializable {
     }
 
     private void startIncrementingAll() {
-        for (Button button : allAvailableCities) {
-            startNumberIncrement(button, incrementRate);
-        }
-    }
-
-    private void startNumberIncrement(Button button, int incrementRate) {
         new Thread(
                 () -> {
                     while (isFinished) {
-                        int value = Integer.parseInt(button.getText()) + 1;
                         try {
-                            Thread.sleep(incrementRate * 1000L);
+                            Thread.sleep(1000L);
                         } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
+                            // ErrorAlert.show(e.getMessage());
                         }
-                        Platform.runLater(() -> {
-                            button.setText(String.valueOf(value));
-                        });
+                        for (City city : game.citiesArmies().keySet()) {
+                            if (game.usersCities().get(city) != null) {
+                                game.citiesArmies().replace(city, game.citiesArmies().get(city) + game.armyGrowthRate());
+                            }
+                        }
+                        for (Button button : allAvailableCities) {
+                            int value = game.citiesArmies().get(getCity(button));
+                            Platform.runLater(() -> {
+                                button.setText(String.valueOf(value));
+                            });
+                        }
+
                     }
                 }
         ).start();
@@ -213,40 +289,53 @@ public class GameController implements Initializable {
                     try {
                         City cityFrom = getCity(fromButton);
                         City cityTo = getCity(toButton);
-                        if (cityTo != null && cityFrom != null) {
+                        System.out.println(" " + cityFrom + cityTo);
+                        if (cityFrom != null && cityTo != null) {
                             Way way = new Way(cityFrom, cityTo);
-                            int armyCount = Integer.parseInt(fromButton.getText());
+                            int armyCount = Integer.parseInt(fromButton.getText()) / 2;
                             GameArmyStartMove move = new GameArmyStartMove(
                                     way, armyCount
                             );
-                            HighLevelMessageManager.moveArmyStart(move, senderSocket);
+                            Response response = HighLevelMessageManager.moveArmyStart(move, senderSocket);
+                            if (response.type() == Response.Type.RESPONSE_ERROR) {
+                                ErrorAlert.show(((ResponseError) response.value()).errorMessage());
+                            }
                         }
+
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        ErrorAlert.show(e.getMessage());
+                        GlobalStorage.getInstance().getMainApp().closeGame();
                     } catch (ProtocolVersionException e) {
-                        throw new RuntimeException(e);
+                        ErrorAlert.show(e.getMessage());
                     }
+
                 }
         ).start();
     }
 
 
     private City getCity(Button button) {
-        for (City city : citiesGameMap.cities()) {
-            if (city.x() - getRelativeXPosition(button) < 0.0005 && city.y() - getRelativeYPosition(button) < 0.0005) {
-                return city;
-            }
-        }
-        return null;
+        return citiesMap.get(button);
     }
 
-    private Button getButton(int x, int y) {
-        for (Node node : pane.getChildren()) {
-            if (getRelativeXPosition((Button) node) - x < 0.0004
-                    && getRelativeYPosition((Button) node) - y < 0.0005
-            ) {
-                return (Button) node;
-            }
+    private Button getButton(City city) {
+        if (city.number() == 1) {
+            return cityBtnFirst;
+        }
+        if (city.number() == 2) {
+            return cityBtnSecond;
+        }
+        if (city.number() == 3) {
+            return cityBtnThird;
+        }
+        if (city.number() == 4) {
+            return cityBtnFourth;
+        }
+        if (city.number() == 5) {
+            return cityBtnFifth;
+        }
+        if (city.number() == 6) {
+            return cityBtnSixth;
         }
         return null;
     }
@@ -254,9 +343,9 @@ public class GameController implements Initializable {
 
     private void drawBall(Button fromButton, Button toButton, Color color, int durationInSeconds) {
         System.out.println(new Route(fromButton, toButton));
-        if (!citiesGameMap.routes().contains(new Route(fromButton, toButton))) {
-            return;
-        }
+        //    if (!citiesGameMap.routes().contains(new Route(fromButton, toButton))) {
+        //      return;
+        // }
         widthMargin = cityBtnFirst.getWidth() / 2;
         Circle ball = new Circle(-fromButton.getLayoutX() - widthMargin, -fromButton.getLayoutY() - widthMargin, widthMargin / 2);
         ball.fillProperty().set(color);
@@ -310,6 +399,7 @@ public class GameController implements Initializable {
     }
 
     private void handleButtonClick(Button clickedButton, Color color, int duration) {
+        drawWays();
         if (isFirst) {
             fromButton = clickedButton;
             drawSelectionBorder(fromButton);
@@ -378,21 +468,30 @@ public class GameController implements Initializable {
 
     private void setStyle(Button button, Color color) {
         java.awt.Color newColor = Converter.convertColor(color);
-        button.setStyle("-fx-background-color: rgb(" + newColor.getRed() + ","
-                + newColor.getGreen() + "," + newColor.getBlue() + ");");
+        Platform.runLater(() -> {
+            button.setStyle("-fx-background-color: rgb(" + newColor.getRed() + ","
+                    + newColor.getGreen() + "," + newColor.getBlue() + ");");
+        });
+
     }
 
 
     private void setButtonText(Button button, int number) {
-        button.setText(String.valueOf(number));
+        Platform.runLater(() -> {
+            button.setText(String.valueOf(number));
+        });
     }
 
     private void drawSelectionBorder(Button button) {
-        button.setStyle("-fx-border-width: 2px");
+        Platform.runLater(() -> {
+            button.setStyle("-fx-border-width: 2px");
+        });
     }
 
     private void clearSelectionBorder(Button button) {
-        button.setStyle("-fx-border-width: 0px");
+        Platform.runLater(() -> {
+            button.setStyle("-fx-border-width: 0px");
+        });
     }
 
 

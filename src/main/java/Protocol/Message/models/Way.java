@@ -32,6 +32,7 @@ public class Way implements Serializable {
         return "Way{" +
                 "start=" + start +
                 ", end=" + end +
+                ", length=" + length +
                 '}';
     }
 
@@ -50,7 +51,7 @@ public class Way implements Serializable {
     @Override
     public int hashCode() {
         int result = start != null ? start.hashCode() : 0;
-        result = 31 * result + (end != null ? end.hashCode() : 0);
+        result += end != null ? end.hashCode() : 0;
         return result;
     }
 }
